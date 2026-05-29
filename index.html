@@ -78,7 +78,24 @@ h1{font-size:19px;font-weight:600;margin-bottom:2px}
 .wc-sec-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--txt3);margin-bottom:5px}
 .wc-item{font-size:12px;color:var(--txt);line-height:1.5;padding:2px 0;display:flex;gap:6px}
 .wc-item::before{content:'·';color:var(--txt3);flex-shrink:0}
+
 .wc-note{font-size:10px;color:var(--txt3);margin-left:4px}
+/* EXERCISE DETAIL */
+.ex-toggle{display:flex;align-items:center;justify-content:space-between;padding:8px 0;cursor:pointer;user-select:none;margin-top:2px}
+.ex-toggle-label{font-size:12px;font-weight:500;color:var(--txt2)}
+.ex-arr{font-size:12px;color:var(--txt3);transition:transform .2s}
+.ex-arr.open{transform:rotate(180deg)}
+.ex-body{display:none;background:var(--bg2);border-radius:var(--r);padding:10px 12px;margin-bottom:8px}
+.ex-body.open{display:block}
+.ex-group{margin-bottom:10px}
+.ex-group:last-child{margin-bottom:0}
+.ex-group-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--txt3);margin-bottom:5px}
+.ex-row{display:flex;gap:6px;padding:4px 0;border-bottom:0.5px solid var(--border);align-items:flex-start}
+.ex-row:last-child{border-bottom:none}
+.ex-num{font-size:11px;color:var(--txt3);min-width:16px;margin-top:1px}
+.ex-name{font-size:12px;font-weight:500;flex:1}
+.ex-sets{font-size:11px;color:var(--txt2);min-width:100px;text-align:right;margin-top:1px}
+.ex-note{font-size:10px;color:var(--txt3);grid-column:2;margin-top:1px}
 .field{display:flex;align-items:center;gap:8px;margin-top:9px}
 .field label{font-size:12px;color:var(--txt2);min-width:126px;flex-shrink:0}
 .field input{flex:1;font-size:14px;height:34px;padding:0 8px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt)}
@@ -573,6 +590,321 @@ function renderWC(sid,type,name){
 }
 function toggleWC(sid){const b=document.getElementById('wcb-'+sid);const a=document.getElementById('wcarr-'+sid);const o=b.classList.toggle('open');a.classList.toggle('open',o);}
 
+
+// ── EXERCISE DETAIL LIBRARY ──────────────────────────────────────────────────
+const EX = {
+'w1s1':{groups:[
+  {title:'A — Primary compound',exercises:[
+    {n:'BB Back Squat',s:'5×8/8/5/5/5',note:'Top set ~245 lbs · 3-sec descent'},
+  ]},
+  {title:'B — Accessory lower',exercises:[
+    {n:'Deficit Reverse Lunges',s:'3×5/leg',note:'2-3" deficit'},
+    {n:'Slider Side Lunges',s:'3×8/side',note:''},
+    {n:'Alt Jump Lunges',s:'3×10',note:'explosive'},
+    {n:'Foot Elevated Glute Bridges',s:'3×12',note:'pause at top'},
+    {n:'Heel Elevated Squat Holds',s:'3×30 sec',note:'heels on plate'},
+  ]},
+]},
+'w1s2':{groups:[
+  {title:'Technique drills — pool',exercises:[
+    {n:'Freestyle technique — catch focus',s:'6×25m',note:'10 sec rest between · focus on high elbow catch'},
+    {n:'Fingertip drag drill',s:'4×25m',note:'forearm recovery awareness'},
+    {n:'Catch-up drill',s:'4×25m',note:'timing and rotation'},
+    {n:'Easy continuous swim',s:'1×200m',note:'Z2 · apply drills'},
+  ]},
+]},
+'w1s3':{groups:[
+  {title:'A — Pull compound',exercises:[
+    {n:'Pull Ups',s:'4×12/10/8/6',note:'add weight if >12 bodyweight'},
+    {n:'SA Landmine Row',s:'4×8/side',note:'brace hard'},
+  ]},
+  {title:'B — Press + shoulders',exercises:[
+    {n:'DB Z Press (seated overhead)',s:'4×10/8/8/6',note:''},
+    {n:'DB Incline Fly',s:'3×12',note:''},
+    {n:'Deficit Push Ups',s:'3×10',note:'hands on plates'},
+  ]},
+  {title:'C — Accessory arms',exercises:[
+    {n:'Incline Bench Curls',s:'3×12',note:''},
+    {n:'DB Reverse Flyes',s:'3×15',note:''},
+  ]},
+]},
+'w1s4':{groups:[
+  {title:'Bike — Zone 2',exercises:[
+    {n:'Warm-up spin',s:'5 min easy',note:'90+ RPM, low resistance'},
+    {n:'Z2 steady state',s:'35 min',note:'HR 130–143 bpm · conversational pace'},
+    {n:'Cool-down spin',s:'5 min easy',note:''},
+  ]},
+]},
+'w1s5':{groups:[
+  {title:'A — Full body compound',exercises:[
+    {n:'BB Reverse Lunge',s:'4×12/12/8/8',note:''},
+    {n:'Plate Bear Crawl',s:'3×20m',note:''},
+    {n:'SL BB RDL',s:'4×8/8/6/6',note:'single leg'},
+    {n:'Bench Supported Row',s:'4×10',note:'chest on incline bench'},
+  ]},
+  {title:'B — Conditioning circuit (AMRAP 12 min)',exercises:[
+    {n:'MB Split Squat Jumps',s:'6 reps',note:''},
+    {n:'Sprinter Sit Ups',s:'10 reps',note:''},
+    {n:'SA DB Snatch',s:'5/side',note:''},
+    {n:'Row',s:'8 cals',note:''},
+  ]},
+  {title:'C — Running prep',exercises:[
+    {n:'BB Split Squats',s:'4×8/8/6/6',note:'front foot elevated'},
+    {n:'KB Half Kneeling Chop',s:'3×10/side',note:''},
+    {n:'Goblet Curtsy Lunges',s:'3×8/side',note:''},
+    {n:'SL Kickstand RDL',s:'3×8/side',note:''},
+    {n:'Slider Wide MTN Climbers',s:'3×12',note:''},
+  ]},
+]},
+'w1s6':{groups:[
+  {title:'Run — Zone 2',exercises:[
+    {n:'Target distance',s:'1.5 mi',note:''},
+    {n:'Target HR',s:'130–143 bpm',note:'Z2 — conversational pace throughout'},
+    {n:'Expected pace',s:'~10:30–11:30 /mi',note:'aerobic capacity leads musculoskeletal tolerance — slower than it feels natural'},
+    {n:'Rule',s:'If HR > 143 — slow down or walk',note:'No exceptions weeks 1–8'},
+  ]},
+]},
+'w2s1':{groups:[
+  {title:'A — Primary compound (heavy)',exercises:[
+    {n:'BB Back Squat',s:'5×8/6/5/5/5',note:'push top set vs wk 1'},
+    {n:'BB RDL',s:'4×8/8/5/5',note:'8×175 → 5×225 target range'},
+  ]},
+  {title:'B — Dynamic lower',exercises:[
+    {n:'DB Bulgarian Split Squat',s:'4×8/8/6/6',note:'rear foot elevated'},
+    {n:'SA Plank Hold',s:'3×30 sec/side',note:''},
+    {n:'BB Kickstand RDL',s:'4×8/leg',note:''},
+    {n:'Slider Hamstring Curls',s:'3×10',note:''},
+    {n:'Alt Lunge Jumps',s:'3×10',note:''},
+    {n:'Plyo SL Glute Bridge',s:'3×8/side',note:''},
+  ]},
+]},
+'w2s3':{groups:[
+  {title:'A — Press',exercises:[
+    {n:'Seated BB Press',s:'4×8',note:''},
+    {n:'Banded Paloff Press w Raise',s:'3×10/side',note:''},
+    {n:'Banded Bench Press',s:'4×8',note:''},
+    {n:'Skullcrushers to Poliquin',s:'3×10',note:''},
+    {n:'Rev Curls',s:'3×12',note:''},
+    {n:'Cross Body Hammer Curls',s:'3×12',note:''},
+  ]},
+  {title:'B — Dynamic upper',exercises:[
+    {n:'DB/BB Push Press',s:'4×10/8/6/6',note:''},
+    {n:'Banded Pulldown',s:'3×15',note:''},
+    {n:'Bench Supported SA Row',s:'4×10/side',note:''},
+    {n:'DB Bent Over Y's',s:'3×15',note:''},
+    {n:'DB Side Plank Pull Through',s:'3×10/side',note:''},
+    {n:'KB/Plate Alt Push Ups',s:'3×10',note:''},
+    {n:'TRX Rows',s:'3×12',note:''},
+    {n:'TRX Bicep Curls',s:'3×12',note:''},
+  ]},
+]},
+'w3s2':{groups:[
+  {title:'CSS Baseline Test',exercises:[
+    {n:'400m Time Trial',s:'1×400m',note:'max effort · record time to the second'},
+    {n:'Rest',s:'10 min',note:'full passive rest — do not skip this'},
+    {n:'200m Time Trial',s:'1×200m',note:'max effort · record time'},
+    {n:'Calculate CSS',s:'(400m pace + 200m pace) ÷ 2',note:'this is your CSS pace per 100m for all future intervals'},
+  ]},
+]},
+'w4s2':{groups:[
+  {title:'CSS Intervals',exercises:[
+    {n:'Warm-up easy swim',s:'200m',note:'Z2'},
+    {n:'CSS intervals',s:'6×50m',note:'at CSS pace · 20 sec rest between · focus on holding pace not going faster'},
+    {n:'Easy cool-down',s:'100m',note:''},
+  ]},
+]},
+'w5s1':{groups:[
+  {title:'A — Primary compound',exercises:[
+    {n:'BB Back Squat',s:'5×8/8/5/5/5',note:'attempt PR on top set'},
+  ]},
+  {title:'B — Squat accessory + core',exercises:[
+    {n:'Deficit Rev Lunges',s:'3×5/leg',note:''},
+    {n:'Slider Side Lunges',s:'3×8/side',note:''},
+    {n:'Alt Jump Lunges',s:'3×10',note:''},
+    {n:'Foot Elevated Glute Bridges',s:'3×12',note:''},
+    {n:'Heel Elevated Squat Holds',s:'3×30 sec',note:''},
+  ]},
+]},
+'w5s3':{groups:[
+  {title:'A — Press',exercises:[
+    {n:'Seated BB Press',s:'4×8',note:''},
+    {n:'Pendlay Row',s:'4×6-8',note:''},
+    {n:'Evil Wheel BB',s:'3×8',note:'ab wheel from knees'},
+    {n:'Banded Bench Press',s:'4×8',note:''},
+    {n:'W Press',s:'3×12',note:''},
+    {n:'Skullcrushers to Poliquin',s:'3×10',note:''},
+    {n:'Rev Curls',s:'3×12',note:''},
+  ]},
+  {title:'B — Pull',exercises:[
+    {n:'L Sit Pull Ups',s:'4×8',note:''},
+    {n:'Plate Bus Drivers',s:'3×10',note:''},
+    {n:'Seated Facepulls to Press',s:'3×15',note:''},
+    {n:'American Sit Ups',s:'3×12',note:''},
+    {n:'MB Stir The Pot',s:'3×10/direction',note:''},
+    {n:'MB In and Outs',s:'3×10',note:''},
+  ]},
+]},
+'w7s1':{groups:[
+  {title:'A — High intensity lower',exercises:[
+    {n:'BB Back Squat',s:'5×8/6/5/5/5',note:'8×185 → 5×225 target'},
+    {n:'BB RDL',s:'4×8/8/5/5',note:'8×175 → 5×225'},
+    {n:'Slider Body Saws',s:'3×10',note:''},
+    {n:'DB Walking Lunges',s:'4×6/5/4/4',note:''},
+    {n:'Leg Curl Machine',s:'3×10-15',note:''},
+    {n:'Seated/Standing Calf Raise',s:'4×15',note:''},
+  ]},
+  {title:'B — Dynamic lower',exercises:[
+    {n:'DB Bulgarian Split Squat',s:'4×8/8/6/6',note:''},
+    {n:'SA Plank Hold',s:'3×30 sec/side',note:''},
+    {n:'BB Kickstand RDL',s:'4×8/leg',note:''},
+    {n:'Side Star Plank',s:'3×20 sec/side',note:''},
+    {n:'Leg Extensions',s:'3×12-15',note:''},
+    {n:'Slider Hamstring Curls',s:'3×10',note:''},
+  ]},
+]},
+'w7s3':{groups:[
+  {title:'A — High intensity upper',exercises:[
+    {n:'Weighted Pull Ups',s:'AMRAP bodyweight then weighted sets',note:''},
+    {n:'Hollow Rocks',s:'3×12',note:''},
+    {n:'BB/DB Bench Press',s:'5×8/8/5/5/5',note:''},
+    {n:'Rope Facepulls',s:'3×15',note:''},
+    {n:'BB Row',s:'4×12/10/8/6',note:''},
+    {n:'Seated DB Shoulder Press',s:'4×8',note:''},
+    {n:'Weighted Dips',s:'3×failure',note:''},
+    {n:'Rope/V-Bar Pushdowns',s:'3×12',note:''},
+  ]},
+  {title:'B — Dynamic upper',exercises:[
+    {n:'DB/BB Push Press',s:'4×10/8/6/6',note:''},
+    {n:'Banded Pulldown',s:'3×15',note:''},
+    {n:'Bench Supported SA Row',s:'4×10/side',note:''},
+    {n:'DB Bent Over Y's',s:'3×15',note:''},
+    {n:'TRX Rows',s:'3×12',note:''},
+    {n:'TRX Bicep Curls',s:'3×12',note:''},
+  ]},
+]},
+'w10s2':{groups:[
+  {title:'CSS Retest #1',exercises:[
+    {n:'400m Time Trial',s:'1×400m max effort',note:'compare to Week 3 baseline'},
+    {n:'Rest',s:'10 min passive',note:''},
+    {n:'200m Time Trial',s:'1×200m max effort',note:''},
+    {n:'Calculate new CSS pace',s:'record improvement %',note:'expect 2–4% improvement from wk 3'},
+  ]},
+]},
+'w14s6':{groups:[
+  {title:'Brick — first ever',exercises:[
+    {n:'Bike — Z2',s:'30 min',note:'HR 130–143 · normal ride effort'},
+    {n:'Transition (T2)',s:'< 2 min',note:'rack bike, swap shoes, go — practice fast transition'},
+    {n:'Run — Z2',s:'10 min',note:'HR 130–143 · first 2 min will feel wrong — heavy legs are normal, just keep moving'},
+  ]},
+  {title:'Key notes',exercises:[
+    {n:'Do not stop at transition',s:'—',note:'keep moving even if slow'},
+    {n:'Run pace expectation',s:'slower than normal run',note:'this is correct — cycling pre-fatigues the legs'},
+    {n:'HR management',s:'HR may spike at run start',note:'let it settle within 3–4 min before judging effort'},
+  ]},
+]},
+'w15s2':{groups:[
+  {title:'CSS Retest #2',exercises:[
+    {n:'400m Time Trial',s:'1×400m max effort',note:'3rd data point'},
+    {n:'Rest',s:'10 min passive',note:''},
+    {n:'200m Time Trial',s:'1×200m max effort',note:''},
+    {n:'Calculate new CSS',s:'record vs wk 3 + wk 10',note:'expect 3–5% total improvement from wk 3'},
+  ]},
+]},
+'w20s2':{groups:[
+  {title:'CSS Final Retest',exercises:[
+    {n:'400m Time Trial',s:'1×400m max effort',note:'final benchmark'},
+    {n:'Rest',s:'10 min passive',note:''},
+    {n:'200m Time Trial',s:'1×200m max effort',note:''},
+    {n:'Calculate final CSS',s:'total % improvement from wk 3',note:'expect 5–8% total improvement (Pugliese 2015 range)'},
+  ]},
+]},
+'w22s6':{groups:[
+  {title:'Race day — sprint triathlon',exercises:[
+    {n:'Swim',s:'750m',note:'seed yourself mid-pack · sight every 6–8 strokes · go out controlled'},
+    {n:'T1',s:'target < 3 min',note:'wetsuit off, helmet on, shoes on, go'},
+    {n:'Bike',s:'race distance',note:'hold ~75–80% of FTP · do not blow up early'},
+    {n:'T2',s:'target < 2 min',note:'rack bike, swap shoes, hat/race belt on'},
+    {n:'Run',s:'5 km',note:'first km will feel awful off the bike — this is normal · settle into pace by km 2'},
+  ]},
+]},
+};
+
+// Generic session detail builders by session code
+function getExDetail(sessionId, sessionName, sessionType) {
+  // Return specific detail if we have it
+  if(EX[sessionId]) return EX[sessionId];
+  
+  // Build generic by type and name
+  const n = sessionName.toLowerCase();
+  
+  if(sessionType === 'bike') return {groups:[
+    {title:'Session structure',exercises:[
+      {n:'Warm-up spin',s:'5 min easy',note:'90+ RPM · low resistance'},
+      {n:'Main set',s:'per week plan',note:'HR target per session detail'},
+      {n:'Cool-down spin',s:'5 min easy',note:''},
+    ]},
+  ]};
+  
+  if(sessionType === 'swim' && n.includes('continuous')) return {groups:[
+    {title:'Continuous swim',exercises:[
+      {n:'Easy warm-up',s:'100m',note:'build pace slowly'},
+      {n:'Continuous freestyle',s:'per session duration',note:'Z2 · HR 130–143 · focus on stroke efficiency not speed'},
+      {n:'Cool-down',s:'100m easy backstroke',note:''},
+    ]},
+  ]};
+  
+  if(sessionType === 'swim' && n.includes('technique')) return {groups:[
+    {title:'Technique drills',exercises:[
+      {n:'Catch-up drill',s:'4×25m',note:'timing and full extension'},
+      {n:'Fingertip drag',s:'4×25m',note:'high elbow recovery'},
+      {n:'6-3-6 kick drill',s:'4×25m',note:'rotation and balance'},
+      {n:'Bilateral breathing',s:'4×50m',note:'breathe every 3 strokes'},
+      {n:'Easy swim',s:'200m',note:'apply drills at Z2 pace'},
+    ]},
+  ]};
+  
+  if(sessionType === 'run') return {groups:[
+    {title:'Run structure',exercises:[
+      {n:'Dynamic warm-up',s:'5 min',note:'leg swings, A-skips, calf raises'},
+      {n:'Main run',s:'per session distance/time',note:'HR target per session detail above'},
+      {n:'Walking cool-down',s:'3–5 min',note:'do not stop abruptly'},
+    ]},
+  ]};
+  
+  if(sessionType === 'brick') return {groups:[
+    {title:'Brick structure',exercises:[
+      {n:'Bike segment',s:'per session detail',note:'Z2 unless otherwise specified'},
+      {n:'Transition',s:'< 2 min',note:'rack bike · swap shoes · go'},
+      {n:'Run segment',s:'per session detail',note:'expect heavy legs · keep moving · HR settles within 3–4 min'},
+    ]},
+  ]};
+  
+  if(sessionType === 'rest') return null;
+  
+  // Generic lift
+  return {groups:[
+    {title:'Session',exercises:[
+      {n:'See trainer's programming',s:'—',note:'use session detail above for exercise reference · log top sets in fields below'},
+    ]},
+  ]};
+}
+
+function renderExDetail(sid, name, type) {
+  const detail = getExDetail(sid, name, type);
+  if(!detail) return '';
+  const groups = detail.groups.map(g => {
+    const rows = g.exercises.map((e,i) => 
+      `<div class="ex-row"><span class="ex-num">${i+1}</span><div><div class="ex-name">${e.n}</div>${e.note?`<div class="ex-note">${e.note}</div>`:''}</div><span class="ex-sets">${e.s}</span></div>`
+    ).join('');
+    return `<div class="ex-group"><div class="ex-group-title">${g.title}</div>${rows}</div>`;
+  }).join('');
+  return `<div class="ex-toggle" onclick="toggleEx('${sid}')"><span class="ex-toggle-label">Exercise detail</span><span class="ex-arr" id="exarr-${sid}">↓</span></div>
+<div class="ex-body" id="exb-${sid}">${groups}</div>`;
+}
+
+function toggleEx(sid){const b=document.getElementById('exb-'+sid);const a=document.getElementById('exarr-'+sid);const o=b.classList.toggle('open');a.classList.toggle('open',o);}
+
+
 // ── WEEKS DATA ───────────────────────────────────────────────────────────────
 const WEEKS=[
 {n:1,phase:'Phase 1',focus:'Establish rhythm + swim technique',load:'moderate',sessions:[
@@ -866,7 +1198,7 @@ function renderTraining(){
   sess.forEach(s=>{
     const sd=wd.sessions[s.id]||{};const isDone=!!sd.done;
     const sb=s.synced?'<span style="font-size:9px;background:var(--green-bg);color:var(--green-txt);padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle">synced</span>':'';
-    html+=`<div class="session" id="sc-${s.id}"><div class="session-top" onclick="toggleSession('${s.id}')"><div class="check ${isDone?'done':''}" id="chk-${s.id}">${isDone?'✓':''}</div><div class="sinfo"><div class="sname">${s.name}${sb}</div><div class="smeta">${s.day}${s.detail?' · '+s.detail:''}</div></div><span class="stag t-${s.type}">${s.type}</span></div><div class="session-body" id="bod-${s.id}">${renderWC(s.id,s.type,s.name)}`;
+    html+=`<div class="session" id="sc-${s.id}"><div class="session-top" onclick="toggleSession('${s.id}')"><div class="check ${isDone?'done':''}" id="chk-${s.id}">${isDone?'✓':''}</div><div class="sinfo"><div class="sname">${s.name}${sb}</div><div class="smeta">${s.day}${s.detail?' · '+s.detail:''}</div></div><span class="stag t-${s.type}">${s.type}</span></div><div class="session-body" id="bod-${s.id}">${renderExDetail(s.id,s.name,s.type)}${renderWC(s.id,s.type,s.name)}`;
     s.fields.forEach(f=>{const v=(sd.fields&&sd.fields[f.k])||'';html+=`<div class="field"><label>${f.l}</label><input type="text" inputmode="decimal" autocomplete="off" value="${v.replace(/"/g,'&quot;')}" placeholder="—" oninput="saveField('${s.id}','${wk.n}','${f.k}',this.value)"></div>`;});
     if(s.type==='run'){const hr=parseInt((sd.fields&&sd.fields['run_avghr'])||0);html+=`<div class="hr-warn" id="hrw-${s.id}" style="display:${hr>143?'block':'none'}">⚠ HR ${hr} bpm — above Z2 ceiling (143). Run was Z3/Z4. Ease off next session.</div>`;}
     const notes=(sd.notes||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
