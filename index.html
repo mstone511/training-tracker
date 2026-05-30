@@ -306,6 +306,10 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
       <div class="photo-macro"><div class="plbl">fat g</div><input type="number" id="pr-fat" inputmode="decimal"></div>
     </div>
     <div class="photo-note" id="photoNote"></div>
+    <div style="font-size:11px;color:var(--txt3);margin-bottom:4px">Add to meal</div>
+    <select id="photoMealSlot" style="width:100%;font-size:13px;padding:7px 8px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt);margin-bottom:8px">
+      <option value="0">Breakfast</option><option value="1">Lunch</option><option value="2">Dinner</option><option value="3">Snacks / shakes</option>
+    </select>
     <div style="display:flex;gap:8px">
       <button class="btn" style="flex:1" onclick="clearPhoto()">Retake</button>
       <button class="btn" style="flex:2;background:var(--txt);color:var(--bg);border-color:var(--txt)" onclick="addPhotoMeal()">Add to log</button>
@@ -1595,9 +1599,11 @@ function buildDayTabs() {
     var d = DAYS_OF_WEEK[i];
     var meals = wd.meals && wd.meals[i];
     var items = wd.foodItems && wd.foodItems[i];
+    var slotItems = wd.slotItems && wd.slotItems[i];
     var hasManual = meals && Object.values(meals).some(function(m) { return m && (m.kcal || m.carb || m.pro || m.fat); });
     var hasItems = items && items.length > 0;
-    var hasLog = hasManual || hasItems;
+    var hasSlot = slotItems && Object.values(slotItems).some(function(arr) { return arr && arr.length > 0; });
+    var hasLog = hasManual || hasItems || hasSlot;
     var cls = 'day-tab' + (i === curDay ? ' active' : '') + (hasLog ? ' has-log' : '');
     html += '<div class="' + cls + '" onclick="selectDay(' + i + ')">' + d + '</div>';
   }
@@ -1611,26 +1617,41 @@ function renderDayLog() {
   if (!wd.meals) wd.meals = {};
   if (!wd.meals[curDay]) wd.meals[curDay] = {};
   var dm = wd.meals[curDay];
-  var html = '';
-  for (var mi = 0; mi < MEALS.length; mi++) {
-    var meal = MEALS[mi];
-    var md = dm[mi] || {};
-    html += '<div class="meal-row">';
-    html += '<div class="meal-label">' + meal + '</div>';
-    html += '<input class="meal-input" type="number" inputmode="decimal" placeholder="kcal" value="' + (md.kcal || '') + '" oninput="saveMeal(' + mi + ',\'kcal\',this.value)">';
-    html += '<input class="meal-input" type="number" inputmode="decimal" placeholder="C" value="' + (md.carb || '') + '" oninput="saveMeal(' + mi + ',\'carb\',this.value)">';
-    html += '<input class="meal-input" type="number" inputmode="decimal" placeholder="P" value="' + (md.pro || '') + '" oninput="saveMeal(' + mi + ',\'pro\',this.value)">';
-    html += '<input class="meal-input" type="number" inputmode="decimal" placeholder="F" value="' + (md.fat || '') + '" oninput="saveMeal(' + mi + ',\'fat\',this.value)">';
-    html += '<div class="meal-del" onclick="clearMealRow(' + mi + ')">&#215;</div>';
-    html += '</div>';
+    // Build meal rows with inline slot items beneath each meal
+  var fullHtml = '';
+  for (var mii = 0; mii < MEALS.length; mii++) {
+    var mealLabel = MEALS[mii];
+    var mdi2 = dm[mii] || {};
+    fullHtml += '<div class="meal-row">';
+    fullHtml += '<div class="meal-label">' + mealLabel + '</div>';
+    fullHtml += '<input class="meal-input" type="number" inputmode="decimal" placeholder="kcal" value="' + (mdi2.kcal || '') + '" oninput="saveMeal(' + mii + ',&quot;kcal&quot;,this.value)">';
+    fullHtml += '<input class="meal-input" type="number" inputmode="decimal" placeholder="C" value="' + (mdi2.carb || '') + '" oninput="saveMeal(' + mii + ',&quot;carb&quot;,this.value)">';
+    fullHtml += '<input class="meal-input" type="number" inputmode="decimal" placeholder="P" value="' + (mdi2.pro || '') + '" oninput="saveMeal(' + mii + ',&quot;pro&quot;,this.value)">';
+    fullHtml += '<input class="meal-input" type="number" inputmode="decimal" placeholder="F" value="' + (mdi2.fat || '') + '" oninput="saveMeal(' + mii + ',&quot;fat&quot;,this.value)">';
+    fullHtml += '<div class="meal-del" onclick="clearMealRow(' + mii + ')">&#215;</div>';
+    fullHtml += '</div>';
+    var slotItems = (wd.slotItems && wd.slotItems[curDay] && wd.slotItems[curDay][mii]) || [];
+    for (var si = 0; si < slotItems.length; si++) {
+      var sitem = slotItems[si];
+      var ssrc = sitem.source === 'photo' ? '&#128247;' : '&#128269;';
+      fullHtml += '<div class="food-item-row">';
+      fullHtml += '<div class="food-item-name">' + ssrc + ' ' + sitem.name + '</div>';
+      fullHtml += '<div><div class="food-item-val">' + sitem.kcal + '</div><div class="food-item-lbl">kcal</div></div>';
+      fullHtml += '<div><div class="food-item-val">' + sitem.carb + 'g</div><div class="food-item-lbl">carbs</div></div>';
+      fullHtml += '<div><div class="food-item-val">' + sitem.pro + 'g</div><div class="food-item-lbl">prot</div></div>';
+      fullHtml += '<div><div class="food-item-val">' + sitem.fat + 'g</div><div class="food-item-lbl">fat</div></div>';
+      fullHtml += '<div class="meal-del" onclick="removeSlotItem(' + mii + ',' + sitem.id + ')">&#215;</div>';
+      fullHtml += '</div>';
+    }
   }
-  document.getElementById('mealRows').innerHTML = html;
-  var items = (wd.foodItems && wd.foodItems[curDay]) || [];
+  document.getElementById('mealRows').innerHTML = fullHtml;
+  // Legacy foodItems (old data compatibility)
+  var legacyItems = (wd.foodItems && wd.foodItems[curDay]) || [];
   var ihtml = '';
-  if (items.length > 0) {
-    ihtml = '<div style="font-size:11px;color:var(--txt3);margin:8px 0 4px;text-transform:uppercase;letter-spacing:.04em">Added via photo / search</div>';
-    for (var ii = 0; ii < items.length; ii++) {
-      var item = items[ii];
+  if (legacyItems.length > 0) {
+    ihtml = '<div style="font-size:11px;color:var(--txt3);margin:8px 0 4px;text-transform:uppercase;letter-spacing:.04em">Previously logged (unassigned)</div>';
+    for (var ii = 0; ii < legacyItems.length; ii++) {
+      var item = legacyItems[ii];
       var src = item.source === 'photo' ? '&#128247;' : '&#128269;';
       ihtml += '<div class="food-item-row">';
       ihtml += '<div class="food-item-name">' + src + ' ' + item.name + '</div>';
@@ -1662,17 +1683,31 @@ function saveMeal(mi, key, val) {
 }
 
 function addSmoothie() {
-  addFoodItemToLog('Post-workout smoothie (BPN whey + banana + blueberries + oat milk)', 380, 42, 40, 7, 'search');
+  addFoodItemToSlot(3, 'Post-workout smoothie (BPN whey + banana + blueberries + oat milk)', 380, 42, 40, 7, 'search');
 }
 
 function addFoodItemToLog(name, kcal, carb, pro, fat, source) {
-  var wk = WEEKS[curWk]; var wd = getWD(wk.n);
-  if (!wd.foodItems) wd.foodItems = {};
-  if (!wd.foodItems[curDay]) wd.foodItems[curDay] = [];
-  wd.foodItems[curDay].push({name:name, kcal:kcal, carb:carb, pro:pro, fat:fat, source:source, id:Date.now()});
-  saveData(); renderDayLog(); showToast('Added to log'); buildDayTabs();
+  // Legacy: add to snacks slot (3) by default
+  addFoodItemToSlot(3, name, kcal, carb, pro, fat, source);
 }
 
+function addFoodItemToSlot(slot, name, kcal, carb, pro, fat, source) {
+  var wk = WEEKS[curWk]; var wd = getWD(wk.n);
+  if (!wd.slotItems) wd.slotItems = {};
+  if (!wd.slotItems[curDay]) wd.slotItems[curDay] = {};
+  if (!wd.slotItems[curDay][slot]) wd.slotItems[curDay][slot] = [];
+  wd.slotItems[curDay][slot].push({name:name, kcal:kcal, carb:carb, pro:pro, fat:fat, source:source, id:Date.now()});
+  saveData(); renderDayLog(); showToast('Added to ' + ['Breakfast','Lunch','Dinner','Snacks'][slot]); buildDayTabs();
+}
+
+function removeSlotItem(slot, id) {
+  var wk = WEEKS[curWk]; var wd = getWD(wk.n);
+  if (!wd.slotItems || !wd.slotItems[curDay] || !wd.slotItems[curDay][slot]) return;
+  wd.slotItems[curDay][slot] = wd.slotItems[curDay][slot].filter(function(i) { return i.id !== id; });
+  saveData(); renderDayLog(); buildDayTabs();
+}
+
+// Legacy remove (foodItems from old data)
 function removeFoodItem(id) {
   var wk = WEEKS[curWk]; var wd = getWD(wk.n);
   if (!wd.foodItems || !wd.foodItems[curDay]) return;
@@ -1683,6 +1718,7 @@ function removeFoodItem(id) {
 function getTotals() {
   var wk = WEEKS[curWk]; var wd = getWD(wk.n);
   var tot = {kcal:0, carb:0, pro:0, fat:0};
+  // Manual rows
   if (wd.meals && wd.meals[curDay]) {
     for (var mi = 0; mi < MEALS.length; mi++) {
       var m = wd.meals[curDay][mi] || {};
@@ -1692,6 +1728,19 @@ function getTotals() {
       tot.fat += parseFloat(m.fat) || 0;
     }
   }
+  // Slot items (photo/search assigned to meal)
+  if (wd.slotItems && wd.slotItems[curDay]) {
+    for (var slot = 0; slot < 4; slot++) {
+      var slotArr = wd.slotItems[curDay][slot] || [];
+      for (var si = 0; si < slotArr.length; si++) {
+        tot.kcal += slotArr[si].kcal || 0;
+        tot.carb += slotArr[si].carb || 0;
+        tot.pro += slotArr[si].pro || 0;
+        tot.fat += slotArr[si].fat || 0;
+      }
+    }
+  }
+  // Legacy unassigned items
   var items = (wd.foodItems && wd.foodItems[curDay]) || [];
   for (var ii = 0; ii < items.length; ii++) {
     tot.kcal += items[ii].kcal || 0;
@@ -1732,6 +1781,7 @@ async function runNutAnalysis() {
   for (var di = 0; di < DAYS_OF_WEEK.length; di++) {
     var dtot = {kcal:0, carb:0, pro:0, fat:0};
     if (wd.meals && wd.meals[di]) { for (var mi = 0; mi < MEALS.length; mi++) { var m = wd.meals[di][mi] || {}; dtot.kcal += parseFloat(m.kcal)||0; dtot.carb += parseFloat(m.carb)||0; dtot.pro += parseFloat(m.pro)||0; dtot.fat += parseFloat(m.fat)||0; } }
+    if (wd.slotItems && wd.slotItems[di]) { for (var slt = 0; slt < 4; slt++) { var sarr = wd.slotItems[di][slt] || []; for (var sai = 0; sai < sarr.length; sai++) { dtot.kcal += sarr[sai].kcal||0; dtot.carb += sarr[sai].carb||0; dtot.pro += sarr[sai].pro||0; dtot.fat += sarr[sai].fat||0; } } }
     var fitems = (wd.foodItems && wd.foodItems[di]) || [];
     for (var fi = 0; fi < fitems.length; fi++) { dtot.kcal += fitems[fi].kcal||0; dtot.carb += fitems[fi].carb||0; dtot.pro += fitems[fi].pro||0; dtot.fat += fitems[fi].fat||0; }
     if (dtot.kcal > 0) days.push(DAYS_OF_WEEK[di] + ': ' + Math.round(dtot.kcal) + ' kcal, ' + Math.round(dtot.carb) + 'g C, ' + Math.round(dtot.pro) + 'g P, ' + Math.round(dtot.fat) + 'g F');
@@ -1791,7 +1841,8 @@ function addPhotoMeal() {
   var fat = parseFloat(document.getElementById('pr-fat').value) || 0;
   if (!kcal && !carb && !pro && !fat) { showToast('Enter at least one value first'); return; }
   var note = document.getElementById('photoNote').textContent.split(' -- ')[0] || 'Photo meal';
-  addFoodItemToLog(note, kcal, carb, pro, fat, 'photo');
+  var slot = parseInt(document.getElementById('photoMealSlot').value) || 0;
+  addFoodItemToSlot(slot, note, kcal, carb, pro, fat, 'photo');
   clearPhoto(); setTool('manual');
 }
 
@@ -1879,7 +1930,8 @@ function confirmAddFood() {
   var carb = Math.round(pendingFood.carbPer100 * scale);
   var pro = Math.round(pendingFood.proPer100 * scale);
   var fat = Math.round(pendingFood.fatPer100 * scale);
-  addFoodItemToLog(pendingFood.name + ' (' + serving + pendingFood.servingUnit + ')', kcal, carb, pro, fat, 'search');
+  var slot = parseInt(document.getElementById('modalMealSlot').value) || 0;
+  addFoodItemToSlot(slot, pendingFood.name + ' (' + serving + pendingFood.servingUnit + ')', kcal, carb, pro, fat, 'search');
   closeModal(); setTool('manual');
   document.getElementById('searchInput').value = '';
   document.getElementById('searchResults').style.display = 'none';
