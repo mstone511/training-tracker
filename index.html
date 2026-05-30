@@ -586,10 +586,15 @@ function buildWCHtml(sid, type, name) {
 // ─── DATA: EXERCISE DETAIL ───────────────────────────────────────────────────
 var EX_DATA = {
   'w1s1': {groups:[
-    {title:"A -- Primary compound",ex:[
+    {title:"A -- BB Back Squat (max effort)",ex:[
       ["BB Back Squat","5x8/8/5/5/5","Top set ~245 lbs, 3-sec descent"],
     ]},
-    {title:"B -- Accessory lower",ex:[
+    {title:"B -- BB RDL (LB-DY hinge)",ex:[
+      ["BB RDL","3-4x8/8/6/6","hip hinge, soft knee, load the hamstrings"],
+      ["BB Kickstand RDL","3x8/leg","single-leg variation"],
+      ["Slider Hamstring Curls","3x10",""],
+    ]},
+    {title:"C -- Squat accessory",ex:[
       ["Deficit Reverse Lunges","3x5/leg","2-3in deficit"],
       ["Slider Side Lunges","3x8/side",""],
       ["Alt Jump Lunges","3x10","explosive"],
@@ -606,16 +611,18 @@ var EX_DATA = {
     ]},
   ]},
   'w1s3': {groups:[
-    {title:"A -- Pull compound",ex:[
-      ["Pull Ups","4x12/10/8/6","add weight if over 12 bodyweight"],
+    {title:"A -- Pull compound (UB-HI)",ex:[
+      ["Pull Ups","4x12/10/8/6","add weight if over 12 bodyweight reps"],
       ["SA Landmine Row","4x8/side","brace hard"],
+      ["BB Row","4x10",""],
+      ["Seated DB Shoulder Press","4x8",""],
+      ["Weighted Dips","3x failure",""],
     ]},
-    {title:"B -- Press and shoulders",ex:[
+    {title:"B -- Dynamic upper (UB-DY)",ex:[
       ["DB Z Press seated overhead","4x10/8/8/6",""],
       ["DB Incline Fly","3x12",""],
       ["Deficit Push Ups","3x10","hands on plates"],
-    ]},
-    {title:"C -- Accessory arms",ex:[
+      ["DB Bent Over Ys","3x15",""],
       ["Incline Bench Curls","3x12",""],
       ["DB Reverse Flyes","3x15",""],
     ]},
@@ -628,7 +635,7 @@ var EX_DATA = {
     ]},
   ]},
   'w1s5': {groups:[
-    {title:"A -- Full body compound",ex:[
+    {title:"A -- Full body (FB-A)",ex:[
       ["BB Reverse Lunge","4x12/12/8/8",""],
       ["Plate Bear Crawl","3x20m",""],
       ["SL BB RDL","4x8/8/6/6","single leg"],
@@ -640,7 +647,7 @@ var EX_DATA = {
       ["SA DB Snatch","5 per side",""],
       ["Row","8 cals",""],
     ]},
-    {title:"C -- Running prep",ex:[
+    {title:"C -- Running prep (RP-SL)",ex:[
       ["BB Split Squats","4x8/8/6/6","front foot elevated"],
       ["KB Half Kneeling Chop","3x10/side",""],
       ["Goblet Curtsy Lunges","3x8/side",""],
@@ -657,34 +664,41 @@ var EX_DATA = {
     ]},
   ]},
   'w2s1': {groups:[
-    {title:"A -- Primary compound heavy",ex:[
+    {title:"A -- BB Back Squat (LB-HI)",ex:[
       ["BB Back Squat","5x8/6/5/5/5","push top set vs wk 1"],
+    ]},
+    {title:"B -- BB RDL (LB-HI)",ex:[
       ["BB RDL","4x8/8/5/5","8x175 to 5x225 target range"],
     ]},
-    {title:"B -- Dynamic lower",ex:[
+    {title:"C -- Dynamic lower (LB-DY)",ex:[
       ["DB Bulgarian Split Squat","4x8/8/6/6","rear foot elevated"],
       ["SA Plank Hold","3x30 sec/side",""],
       ["BB Kickstand RDL","4x8/leg",""],
+      ["Slider Body Saws","3x10",""],
       ["Slider Hamstring Curls","3x10",""],
       ["Alt Lunge Jumps","3x10",""],
       ["Plyo SL Glute Bridge","3x8/side",""],
     ]},
   ]},
   'w2s3': {groups:[
-    {title:"A -- Press",ex:[
-      ["Seated BB Press","4x8",""],
+    {title:"A -- Press (UB-PR)",ex:[
+      ["Seated BB Press","4x8","top set target"],
       ["Banded Paloff Press w Raise","3x10/side",""],
       ["Banded Bench Press","4x8",""],
       ["Skullcrushers to Poliquin","3x10",""],
       ["Rev Curls","3x12",""],
       ["Cross Body Hammer Curls","3x12",""],
     ]},
-    {title:"B -- Dynamic upper",ex:[
+    {title:"B -- Pendlay Row (UB-PR)",ex:[
+      ["Pendlay Row","4x6-8","top set target -- explosive concentric, controlled reset"],
+      ["W Press","3x12",""],
+      ["Rope or V-Bar Pushdowns","3x12",""],
+    ]},
+    {title:"C -- Dynamic upper (UB-DY)",ex:[
       ["DB Push Press","4x10/8/6/6",""],
       ["Banded Pulldown","3x15",""],
       ["Bench Supported SA Row","4x10/side",""],
       ["DB Bent Over Ys","3x15",""],
-      ["DB Side Plank Pull Through","3x10/side",""],
       ["TRX Rows","3x12",""],
       ["TRX Bicep Curls","3x12",""],
     ]},
@@ -697,54 +711,28 @@ var EX_DATA = {
       ["Calculate CSS","(400m pace + 200m pace) divided by 2","CSS pace per 100m for all future intervals"],
     ]},
   ]},
-  'w4s2': {groups:[
-    {title:"CSS Intervals",ex:[
-      ["Warm-up easy swim","200m","Z2"],
-      ["CSS intervals","6x50m","at CSS pace, 20 sec rest, hold pace not faster"],
-      ["Easy cool-down","100m",""],
+  'w3s3': {groups:[
+    {title:"A -- Pull (UB-HI)",ex:[
+      ["Weighted Pull Ups","AMRAP bodyweight then add weight","top set weight"],
+      ["Hollow Rocks","3x12",""],
+      ["BB Row","4x12/10/8/6",""],
+      ["Rope Facepulls","3x15",""],
+    ]},
+    {title:"B -- Press (UB-HI)",ex:[
+      ["BB or DB Bench Press","5x8/8/5/5/5","top set target"],
+      ["Seated DB Shoulder Press","4x8",""],
+      ["Weighted Dips","3x failure",""],
+      ["Rope Pushdowns","3x12",""],
     ]},
   ]},
-  'w5s1': {groups:[
-    {title:"A -- Primary compound",ex:[
-      ["BB Back Squat","5x8/8/5/5/5","attempt PR on top set"],
+  'w4s1': {groups:[
+    {title:"A -- BB Back Squat (LB-HI)",ex:[
+      ["BB Back Squat","5x8/6/5/5/5","push top set from wk 2"],
     ]},
-    {title:"B -- Squat accessory and core",ex:[
-      ["Deficit Rev Lunges","3x5/leg",""],
-      ["Slider Side Lunges","3x8/side",""],
-      ["Alt Jump Lunges","3x10",""],
-      ["Foot Elevated Glute Bridges","3x12",""],
-      ["Heel Elevated Squat Holds","3x30 sec",""],
+    {title:"B -- BB RDL (LB-HI)",ex:[
+      ["BB RDL","4x8/8/5/5","8x185 to 5x235 target range"],
     ]},
-  ]},
-  'w5s3': {groups:[
-    {title:"A -- Press",ex:[
-      ["Seated BB Press","4x8",""],
-      ["Pendlay Row","4x6-8",""],
-      ["Evil Wheel BB","3x8","ab wheel from knees"],
-      ["Banded Bench Press","4x8",""],
-      ["W Press","3x12",""],
-      ["Skullcrushers to Poliquin","3x10",""],
-      ["Rev Curls","3x12",""],
-    ]},
-    {title:"B -- Pull",ex:[
-      ["L Sit Pull Ups","4x8",""],
-      ["Plate Bus Drivers","3x10",""],
-      ["Seated Facepulls to Press","3x15",""],
-      ["American Sit Ups","3x12",""],
-      ["MB Stir The Pot","3x10 per direction",""],
-      ["MB In and Outs","3x10",""],
-    ]},
-  ]},
-  'w7s1': {groups:[
-    {title:"A -- High intensity lower",ex:[
-      ["BB Back Squat","5x8/6/5/5/5","8x185 to 5x225 target"],
-      ["BB RDL","4x8/8/5/5","8x175 to 5x225"],
-      ["Slider Body Saws","3x10",""],
-      ["DB Walking Lunges","4x6/5/4/4",""],
-      ["Leg Curl Machine","3x10-15",""],
-      ["Seated or Standing Calf Raise","4x15",""],
-    ]},
-    {title:"B -- Dynamic lower",ex:[
+    {title:"C -- Dynamic lower (LB-DY)",ex:[
       ["DB Bulgarian Split Squat","4x8/8/6/6",""],
       ["SA Plank Hold","3x30 sec/side",""],
       ["BB Kickstand RDL","4x8/leg",""],
@@ -753,18 +741,97 @@ var EX_DATA = {
       ["Slider Hamstring Curls","3x10",""],
     ]},
   ]},
-  'w7s3': {groups:[
-    {title:"A -- High intensity upper",ex:[
-      ["Weighted Pull Ups","AMRAP bodyweight then weighted sets",""],
+  'w4s2': {groups:[
+    {title:"CSS Intervals",ex:[
+      ["Warm-up easy swim","200m","Z2"],
+      ["CSS intervals","6x50m","at CSS pace, 20 sec rest, hold pace not faster"],
+      ["Easy cool-down","100m",""],
+    ]},
+  ]},
+  'w4s3': {groups:[
+    {title:"A -- Pull (UB-HI)",ex:[
+      ["Weighted Pull Ups","AMRAP bodyweight + weighted sets","top set reps"],
       ["Hollow Rocks","3x12",""],
-      ["BB or DB Bench Press","5x8/8/5/5/5",""],
-      ["Rope Facepulls","3x15",""],
       ["BB Row","4x12/10/8/6",""],
+      ["Rope Facepulls","3x15",""],
+    ]},
+    {title:"B -- Press (UB-HI)",ex:[
+      ["BB or DB Bench Press","5x8/8/5/5/5","top set target"],
+      ["Seated DB Shoulder Press","4x8",""],
+      ["Weighted Dips","3x failure",""],
+      ["Rope Pushdowns","3x12",""],
+    ]},
+    {title:"C -- Dynamic upper (UB-DY)",ex:[
+      ["DB Push Press","4x10/8/6/6",""],
+      ["Banded Pulldown","3x15",""],
+      ["DB Bent Over Ys","3x15",""],
+      ["TRX Rows","3x12",""],
+    ]},
+  ]},
+  'w5s1': {groups:[
+    {title:"A -- BB Back Squat (LB-SQ)",ex:[
+      ["BB Back Squat","5x8/8/5/5/5","attempt top set PR"],
+    ]},
+    {title:"B -- Squat accessory",ex:[
+      ["Deficit Reverse Lunges","3x5/leg",""],
+      ["Slider Side Lunges","3x8/side",""],
+      ["Alt Jump Lunges","3x10",""],
+      ["Foot Elevated Glute Bridges","3x12",""],
+      ["Heel Elevated Squat Holds","3x30 sec",""],
+    ]},
+  ]},
+  'w5s3': {groups:[
+    {title:"A -- Press (UB-PR)",ex:[
+      ["Seated BB Press","4x8","top set target"],
+      ["Pendlay Row","4x6-8","top set target"],
+      ["Evil Wheel BB","3x8","ab wheel from knees"],
+      ["Banded Bench Press","4x8",""],
+      ["W Press","3x12",""],
+      ["Skullcrushers to Poliquin","3x10",""],
+      ["Rev Curls","3x12",""],
+    ]},
+    {title:"B -- Pull (UB-PL)",ex:[
+      ["L Sit Pull Ups","4x8","top set reps"],
+      ["Plate Bus Drivers","3x10",""],
+      ["Seated Facepulls to Press","3x15",""],
+      ["American Sit Ups","3x12",""],
+      ["MB Stir The Pot","3x10 per direction",""],
+      ["MB In and Outs","3x10",""],
+    ]},
+  ]},
+  'w7s1': {groups:[
+    {title:"A -- BB Back Squat (LB-HI)",ex:[
+      ["BB Back Squat","5x8/6/5/5/5","8x185 to 5x225 target"],
+    ]},
+    {title:"B -- BB RDL (LB-HI)",ex:[
+      ["BB RDL","4x8/8/5/5","8x175 to 5x225"],
+      ["Slider Body Saws","3x10",""],
+    ]},
+    {title:"C -- Dynamic lower (LB-DY)",ex:[
+      ["DB Walking Lunges","4x6/5/4/4",""],
+      ["DB Bulgarian Split Squat","4x8/8/6/6",""],
+      ["SA Plank Hold","3x30 sec/side",""],
+      ["BB Kickstand RDL","4x8/leg",""],
+      ["Side Star Plank","3x20 sec/side",""],
+      ["Leg Curl Machine","3x10-15",""],
+      ["Seated or Standing Calf Raise","4x15",""],
+      ["Leg Extensions","3x12-15",""],
+    ]},
+  ]},
+  'w7s3': {groups:[
+    {title:"A -- Pull (UB-HI)",ex:[
+      ["Weighted Pull Ups","AMRAP bodyweight + weighted sets","top set reps"],
+      ["Hollow Rocks","3x12",""],
+      ["BB Row","4x12/10/8/6",""],
+      ["Rope Facepulls","3x15",""],
+    ]},
+    {title:"B -- Press (UB-HI)",ex:[
+      ["BB or DB Bench Press","5x8/8/5/5/5","top set target"],
       ["Seated DB Shoulder Press","4x8",""],
       ["Weighted Dips","3x failure",""],
       ["Rope or V-Bar Pushdowns","3x12",""],
     ]},
-    {title:"B -- Dynamic upper",ex:[
+    {title:"C -- Dynamic upper (UB-DY)",ex:[
       ["DB Push Press","4x10/8/6/6",""],
       ["Banded Pulldown","3x15",""],
       ["Bench Supported SA Row","4x10/side",""],
@@ -773,12 +840,111 @@ var EX_DATA = {
       ["TRX Bicep Curls","3x12",""],
     ]},
   ]},
+  'w9s1': {groups:[
+    {title:"A -- BB Back Squat (LB-HI)",ex:[
+      ["BB Back Squat","5x8/6/5/5/5","push top set -- highest load week"],
+    ]},
+    {title:"B -- BB RDL (LB-HI)",ex:[
+      ["BB RDL","4x8/8/5/5","push top set -- record weight"],
+    ]},
+    {title:"C -- Dynamic lower (LB-DY)",ex:[
+      ["DB Bulgarian Split Squat","4x8/8/6/6",""],
+      ["SA Plank Hold","3x30 sec/side",""],
+      ["BB Kickstand RDL","4x8/leg",""],
+      ["Side Star Plank","3x20 sec/side",""],
+      ["Leg Extensions","3x12-15",""],
+      ["Slider Hamstring Curls","3x10",""],
+    ]},
+  ]},
+  'w9s3': {groups:[
+    {title:"A -- Pull (UB-HI)",ex:[
+      ["Weighted Pull Ups","AMRAP + weighted sets","top set reps"],
+      ["Hollow Rocks","3x12",""],
+      ["BB Row","4x12/10/8/6",""],
+      ["Rope Facepulls","3x15",""],
+    ]},
+    {title:"B -- Press (UB-HI)",ex:[
+      ["BB or DB Bench Press","5x8/8/5/5/5","top set target"],
+      ["Seated DB Shoulder Press","4x8",""],
+      ["Weighted Dips","3x failure",""],
+      ["Rope Pushdowns","3x12",""],
+    ]},
+    {title:"C -- Dynamic upper (UB-DY)",ex:[
+      ["DB Push Press","4x10/8/6/6",""],
+      ["Banded Pulldown","3x15",""],
+      ["Bench Supported SA Row","4x10/side",""],
+      ["DB Bent Over Ys","3x15",""],
+      ["TRX Rows","3x12",""],
+    ]},
+  ]},
   'w10s2': {groups:[
     {title:"CSS Retest #1",ex:[
       ["400m Time Trial","1x400m max effort","compare to Week 3 baseline"],
       ["Rest","10 min passive",""],
       ["200m Time Trial","1x200m max effort",""],
       ["Calculate new CSS pace","record improvement %","expect 2-4% improvement from wk 3"],
+    ]},
+  ]},
+  'w11s1': {groups:[
+    {title:"A -- BB Back Squat (LB-HI)",ex:[
+      ["BB Back Squat","5x8/6/5/5/5","peak load week -- push top set"],
+    ]},
+    {title:"B -- BB RDL (LB-HI)",ex:[
+      ["BB RDL","4x8/8/5/5","peak load week -- push top set, record weight"],
+    ]},
+    {title:"C -- Dynamic lower (LB-DY)",ex:[
+      ["DB Bulgarian Split Squat","4x8/8/6/6",""],
+      ["SA Plank Hold","3x30 sec/side",""],
+      ["BB Kickstand RDL","4x8/leg",""],
+      ["Side Star Plank","3x20 sec/side",""],
+      ["Leg Extensions","3x12-15",""],
+      ["Slider Hamstring Curls","3x10",""],
+    ]},
+  ]},
+  'w11s3': {groups:[
+    {title:"A -- Pull (UB-HI)",ex:[
+      ["Weighted Pull Ups","AMRAP + weighted sets","top set reps -- peak week"],
+      ["Hollow Rocks","3x12",""],
+      ["BB Row","4x12/10/8/6",""],
+      ["Rope Facepulls","3x15",""],
+    ]},
+    {title:"B -- Press (UB-HI)",ex:[
+      ["BB or DB Bench Press","5x8/8/5/5/5","top set target -- peak week"],
+      ["Seated DB Shoulder Press","4x8",""],
+      ["Weighted Dips","3x failure",""],
+      ["Rope Pushdowns","3x12",""],
+    ]},
+    {title:"C -- Dynamic upper (UB-DY)",ex:[
+      ["DB Push Press","4x10/8/6/6",""],
+      ["Banded Pulldown","3x15",""],
+      ["DB Bent Over Ys","3x15",""],
+      ["TRX Rows","3x12",""],
+    ]},
+  ]},
+  'w13s1': {groups:[
+    {title:"A -- BB Back Squat (LB-HI, -30% accessory)",ex:[
+      ["BB Back Squat","5x8/6/5/5/5","top set -- accessory volume cut 30% this phase"],
+    ]},
+    {title:"B -- BB RDL (LB-HI)",ex:[
+      ["BB RDL","4x8/8/5/5","top set -- record weight"],
+      ["Slider Body Saws","2x10","reduced volume"],
+    ]},
+    {title:"C -- Dynamic lower reduced",ex:[
+      ["DB Bulgarian Split Squat","3x8/8/6","30% less volume vs Phase 2"],
+      ["BB Kickstand RDL","3x8/leg",""],
+      ["Slider Hamstring Curls","2x10",""],
+    ]},
+  ]},
+  'w13s3': {groups:[
+    {title:"A -- Pull (UB-HI, -30% accessory)",ex:[
+      ["Weighted Pull Ups","AMRAP + weighted sets","top set reps"],
+      ["BB Row","3x10/8/6","reduced vs Phase 2"],
+      ["Rope Facepulls","2x15",""],
+    ]},
+    {title:"B -- Press (UB-HI)",ex:[
+      ["BB or DB Bench Press","4x8/8/5/5","top set target"],
+      ["Seated DB Shoulder Press","3x8","reduced volume"],
+      ["Weighted Dips","2x failure",""],
     ]},
   ]},
   'w14s6': {groups:[
@@ -801,12 +967,60 @@ var EX_DATA = {
       ["Calculate new CSS","record vs wk 3 + wk 10","expect 3-5% total improvement from wk 3"],
     ]},
   ]},
+  'w16s1': {groups:[
+    {title:"A -- BB Back Squat (LB-HI)",ex:[
+      ["BB Back Squat","5x8/6/5/5/5","top set -- Phase 3 peak"],
+    ]},
+    {title:"B -- BB RDL (LB-HI)",ex:[
+      ["BB RDL","4x8/8/5/5","top set -- record weight"],
+      ["Slider Body Saws","2x10",""],
+    ]},
+    {title:"C -- Dynamic lower reduced",ex:[
+      ["DB Bulgarian Split Squat","3x8/8/6",""],
+      ["BB Kickstand RDL","3x8/leg",""],
+      ["Slider Hamstring Curls","2x10",""],
+    ]},
+  ]},
+  'w16s3': {groups:[
+    {title:"A -- Pull (UB-HI)",ex:[
+      ["Weighted Pull Ups","AMRAP + weighted sets","top set reps"],
+      ["BB Row","3x10/8/6",""],
+      ["Rope Facepulls","2x15",""],
+    ]},
+    {title:"B -- Press (UB-HI)",ex:[
+      ["BB or DB Bench Press","4x8/8/5/5","top set target"],
+      ["Seated DB Shoulder Press","3x8",""],
+      ["Weighted Dips","2x failure",""],
+    ]},
+  ]},
+  'w18s5': {groups:[
+    {title:"A -- Pull (UB-HI, Phase 4 maintenance)",ex:[
+      ["Weighted Pull Ups","AMRAP + weighted sets","top set reps -- 2 lifts/wk now"],
+      ["BB Row","3x10/8/6",""],
+      ["Rope Facepulls","2x15",""],
+    ]},
+    {title:"B -- Press (UB-HI)",ex:[
+      ["BB or DB Bench Press","4x8/8/5/5","top set target"],
+      ["Seated DB Shoulder Press","3x8",""],
+      ["Weighted Dips","2x failure",""],
+    ]},
+  ]},
   'w20s2': {groups:[
     {title:"CSS Final Retest",ex:[
       ["400m Time Trial","1x400m max effort","final benchmark"],
       ["Rest","10 min passive",""],
       ["200m Time Trial","1x200m max effort",""],
       ["Calculate final CSS","total % improvement from wk 3","expect 5-8% total improvement"],
+    ]},
+  ]},
+  'w20s5': {groups:[
+    {title:"A -- Pull (UB-HI, pre-taper)",ex:[
+      ["Weighted Pull Ups","AMRAP + weighted sets","top set reps"],
+      ["BB Row","3x10/8/6",""],
+    ]},
+    {title:"B -- Press (UB-HI)",ex:[
+      ["BB or DB Bench Press","4x8/8/5/5","top set target"],
+      ["Seated DB Shoulder Press","3x8",""],
     ]},
   ]},
   'w22s6': {groups:[
