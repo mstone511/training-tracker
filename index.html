@@ -141,7 +141,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
 .day-tab.has-log{border-color:var(--green-txt);color:var(--green-txt)}
 .day-tab.active.has-log{background:var(--green-txt);color:#fff;border-color:var(--green-txt)}
 .log-toolbar{display:flex;gap:6px;margin-bottom:10px;align-items:center}
-.log-tool-btn{flex:1;padding:8px 4px;border-radius:var(--r);border:0.5px solid var(--border2);background:var(--bg);color:var(--txt);font-size:12px;font-weight:500;cursor:pointer;text-align:center}
+.log-tool-btn{flex:1;padding:8px 2px;border-radius:var(--r);border:0.5px solid var(--border2);background:var(--bg);color:var(--txt);font-size:11px;font-weight:500;cursor:pointer;text-align:center}
 .log-tool-btn:active{background:var(--bg2)}
 .log-tool-btn.active-tool{background:var(--blue-bg);color:var(--blue-txt);border-color:var(--blue-txt)}
 .photo-panel{background:var(--bg2);border-radius:var(--rl);padding:12px;margin-bottom:10px;display:none}
@@ -270,6 +270,25 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
 <h1>Nutrition</h1>
 <p class="subtitle">Dynamic targets &middot; daily log</p>
 <div style="font-size:12px;color:var(--txt3);margin-bottom:10px">Synced to: <span id="nutWeekLabel" style="color:var(--txt2);font-weight:500">Week 1</span> &middot; <button class="btn" style="font-size:11px;padding:3px 8px" onclick="switchTab('training')">change week</button></div>
+<div class="sync-panel" style="margin-bottom:10px">
+  <div class="sync-head" onclick="document.getElementById('metricsBody').classList.toggle('open')">
+    <span style="font-size:13px;font-weight:500">&#9878; Body metrics</span>
+    <span style="font-size:12px;color:var(--txt2)" id="metricsLatest">no data</span>
+  </div>
+  <div class="sync-body" id="metricsBody">
+    <div class="sync-field">
+      <label>Height (in) -- set once</label>
+      <input type="number" id="bmHeight" inputmode="decimal" placeholder="e.g. 70" oninput="saveProfile()">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div><label style="display:block;font-size:12px;color:var(--txt2);margin-bottom:4px">Weight (lbs)</label><input type="number" id="bmWeight" inputmode="decimal" placeholder="167.5" style="width:100%;font-size:13px;height:34px;padding:0 8px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt)"></div>
+      <div><label style="display:block;font-size:12px;color:var(--txt2);margin-bottom:4px">Body fat % (opt)</label><input type="number" id="bmBF" inputmode="decimal" placeholder="14.8" style="width:100%;font-size:13px;height:34px;padding:0 8px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt)"></div>
+    </div>
+    <button class="btn" style="width:100%" onclick="logBodyMetric()">Log today's measurement</button>
+    <div id="metricsHistory" style="margin-top:10px"></div>
+    <div class="sync-help" style="margin-top:8px">Weight trend over 2-3 weeks is the best signal for whether your calorie target is right. The nutrition AI uses this to recommend adjustments.</div>
+  </div>
+</div>
 <div class="macro-targets">
   <div class="macro-week-label" id="ntPhaseLabel">Phase 1 &middot; week 1</div>
   <div class="macro-phase" id="ntLoadLabel">Moderate load</div>
@@ -287,8 +306,9 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   <button class="log-tool-btn active-tool" id="toolManual" onclick="setTool('manual')">&#9998; Manual</button>
   <button class="log-tool-btn" id="toolPhoto" onclick="setTool('photo')">&#128247; Photo</button>
   <button class="log-tool-btn" id="toolSearch" onclick="setTool('search')">&#128269; Search</button>
-  <button class="btn" style="font-size:11px;padding:5px 8px;flex-shrink:0" onclick="addSmoothie()">+ Smoothie</button>
+  <button class="log-tool-btn" id="toolBarcode" onclick="setTool('barcode')">&#9974; Scan</button>
 </div>
+<div style="margin-bottom:10px"><button class="btn" style="width:100%;font-size:12px;padding:6px" onclick="addSmoothie()">+ Add post-workout smoothie to snacks</button></div>
 <div class="photo-panel" id="photoPanel">
   <div class="photo-drop" onclick="document.getElementById('photoFile').click()">
     <input type="file" id="photoFile" accept="image/*" capture="environment" onchange="handlePhotoSelect(event)">
@@ -324,6 +344,19 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   <div style="font-size:11px;color:var(--txt3);margin-bottom:8px">USDA FoodData Central &middot; 300,000+ foods</div>
   <div class="search-loading" id="searchLoading">Searching...</div>
   <div class="search-results" id="searchResults"></div>
+</div>
+<div class="search-panel" id="barcodePanel">
+  <div id="barcodeScanArea" style="margin-bottom:10px">
+    <div id="barcodeReader" style="width:100%;border-radius:var(--r);overflow:hidden;background:#000;min-height:200px"></div>
+    <div style="font-size:11px;color:var(--txt3);margin-top:6px;text-align:center">Point your camera at a product barcode</div>
+  </div>
+  <div class="search-row" style="margin-top:10px">
+    <input class="search-input" id="barcodeManual" type="text" inputmode="numeric" placeholder="Or type barcode number..." autocomplete="off">
+    <button class="btn" onclick="lookupBarcode(document.getElementById('barcodeManual').value)">Look up</button>
+  </div>
+  <div style="font-size:11px;color:var(--txt3);margin-bottom:8px">Open Food Facts database &middot; ~3M packaged products</div>
+  <div class="search-loading" id="barcodeLoading">Looking up product...</div>
+  <div class="search-results" id="barcodeResults"></div>
 </div>
 <div class="card" id="manualCard">
   <div class="card-body" style="padding:12px">
@@ -1078,12 +1111,30 @@ function getGenericExDetail(type, name) {
   ]}]};
 }
 
+var CHEST_ARMS_ADDON = {
+  'w6s1': {title:"Chest + arms (light -- deload)", ex:[["DB Bench Press or Push-ups","2x10","light -- maintenance only, 3-4 RIR"],["DB Curl","2x12","light -- pump only"],["Tricep Pushdown or Dips","2x12","light -- pump only"]]},
+  'w12s1': {title:"Chest + arms (light -- deload)", ex:[["DB Bench Press or Push-ups","2x10","light -- maintenance only, 3-4 RIR"],["DB Curl","2x12","light -- pump only"],["Tricep Pushdown or Dips","2x12","light -- pump only"]]},
+  'w13s5': {title:"Chest + arms finisher", ex:[["DB Bench Press or Push-ups","3x10-12","chest -- moderate load, 1-2 RIR"],["Incline DB Fly","2x12","chest stretch emphasis"],["EZ-Bar or DB Curl","3x10-12","biceps"],["Rope or DB Tricep Extension","3x10-12","triceps"]]},
+  'w15s1': {title:"Chest + arms finisher", ex:[["DB Bench Press or Push-ups","3x10-12","chest -- moderate load, 1-2 RIR"],["Incline DB Fly","2x12","chest stretch emphasis"],["EZ-Bar or DB Curl","3x10-12","biceps"],["Rope or DB Tricep Extension","3x10-12","triceps"]]},
+  'w16s1': {title:"Chest + arms finisher", ex:[["DB Bench Press or Push-ups","3x10-12","chest -- moderate load, 1-2 RIR"],["Incline DB Fly","2x12","chest stretch emphasis"],["EZ-Bar or DB Curl","3x10-12","biceps"],["Rope or DB Tricep Extension","3x10-12","triceps"]]},
+  'w17s1': {title:"Chest + arms (light -- deload)", ex:[["DB Bench Press or Push-ups","2x10","light -- maintenance only, 3-4 RIR"],["DB Curl","2x12","light -- pump only"],["Tricep Pushdown or Dips","2x12","light -- pump only"]]},
+  'w18s1': {title:"Chest + arms (maintenance -- light)", ex:[["DB Bench Press or Push-ups","2x10","light -- maintenance only, 3-4 RIR"],["DB Curl","2x12","light -- pump only"],["Tricep Pushdown or Dips","2x12","light -- pump only"]]},
+  'w19s1': {title:"Chest + arms (maintenance -- light)", ex:[["DB Bench Press or Push-ups","2x10","light -- maintenance only, 3-4 RIR"],["DB Curl","2x12","light -- pump only"],["Tricep Pushdown or Dips","2x12","light -- pump only"]]},
+  'w20s1': {title:"Chest + arms (maintenance -- light)", ex:[["DB Bench Press or Push-ups","2x10","light -- maintenance only, 3-4 RIR"],["DB Curl","2x12","light -- pump only"],["Tricep Pushdown or Dips","2x12","light -- pump only"]]},
+  'w21s1': {title:"Chest + arms (maintenance -- light)", ex:[["DB Bench Press or Push-ups","2x10","light -- maintenance only, 3-4 RIR"],["DB Curl","2x12","light -- pump only"],["Tricep Pushdown or Dips","2x12","light -- pump only"]]},
+  'w21s4': {title:"Chest + arms 2nd touch (maintenance -- light)", ex:[["DB Bench Press or Push-ups","2x10","light -- maintenance only, 3-4 RIR"],["DB Curl","2x12","light -- pump only"],["Tricep Pushdown or Dips","2x12","light -- pump only"]]},
+  'w22s3': {title:"Chest + arms (very light -- race week pump)", ex:[["DB Bench Press or Push-ups","2x10","light -- maintenance only, 3-4 RIR"],["DB Curl","2x12","light -- pump only"],["Tricep Pushdown or Dips","2x12","light -- pump only"]]}
+};
+
 function buildExHtml(sid, type, name) {
   var detail = EX_DATA[sid] || getGenericExDetail(type, name);
   if (!detail) return '';
+  // Clone groups so we can append chest+arms addon without mutating source
+  var allGroups = detail.groups.slice();
+  if (CHEST_ARMS_ADDON[sid]) { allGroups = allGroups.concat([CHEST_ARMS_ADDON[sid]]); }
   var groupsHtml = '';
-  for (var g = 0; g < detail.groups.length; g++) {
-    var group = detail.groups[g];
+  for (var g = 0; g < allGroups.length; g++) {
+    var group = allGroups[g];
     var rowsHtml = '';
     for (var e = 0; e < group.ex.length; e++) {
       var ex = group.ex[e];
@@ -1157,7 +1208,7 @@ var WEEKS = [
 {id:'w5s6',name:'Run -- Z2 2.5 mi',type:'run',day:'Sat',detail:'Longest run Phase 1',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR (bpm)'},{k:'run_pace',l:'Pace (min/mi)'}]},
 ]},
 {n:6,phase:'Phase 1',focus:'Deload -- active recovery',load:'deload',sessions:[
-{id:'w6s1',name:'Lower body -- dynamic light',type:'lift',day:'Mon',detail:'LB-DY reduced',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
+{id:'w6s1',name:'Lower body -- dynamic light',type:'lift',day:'Mon',detail:'LB-DY reduced + chest/arms (light)',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
 {id:'w6s2',name:'Swim -- easy Z2',type:'swim',day:'Tue',detail:'25 min',fields:[{k:'swim_min',l:'Duration (min)'}]},
 {id:'w6s3',name:'Upper body -- dynamic light',type:'lift',day:'Wed',detail:'UB-DY',fields:[{k:'bench_top',l:'Working weight (lbs)'}]},
 {id:'w6s4',name:'Bike -- easy Z2',type:'bike',day:'Thu',detail:'40 min easy',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR (bpm)'}]},
@@ -1211,7 +1262,7 @@ var WEEKS = [
 {id:'w11s7',name:'Swim -- continuous 45 min',type:'swim',day:'Sun',detail:'Z2 longest swim to date',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:12,phase:'Phase 2',focus:'Phase 2 deload',load:'deload',sessions:[
-{id:'w12s1',name:'Lower body -- dynamic light',type:'lift',day:'Mon',detail:'LB-DY only',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
+{id:'w12s1',name:'Lower body -- dynamic light',type:'lift',day:'Mon',detail:'LB-DY + chest/arms (light)',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
 {id:'w12s2',name:'Swim -- easy Z2 30 min',type:'swim',day:'Tue',detail:'No intervals',fields:[{k:'swim_min',l:'Duration (min)'}]},
 {id:'w12s3',name:'Upper body -- dynamic light',type:'lift',day:'Wed',detail:'UB-DY only',fields:[{k:'bench_top',l:'Working weight (lbs)'}]},
 {id:'w12s4',name:'Run -- Z2 2.5 mi easy',type:'run',day:'Thu',detail:'Easy short',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR'}]},
@@ -1224,7 +1275,7 @@ var WEEKS = [
 {id:'w13s2',name:'Swim -- CSS 40 min',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w13s3',name:'Upper body -- high intensity',type:'lift',day:'Wed',detail:'UB-HI accessory -30%',fields:[{k:'pullup_reps',l:'Pull-up reps'},{k:'bench_top',l:'Bench top (lbs)'}]},
 {id:'w13s4',name:'Run Z2 3 mi + Swim technique',type:'run',day:'Thu',detail:'Short run AM, swim PM 35 min',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'swim_min',l:'Swim duration'}]},
-{id:'w13s5',name:'Running prep',type:'lift',day:'Fri',detail:'RP-SL',fields:[]},
+{id:'w13s5',name:'Running prep + chest/arms',type:'lift',day:'Fri',detail:'RP-SL + chest/arms finisher',fields:[]},
 {id:'w13s6',name:'Run Z2 4 mi + Z3 bike 50 min',type:'run',day:'Sat',detail:'Longest run to date',fields:[{k:'run_dist',l:'Run distance (mi)'},{k:'run_avghr',l:'Run avg HR'},{k:'run_pace',l:'Pace (min/mi)'}]},
 {id:'w13s7',name:'Swim -- continuous 45 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
@@ -1238,7 +1289,7 @@ var WEEKS = [
 {id:'w14s7',name:'Swim -- continuous 45 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:15,phase:'Phase 3',focus:'CSS retest #2 + brick 35/12',load:'moderate',sessions:[
-{id:'w15s1',name:'Lower body -- dynamic',type:'lift',day:'Mon',detail:'LB-DY',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
+{id:'w15s1',name:'Lower body -- dynamic',type:'lift',day:'Mon',detail:'LB-DY + chest/arms finisher',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
 {id:'w15s2',name:'Swim -- CSS retest #2',type:'swim',day:'Tue',detail:'400m TT + 200m TT',fields:[{k:'css_400',l:'400m time (mm:ss)'},{k:'css_200',l:'200m time (mm:ss)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w15s3',name:'Upper body -- dynamic',type:'lift',day:'Wed',detail:'UB-DY',fields:[{k:'bench_top',l:'Working weight (lbs)'}]},
 {id:'w15s4',name:'Run Z2 3 mi + Swim technique',type:'run',day:'Thu',detail:'Short run + swim PM',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'swim_min',l:'Swim min'}]},
@@ -1247,7 +1298,7 @@ var WEEKS = [
 {id:'w15s7',name:'Swim -- continuous 50 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:16,phase:'Phase 3',focus:'5 km continuous run milestone',load:'high',sessions:[
-{id:'w16s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI',fields:[{k:'squat_top',l:'Squat top (lbs)'},{k:'rdl_top',l:'RDL top (lbs)'}]},
+{id:'w16s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI + chest/arms finisher',fields:[{k:'squat_top',l:'Squat top (lbs)'},{k:'rdl_top',l:'RDL top (lbs)'}]},
 {id:'w16s2',name:'Swim -- CSS 45 min',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w16s3',name:'Upper body -- high intensity',type:'lift',day:'Wed',detail:'UB-HI',fields:[{k:'pullup_reps',l:'Pull-up reps'},{k:'bench_top',l:'Bench top (lbs)'}]},
 {id:'w16s4',name:'Run Z2 3 mi + Swim technique',type:'run',day:'Thu',detail:'Mid-week run + swim PM',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'swim_min',l:'Swim min'}]},
@@ -1256,7 +1307,7 @@ var WEEKS = [
 {id:'w16s7',name:'Swim -- continuous 50 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:17,phase:'Phase 3',focus:'Phase 3 deload',load:'deload',sessions:[
-{id:'w17s1',name:'Lower body -- dynamic light',type:'lift',day:'Mon',detail:'LB-DY no heavy loading',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
+{id:'w17s1',name:'Lower body -- dynamic light',type:'lift',day:'Mon',detail:'LB-DY + chest/arms (light)',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
 {id:'w17s2',name:'Swim -- easy 30 min',type:'swim',day:'Tue',detail:'No intervals',fields:[{k:'swim_min',l:'Duration (min)'}]},
 {id:'w17s3',name:'Upper body -- dynamic light',type:'lift',day:'Wed',detail:'UB-DY',fields:[{k:'bench_top',l:'Working weight (lbs)'}]},
 {id:'w17s4',name:'Run -- Z2 2.5 mi easy',type:'run',day:'Thu',detail:'Easy short',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR'}]},
@@ -1265,7 +1316,7 @@ var WEEKS = [
 {id:'w17s7',name:'Swim -- easy 30 min',type:'swim',day:'Sun',detail:'Easy continuous',fields:[{k:'swim_min',l:'Duration (min)'}]},
 ]},
 {n:18,phase:'Phase 4',focus:'Race-specific, strength to 2x/wk',load:'high',sessions:[
-{id:'w18s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI, 2 sessions/wk',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
+{id:'w18s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI + chest/arms (maintenance)',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
 {id:'w18s2',name:'Swim -- CSS 45 min',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w18s3',name:'Run Z3 tempo 3 mi + Swim technique',type:'run',day:'Wed',detail:'First Z3 run, 143-155 bpm',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR (bpm)'},{k:'run_pace',l:'Pace (min/mi)'}]},
 {id:'w18s4',name:'Bike -- Z3 intervals 55 min',type:'bike',day:'Thu',detail:'3x10 min Z3, 3 min rest',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR'}]},
@@ -1274,7 +1325,7 @@ var WEEKS = [
 {id:'w18s7',name:'Swim -- continuous 50 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:19,phase:'Phase 4',focus:'Race simulation intensity',load:'peak',sessions:[
-{id:'w19s1',name:'Lower body -- dynamic',type:'lift',day:'Mon',detail:'LB-DY',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
+{id:'w19s1',name:'Lower body -- dynamic',type:'lift',day:'Mon',detail:'LB-DY + chest/arms (maintenance)',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
 {id:'w19s2',name:'Swim -- CSS race pace 45 min',type:'swim',day:'Tue',detail:'Push CSS pace',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w19s3',name:'Run Z3 3.5 mi + Swim technique',type:'run',day:'Wed',detail:'Z3 run 143-155 bpm',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR'},{k:'run_pace',l:'Pace'}]},
 {id:'w19s4',name:'Bike -- Z4 intervals 50 min',type:'bike',day:'Thu',detail:'2x10 min threshold, 3 min rest',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR'},{k:'bike_peak_hr',l:'Peak HR'}]},
@@ -1283,7 +1334,7 @@ var WEEKS = [
 {id:'w19s7',name:'Swim -- open water or 40 min pool',type:'swim',day:'Sun',detail:'Open water if possible',fields:[{k:'swim_min',l:'Duration (min)'},{k:'open_water',l:'Open water? (yes/no)'}]},
 ]},
 {n:20,phase:'Phase 4',focus:'CSS retest #3 + longest brick',load:'peak',sessions:[
-{id:'w20s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
+{id:'w20s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI + chest/arms (maintenance)',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
 {id:'w20s2',name:'Swim -- final CSS retest',type:'swim',day:'Tue',detail:'400m TT + 200m TT',fields:[{k:'css_400',l:'400m time (mm:ss)'},{k:'css_200',l:'200m time (mm:ss)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w20s3',name:'Run Z2 3 mi + Swim technique',type:'run',day:'Wed',detail:'Easy run',fields:[{k:'run_avghr',l:'Run avg HR'}]},
 {id:'w20s4',name:'Bike -- Z3 50 min',type:'bike',day:'Thu',detail:'Z3 intervals',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR'}]},
@@ -1292,10 +1343,10 @@ var WEEKS = [
 {id:'w20s7',name:'Swim -- easy 35 min',type:'swim',day:'Sun',detail:'Easy Z2',fields:[{k:'swim_min',l:'Duration (min)'}]},
 ]},
 {n:21,phase:'Phase 4',focus:'Final load week before taper',load:'high',sessions:[
-{id:'w21s1',name:'Lower body -- dynamic',type:'lift',day:'Mon',detail:'LB-DY',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
+{id:'w21s1',name:'Lower body -- dynamic',type:'lift',day:'Mon',detail:'LB-DY + chest/arms (maintenance)',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
 {id:'w21s2',name:'Swim -- CSS 45 min',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w21s3',name:'Run Z3 4 mi + Swim technique',type:'run',day:'Wed',detail:'Longest Z3 run',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR'},{k:'run_pace',l:'Pace'}]},
-{id:'w21s4',name:'Bike -- Z3 55 min',type:'bike',day:'Thu',detail:'Intervals',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR'}]},
+{id:'w21s4',name:'Bike -- Z3 55 min + chest/arms',type:'bike',day:'Thu',detail:'Z3 intervals + chest/arms 2nd touch (light)',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR'}]},
 {id:'w21s5',name:'REST',type:'rest',day:'Fri',detail:'Full rest',fields:[]},
 {id:'w21s6',name:'Run Z2 5 km + easy bike 30 min',type:'run',day:'Sat',detail:'Should feel easy vs wk 16',fields:[{k:'run_dist',l:'Run distance (km)'},{k:'run_avghr',l:'Run avg HR'},{k:'run_time',l:'Total run time'}]},
 {id:'w21s7',name:'Swim -- continuous 45 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
@@ -1303,7 +1354,7 @@ var WEEKS = [
 {n:22,phase:'Race week',focus:'Taper -- 40-50% volume drop',load:'taper',sessions:[
 {id:'w22s1',name:'Upper body -- dynamic light',type:'lift',day:'Mon',detail:'UB-DY reduced',fields:[{k:'bench_top',l:'Working weight (lbs)'}]},
 {id:'w22s2',name:'Swim -- easy + 4x50m race pace',type:'swim',day:'Tue',detail:'25 min total',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'50m split (mm:ss)'}]},
-{id:'w22s3',name:'Run 20 min + Bike 20 min easy',type:'run',day:'Wed',detail:'Z2 both',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'bike_avghr',l:'Bike avg HR'}]},
+{id:'w22s3',name:'Run + Bike easy + chest/arms',type:'run',day:'Wed',detail:'Z2 both + chest/arms (very light pump)',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'bike_avghr',l:'Bike avg HR'}]},
 {id:'w22s4',name:'Mini brick -- race pace',type:'brick',day:'Thu',detail:'Bike 20 to Run 10 with race-pace mile',fields:[{k:'brick_feel',l:'Feel (1-10)'},{k:'run_pace',l:'Race pace segment (min/mi)'}]},
 {id:'w22s5',name:'Rest + 15 min easy swim',type:'swim',day:'Fri',detail:'Very easy only',fields:[]},
 {id:'w22s6',name:'RACE DAY -- sprint triathlon',type:'brick',day:'Sat',detail:'750m swim, bike, 5 km run',fields:[{k:'swim_time',l:'Swim (mm:ss)'},{k:'t1_time',l:'T1 (mm:ss)'},{k:'bike_time',l:'Bike (mm:ss)'},{k:'t2_time',l:'T2 (mm:ss)'},{k:'run_time',l:'Run (mm:ss)'},{k:'finish_time',l:'Total finish (mm:ss)'},{k:'overall_feel',l:'Overall (1-10)'}]},
@@ -1315,8 +1366,8 @@ var WEEKS = [
 var MACRO_BY_LOAD = {
   deload: {kcal:2400,carb:295,pro:161,fat:72,label:'Deload week -- reduced targets',reason:'Volume down ~40%. Drop carbs to match lower glycogen demand. Protein floor holds at 161g. Fat minimum 65g.'},
   low:    {kcal:2550,carb:315,pro:161,fat:74,label:'Low-load week',reason:'Light training. Moderate carb reduction. Protein unchanged. Prioritise sleep and food quality.'},
-  moderate:{kcal:2748,carb:355,pro:161,fat:76,label:'Moderate load -- baseline targets',reason:'4 strength sessions + light cardio. Standard hypertrophy targets. Hit protein first, fill remaining calories with carbs, fat fills the gap.'},
-  high:   {kcal:2950,carb:390,pro:165,fat:78,label:'High-load week -- increase carbs',reason:'4-5 sessions including swim 3x and running. Glycogen demand elevated. Add ~35g carbs above baseline especially on training days. Post-workout smoothie non-negotiable.'},
+  moderate:{kcal:2748,carb:355,pro:161,fat:76,label:'Moderate load -- baseline targets',reason:'Standard hypertrophy targets for this load. Hit protein first, fill remaining calories with carbs, fat fills the gap.'},
+  high:   {kcal:2950,carb:390,pro:165,fat:78,label:'High-load week -- increase carbs',reason:'Higher training volume -- glycogen demand elevated. Add ~35g carbs above baseline especially on training days. Post-workout smoothie non-negotiable.'},
   peak:   {kcal:3100,carb:415,pro:168,fat:80,label:'Peak load -- highest caloric demand',reason:'Maximum concurrent training volume. Do not undereat -- it directly impairs recovery and hypertrophy. On double-session days add 200-300 kcal carb-dominant.'},
   taper:  {kcal:2650,carb:330,pro:161,fat:75,label:'Race week -- moderate taper targets',reason:'Reduce volume but do NOT restrict carbs. Race-day performance depends on glycogen loaded Wed-Fri. Hydration and electrolytes are the primary variable.'}
 };
@@ -1558,12 +1609,32 @@ async function runAnalysis() {
 // ─── NUTRITION ────────────────────────────────────────────────────────────────
 function getMT(idx) { return MACRO_BY_LOAD[WEEKS[idx].load] || MACRO_BY_LOAD.moderate; }
 
+function getSessionComposition(wk) {
+  var lift = 0, swim = 0, run = 0, bike = 0, brick = 0, rest = 0;
+  for (var i = 0; i < wk.sessions.length; i++) {
+    var t = wk.sessions[i].type;
+    if (t === 'lift') lift++;
+    else if (t === 'swim') swim++;
+    else if (t === 'run') run++;
+    else if (t === 'bike') bike++;
+    else if (t === 'brick') brick++;
+    else if (t === 'rest') rest++;
+  }
+  var parts = [];
+  if (lift) parts.push(lift + ' strength');
+  if (swim) parts.push(swim + ' swim');
+  if (run) parts.push(run + ' run');
+  if (bike) parts.push(bike + ' bike');
+  if (brick) parts.push(brick + ' brick');
+  return parts.join(' + ') + ' this week.';
+}
+
 function renderNutrition() {
   var wk = WEEKS[curWk]; var mt = getMT(curWk);
   document.getElementById('nutWeekLabel').textContent = 'Week ' + wk.n + ' ' + wk.phase + ' -- ' + wk.focus;
   document.getElementById('ntPhaseLabel').textContent = wk.phase + ' week ' + wk.n;
   document.getElementById('ntLoadLabel').textContent = mt.label;
-  document.getElementById('ntReason').textContent = mt.reason;
+  document.getElementById('ntReason').textContent = getSessionComposition(wk) + ' ' + mt.reason;
   document.getElementById('nt-kcal').textContent = mt.kcal.toLocaleString();
   document.getElementById('nt-pro').textContent = mt.pro + 'g';
   document.getElementById('nt-carb').textContent = mt.carb + 'g';
@@ -1581,7 +1652,7 @@ function renderNutrition() {
 
 function setTool(tool) {
   activeTool = tool;
-  var tools = ['manual','photo','search'];
+  var tools = ['manual','photo','search','barcode'];
   for (var i = 0; i < tools.length; i++) {
     var t = tools[i];
     var btn = document.getElementById('tool' + t.charAt(0).toUpperCase() + t.slice(1));
@@ -1589,7 +1660,10 @@ function setTool(tool) {
   }
   document.getElementById('photoPanel').classList.toggle('open', tool === 'photo');
   document.getElementById('searchPanel').classList.toggle('open', tool === 'search');
+  document.getElementById('barcodePanel').classList.toggle('open', tool === 'barcode');
   if (tool === 'search') document.getElementById('searchInput').focus();
+  if (tool === 'barcode') startBarcodeScanner();
+  else stopBarcodeScanner();
 }
 
 function buildDayTabs() {
@@ -1786,7 +1860,22 @@ async function runNutAnalysis() {
     for (var fi = 0; fi < fitems.length; fi++) { dtot.kcal += fitems[fi].kcal||0; dtot.carb += fitems[fi].carb||0; dtot.pro += fitems[fi].pro||0; dtot.fat += fitems[fi].fat||0; }
     if (dtot.kcal > 0) days.push(DAYS_OF_WEEK[di] + ': ' + Math.round(dtot.kcal) + ' kcal, ' + Math.round(dtot.carb) + 'g C, ' + Math.round(dtot.pro) + 'g P, ' + Math.round(dtot.fat) + 'g F');
   }
-  var prompt = 'Sports dietitian reviewing weekly nutrition for Matt (167.5 lbs, 14.8% BF, 81.4 lbs SMM). Week ' + wk.n + '/22, load: ' + wk.load + '. Targets: ' + mt.kcal + ' kcal / ' + mt.carb + 'g C / ' + mt.pro + 'g P / ' + mt.fat + 'g F. ' + mt.reason + '\nLogged days:\n' + (days.join('\n') || 'No days logged yet.') + '\nPost-workout smoothie = 380 kcal / 42g C / 40g P / 7g F.\nDirect feedback max 180 words: 1) protein compliance 2) carb-to-training match 3) obvious under/over-eating days 4) one practical adjustment. Numbers only.';
+  // Body-metric context
+  var metricsCtx = '';
+  var metrics = appData.metrics || [];
+  if (metrics.length >= 1) {
+    var lastM = metrics[metrics.length - 1];
+    metricsCtx = 'Latest weight: ' + lastM.weight + ' lbs' + (lastM.bf ? ' at ' + lastM.bf + '% BF' : '') + '.';
+    if (metrics.length >= 2) {
+      var firstM = metrics[0];
+      var dW = (lastM.weight - firstM.weight).toFixed(1);
+      var dDays = Math.max(1, Math.round((lastM.ts - firstM.ts) / 86400000));
+      metricsCtx += ' Weight trend: ' + (dW > 0 ? '+' : '') + dW + ' lbs over ' + dDays + ' days.';
+    }
+  } else {
+    metricsCtx = 'No body weight logged yet (using baseline 167.5 lbs, 14.8% BF).';
+  }
+  var prompt = 'Sports dietitian reviewing weekly nutrition for Matt (baseline 167.5 lbs, 14.8% BF, 81.4 lbs SMM; goal: body recomposition -- build/maintain muscle especially legs while supporting sprint triathlon training). ' + metricsCtx + ' Week ' + wk.n + '/22, load: ' + wk.load + '. Targets: ' + mt.kcal + ' kcal / ' + mt.carb + 'g C / ' + mt.pro + 'g P / ' + mt.fat + 'g F. ' + mt.reason + '\nLogged days:\n' + (days.join('\n') || 'No days logged yet.') + '\nPost-workout smoothie = 380 kcal / 42g C / 40g P / 7g F.\nDirect feedback max 200 words: 1) protein compliance 2) carb-to-training match 3) obvious under/over-eating days 4) IF weight trend data exists, comment on whether current calorie target aligns with the recomposition goal and recommend a specific kcal adjustment if the trend suggests it 5) one practical adjustment. Numbers only.';
   try {
     var r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:1000, messages:[{role:'user', content:prompt}]})});
     var d = await r.json();
@@ -1943,11 +2032,169 @@ function showToast(msg) {
   setTimeout(function() { t.classList.remove('show'); }, 2000);
 }
 
+// ─── BODY METRICS ─────────────────────────────────────────────────────────────
+function saveProfile() {
+  if (!appData.profile) appData.profile = {};
+  var h = document.getElementById('bmHeight').value;
+  if (h) appData.profile.height = parseFloat(h);
+  saveData();
+}
+
+function loadProfile() {
+  if (appData.profile && appData.profile.height) {
+    document.getElementById('bmHeight').value = appData.profile.height;
+  }
+  renderMetricsHistory();
+}
+
+function logBodyMetric() {
+  var w = parseFloat(document.getElementById('bmWeight').value);
+  var bf = parseFloat(document.getElementById('bmBF').value);
+  if (!w) { showToast('Enter a weight first'); return; }
+  if (!appData.metrics) appData.metrics = [];
+  var today = new Date();
+  var dateStr = today.toLocaleDateString('en-US', {year:'numeric', month:'short', day:'numeric'});
+  var entry = {date: dateStr, ts: today.getTime(), weight: w};
+  if (bf) entry.bf = bf;
+  appData.metrics.push(entry);
+  appData.metrics.sort(function(a,b){ return a.ts - b.ts; });
+  saveData();
+  document.getElementById('bmWeight').value = '';
+  document.getElementById('bmBF').value = '';
+  renderMetricsHistory();
+  showToast('Measurement logged');
+}
+
+function removeMetric(ts) {
+  if (!appData.metrics) return;
+  appData.metrics = appData.metrics.filter(function(m){ return m.ts !== ts; });
+  saveData();
+  renderMetricsHistory();
+}
+
+function renderMetricsHistory() {
+  var el = document.getElementById('metricsHistory');
+  var latest = document.getElementById('metricsLatest');
+  if (!el) return;
+  var metrics = appData.metrics || [];
+  if (metrics.length === 0) {
+    el.innerHTML = '';
+    if (latest) latest.textContent = 'no data';
+    return;
+  }
+  var last = metrics[metrics.length - 1];
+  if (latest) latest.textContent = last.weight + ' lbs';
+  // Show last 6 entries, newest first, with trend
+  var html = '<div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Recent measurements</div>';
+  var recent = metrics.slice(-6).reverse();
+  for (var i = 0; i < recent.length; i++) {
+    var m = recent[i];
+    var bfTxt = m.bf ? (' &middot; ' + m.bf + '% BF') : '';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px">';
+    html += '<span style="color:var(--txt2)">' + m.date + '</span>';
+    html += '<span><strong>' + m.weight + ' lbs</strong>' + bfTxt + ' <span class="meal-del" style="display:inline;margin-left:8px" onclick="removeMetric(' + m.ts + ')">&#215;</span></span>';
+    html += '</div>';
+  }
+  // Trend over available window
+  if (metrics.length >= 2) {
+    var first = metrics[0];
+    var deltaW = (last.weight - first.weight).toFixed(1);
+    var days = Math.max(1, Math.round((last.ts - first.ts) / 86400000));
+    var sign = deltaW > 0 ? '+' : '';
+    html += '<div style="font-size:11px;color:var(--txt3);margin-top:8px">Trend: ' + sign + deltaW + ' lbs over ' + days + ' days (' + metrics.length + ' measurements)</div>';
+  }
+  el.innerHTML = html;
+}
+
+// ─── BARCODE SCANNER ──────────────────────────────────────────────────────────
+var html5QrScanner = null;
+
+function startBarcodeScanner() {
+  if (typeof Html5Qrcode === 'undefined') {
+    document.getElementById('barcodeReader').innerHTML = '<div style="color:#fff;padding:20px;text-align:center;font-size:13px">Scanner library still loading -- type the barcode number below instead, or try reopening.</div>';
+    return;
+  }
+  if (html5QrScanner) return;
+  try {
+    html5QrScanner = new Html5Qrcode('barcodeReader');
+    html5QrScanner.start(
+      {facingMode: 'environment'},
+      {fps: 10, qrbox: {width: 250, height: 150}},
+      function(decodedText) {
+        // Success -- stop and look up
+        stopBarcodeScanner();
+        document.getElementById('barcodeManual').value = decodedText;
+        lookupBarcode(decodedText);
+      },
+      function(err) { /* ignore per-frame scan errors */ }
+    ).catch(function(e) {
+      document.getElementById('barcodeReader').innerHTML = '<div style="color:#fff;padding:20px;text-align:center;font-size:13px">Camera unavailable: ' + e + '<br><br>Type the barcode number below instead.</div>';
+    });
+  } catch(e) {
+    document.getElementById('barcodeReader').innerHTML = '<div style="color:#fff;padding:20px;text-align:center;font-size:13px">Scanner could not start. Type the barcode number below instead.</div>';
+  }
+}
+
+function stopBarcodeScanner() {
+  if (html5QrScanner) {
+    try {
+      html5QrScanner.stop().then(function() {
+        html5QrScanner.clear();
+        html5QrScanner = null;
+      }).catch(function() { html5QrScanner = null; });
+    } catch(e) { html5QrScanner = null; }
+  }
+}
+
+async function lookupBarcode(code) {
+  code = (code || '').trim();
+  if (!code) { showToast('Enter or scan a barcode'); return; }
+  var loading = document.getElementById('barcodeLoading');
+  var results = document.getElementById('barcodeResults');
+  loading.style.display = 'block'; results.style.display = 'none';
+  try {
+    var url = 'https://world.openfoodfacts.org/api/v2/product/' + encodeURIComponent(code) + '.json?fields=product_name,brands,nutriments,serving_size';
+    var r = await fetch(url);
+    var d = await r.json();
+    if (!d || d.status === 0 || !d.product) {
+      results.innerHTML = '<div class="search-empty">No product found for barcode ' + code + '. Try Search instead, or enter manually.</div>';
+      results.style.display = 'block'; loading.style.display = 'none'; return;
+    }
+    var p = d.product;
+    var nut = p.nutriments || {};
+    // Open Food Facts gives per-100g values
+    var kcal100 = Math.round(nut['energy-kcal_100g'] || nut['energy-kcal'] || 0);
+    var carb100 = Math.round(nut['carbohydrates_100g'] || 0);
+    var pro100 = Math.round(nut['proteins_100g'] || 0);
+    var fat100 = Math.round(nut['fat_100g'] || 0);
+    var name = p.product_name || 'Product ' + code;
+    var brand = p.brands || '';
+    if (kcal100 === 0 && carb100 === 0 && pro100 === 0 && fat100 === 0) {
+      results.innerHTML = '<div class="search-empty">Found "' + name + '" but it has no nutrition data in the database. Enter manually instead.</div>';
+      results.style.display = 'block'; loading.style.display = 'none'; return;
+    }
+    var foodObj = {name: name, brand: brand, fdcId: code, kcalPer100: kcal100, carbPer100: carb100, proPer100: pro100, fatPer100: fat100, serving: 'per 100g', servingSize: 100, servingUnit: 'g'};
+    var html = '<div class="search-item" onclick="selectFood(' + JSON.stringify(foodObj).replace(/"/g, '&quot;') + ')">';
+    html += '<div class="search-item-name">' + name + '</div>';
+    if (brand) html += '<div class="search-item-meta">' + brand + '</div>';
+    html += '<div class="search-item-macros">' + kcal100 + ' kcal, ' + carb100 + 'g C, ' + pro100 + 'g P, ' + fat100 + 'g F -- per 100g</div>';
+    html += '<div style="font-size:11px;color:var(--txt3);margin-top:4px">Tap to set serving size and add</div>';
+    html += '</div>';
+    results.innerHTML = html; results.style.display = 'block';
+  } catch(e) {
+    results.innerHTML = '<div class="search-empty">Lookup failed -- check connection and try again.</div>';
+    results.style.display = 'block';
+  }
+  loading.style.display = 'none';
+}
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 loadData();
 buildSelect();
 renderTraining();
 loadSyncSettings();
+loadProfile();
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
