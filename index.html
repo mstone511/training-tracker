@@ -140,7 +140,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
 .day-tab.active{background:var(--txt);color:var(--bg);border-color:var(--txt)}
 .day-tab.has-log{border-color:var(--green-txt);color:var(--green-txt)}
 .day-tab.active.has-log{background:var(--green-txt);color:#fff;border-color:var(--green-txt)}
-.log-toolbar{display:flex;gap:6px;margin-bottom:10px;align-items:center}
+.log-toolbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;align-items:center}.log-tool-btn{min-width:60px}
 .log-tool-btn{flex:1;padding:8px 2px;border-radius:var(--r);border:0.5px solid var(--border2);background:var(--bg);color:var(--txt);font-size:11px;font-weight:500;cursor:pointer;text-align:center}
 .log-tool-btn:active{background:var(--bg2)}
 .log-tool-btn.active-tool{background:var(--blue-bg);color:var(--blue-txt);border-color:var(--blue-txt)}
@@ -280,6 +280,16 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
       <label>Height (in) -- set once</label>
       <input type="number" id="bmHeight" inputmode="decimal" placeholder="e.g. 70" oninput="saveProfile()">
     </div>
+    <div class="sync-field">
+      <label>Nutrition goal -- adjusts targets</label>
+      <select id="bmGoal" onchange="saveProfile(); if(document.getElementById('page-nutrition').classList.contains('active')) renderNutrition();" style="width:100%;font-size:13px;height:34px;padding:0 8px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt)">
+        <option value="baseline">Use fixed baseline (Jan InBody)</option>
+        <option value="recomp">Recomposition -- maintain weight, build muscle</option>
+        <option value="cut">Fat loss -- gradual deficit</option>
+        <option value="gain">Lean gain -- gradual surplus</option>
+      </select>
+      <div class="sync-help">When set to anything other than baseline, calorie + macro targets recalculate from your most recent logged weight.</div>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
       <div><label style="display:block;font-size:12px;color:var(--txt2);margin-bottom:4px">Weight (lbs)</label><input type="number" id="bmWeight" inputmode="decimal" placeholder="167.5" style="width:100%;font-size:13px;height:34px;padding:0 8px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt)"></div>
       <div><label style="display:block;font-size:12px;color:var(--txt2);margin-bottom:4px">Body fat % (opt)</label><input type="number" id="bmBF" inputmode="decimal" placeholder="14.8" style="width:100%;font-size:13px;height:34px;padding:0 8px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt)"></div>
@@ -307,6 +317,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   <button class="log-tool-btn" id="toolPhoto" onclick="setTool('photo')">&#128247; Photo</button>
   <button class="log-tool-btn" id="toolSearch" onclick="setTool('search')">&#128269; Search</button>
   <button class="log-tool-btn" id="toolBarcode" onclick="setTool('barcode')">&#9974; Scan</button>
+  <button class="log-tool-btn" id="toolDescribe" onclick="setTool('describe')">&#128172; Describe</button>
 </div>
 <div style="margin-bottom:10px"><button class="btn" style="width:100%;font-size:12px;padding:6px" onclick="addSmoothie()">+ Add post-workout smoothie to snacks</button></div>
 <div class="photo-panel" id="photoPanel">
@@ -357,6 +368,28 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   <div style="font-size:11px;color:var(--txt3);margin-bottom:8px">Open Food Facts database &middot; ~3M packaged products</div>
   <div class="search-loading" id="barcodeLoading">Looking up product...</div>
   <div class="search-results" id="barcodeResults"></div>
+</div>
+<div class="search-panel" id="describePanel">
+  <div style="font-size:12px;color:var(--txt2);margin-bottom:8px">Describe what you ate in plain language and AI will estimate the macros.</div>
+  <textarea id="describeInput" placeholder="e.g. 2 scrambled eggs, a slice of sourdough with butter, and a cup of black coffee" style="width:100%;min-height:70px;font-size:14px;padding:8px 10px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt);font-family:inherit"></textarea>
+  <div style="font-size:11px;color:var(--txt3);margin:4px 0 8px">Include rough amounts where you can -- "a handful", "2 cups", "a palm-sized piece" all work.</div>
+  <button class="btn" style="width:100%;background:var(--txt);color:var(--bg);border-color:var(--txt)" onclick="estimateDescribed()">Estimate macros</button>
+  <div class="photo-status" id="describeStatus" style="margin-top:10px">Estimating...</div>
+  <div class="photo-result" id="describeResult" style="margin-top:10px">
+    <div class="photo-result-title">AI estimate -- edit if needed</div>
+    <div class="photo-macros">
+      <div class="photo-macro"><div class="plbl">kcal</div><input type="number" id="de-kcal" inputmode="decimal"></div>
+      <div class="photo-macro"><div class="plbl">carbs g</div><input type="number" id="de-carb" inputmode="decimal"></div>
+      <div class="photo-macro"><div class="plbl">protein g</div><input type="number" id="de-pro" inputmode="decimal"></div>
+      <div class="photo-macro"><div class="plbl">fat g</div><input type="number" id="de-fat" inputmode="decimal"></div>
+    </div>
+    <div class="photo-note" id="describeNote"></div>
+    <div style="font-size:11px;color:var(--txt3);margin-bottom:4px">Add to meal</div>
+    <select id="describeMealSlot" style="width:100%;font-size:13px;padding:7px 8px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt);margin-bottom:8px">
+      <option value="0">Breakfast</option><option value="1">Lunch</option><option value="2">Dinner</option><option value="3">Snacks / shakes</option>
+    </select>
+    <button class="btn" style="width:100%;background:var(--txt);color:var(--bg);border-color:var(--txt)" onclick="addDescribedMeal()">Add to log</button>
+  </div>
 </div>
 <div class="card" id="manualCard">
   <div class="card-body" style="padding:12px">
@@ -672,24 +705,22 @@ var EX_DATA = {
     ]},
   ]},
   'w1s5': {groups:[
-    {title:"A -- Full body (FB-A)",ex:[
+    {title:"A -- Full body (FB-A) ~30 min",ex:[
       ["BB Reverse Lunge","4x12/12/8/8",""],
-      ["Plate Bear Crawl","3x20m",""],
       ["SL BB RDL","4x8/8/6/6","single leg"],
       ["Bench Supported Row","4x10","chest on incline bench"],
     ]},
-    {title:"B -- Conditioning circuit AMRAP 12 min",ex:[
-      ["MB Split Squat Jumps","6 reps",""],
+    {title:"B -- Conditioning AMRAP 12 min",ex:[
+      ["MB Split Squat Jumps","6 reps","superset all 4 -- no rest within round"],
       ["Sprinter Sit Ups","10 reps",""],
       ["SA DB Snatch","5 per side",""],
       ["Row","8 cals",""],
     ]},
-    {title:"C -- Running prep (RP-SL)",ex:[
-      ["BB Split Squats","4x8/8/6/6","front foot elevated"],
-      ["KB Half Kneeling Chop","3x10/side",""],
-      ["Goblet Curtsy Lunges","3x8/side",""],
-      ["SL Kickstand RDL","3x8/side",""],
-      ["Slider Wide MTN Climbers","3x12",""],
+    {title:"C -- Running prep (RP-SL) ~15 min -- superset pairs",ex:[
+      ["BB Split Squats","3x8/side","front foot elevated"],
+      ["SL Kickstand RDL","3x8/side","superset with split squats"],
+      ["KB Half Kneeling Chop","2x10/side","superset with climbers"],
+      ["Slider Wide MTN Climbers","2x12",""],
     ]},
   ]},
   'w1s6': {groups:[
@@ -718,26 +749,21 @@ var EX_DATA = {
     ]},
   ]},
   'w2s3': {groups:[
-    {title:"A -- Press (UB-PR)",ex:[
-      ["Seated BB Press","4x8","top set target"],
-      ["Banded Paloff Press w Raise","3x10/side",""],
+    {title:"A -- Press (UB-PR) ~25 min",ex:[
+      ["Seated BB Press","4x8","top set target -- main lift"],
       ["Banded Bench Press","4x8",""],
-      ["Skullcrushers to Poliquin","3x10",""],
-      ["Rev Curls","3x12",""],
+      ["Skullcrushers to Poliquin","3x10","superset with curls"],
       ["Cross Body Hammer Curls","3x12",""],
     ]},
-    {title:"B -- Pendlay Row (UB-PR)",ex:[
-      ["Pendlay Row","4x6-8","top set target -- explosive concentric, controlled reset"],
-      ["W Press","3x12",""],
+    {title:"B -- Pendlay Row (UB-PR) ~20 min",ex:[
+      ["Pendlay Row","4x6-8","top set target -- explosive concentric"],
+      ["Banded Pulldown","3x15","superset with row"],
       ["Rope or V-Bar Pushdowns","3x12",""],
     ]},
-    {title:"C -- Dynamic upper (UB-DY)",ex:[
-      ["DB Push Press","4x10/8/6/6",""],
-      ["Banded Pulldown","3x15",""],
-      ["Bench Supported SA Row","4x10/side",""],
-      ["DB Bent Over Ys","3x15",""],
-      ["TRX Rows","3x12",""],
-      ["TRX Bicep Curls","3x12",""],
+    {title:"C -- Dynamic finisher ~15 min -- superset",ex:[
+      ["DB Push Press","3x10/8/6",""],
+      ["Bench Supported SA Row","3x10/side","superset with push press"],
+      ["DB Bent Over Ys","2x15",""],
     ]},
   ]},
   'w3s2': {groups:[
@@ -818,22 +844,18 @@ var EX_DATA = {
     ]},
   ]},
   'w5s3': {groups:[
-    {title:"A -- Press (UB-PR)",ex:[
-      ["Seated BB Press","4x8","top set target"],
-      ["Pendlay Row","4x6-8","top set target"],
-      ["Evil Wheel BB","3x8","ab wheel from knees"],
+    {title:"A -- Press (UB-PR) ~28 min",ex:[
+      ["Seated BB Press","4x8","top set target -- main lift"],
       ["Banded Bench Press","4x8",""],
-      ["W Press","3x12",""],
-      ["Skullcrushers to Poliquin","3x10",""],
+      ["Skullcrushers to Poliquin","3x10","superset with curls"],
       ["Rev Curls","3x12",""],
+      ["Evil Wheel BB","3x8","ab wheel from knees"],
     ]},
-    {title:"B -- Pull (UB-PL)",ex:[
+    {title:"B -- Pull (UB-PL) ~25 min -- superset pairs",ex:[
       ["L Sit Pull Ups","4x8","top set reps"],
-      ["Plate Bus Drivers","3x10",""],
+      ["Plate Bus Drivers","3x10","superset with pull-ups"],
       ["Seated Facepulls to Press","3x15",""],
-      ["American Sit Ups","3x12",""],
-      ["MB Stir The Pot","3x10 per direction",""],
-      ["MB In and Outs","3x10",""],
+      ["MB Stir The Pot","3x10 per direction","core finisher"],
     ]},
   ]},
   'w7s1': {groups:[
@@ -856,25 +878,21 @@ var EX_DATA = {
     ]},
   ]},
   'w7s3': {groups:[
-    {title:"A -- Pull (UB-HI)",ex:[
-      ["Weighted Pull Ups","AMRAP bodyweight + weighted sets","top set reps"],
+    {title:"A -- Pull (UB-HI) ~25 min",ex:[
+      ["Weighted Pull Ups","AMRAP bodyweight + weighted sets","top set reps -- main lift"],
+      ["BB Row","4x12/10/8/6","superset with hollow rocks"],
       ["Hollow Rocks","3x12",""],
-      ["BB Row","4x12/10/8/6",""],
       ["Rope Facepulls","3x15",""],
     ]},
-    {title:"B -- Press (UB-HI)",ex:[
-      ["BB or DB Bench Press","5x8/8/5/5/5","top set target"],
-      ["Seated DB Shoulder Press","4x8",""],
+    {title:"B -- Press (UB-HI) ~25 min",ex:[
+      ["BB or DB Bench Press","5x8/8/5/5/5","top set target -- main lift"],
+      ["Seated DB Shoulder Press","4x8","superset with dips"],
       ["Weighted Dips","3x failure",""],
       ["Rope or V-Bar Pushdowns","3x12",""],
     ]},
-    {title:"C -- Dynamic upper (UB-DY)",ex:[
-      ["DB Push Press","4x10/8/6/6",""],
-      ["Banded Pulldown","3x15",""],
-      ["Bench Supported SA Row","4x10/side",""],
-      ["DB Bent Over Ys","3x15",""],
-      ["TRX Rows","3x12",""],
-      ["TRX Bicep Curls","3x12",""],
+    {title:"C -- Dynamic finisher ~12 min -- superset",ex:[
+      ["DB Push Press","3x10/8/6",""],
+      ["Bench Supported SA Row","3x10/side","superset with push press"],
     ]},
   ]},
   'w9s1': {groups:[
@@ -894,24 +912,21 @@ var EX_DATA = {
     ]},
   ]},
   'w9s3': {groups:[
-    {title:"A -- Pull (UB-HI)",ex:[
-      ["Weighted Pull Ups","AMRAP + weighted sets","top set reps"],
+    {title:"A -- Pull (UB-HI) ~25 min",ex:[
+      ["Weighted Pull Ups","AMRAP + weighted sets","top set reps -- main lift"],
+      ["BB Row","4x12/10/8/6","superset with hollow rocks"],
       ["Hollow Rocks","3x12",""],
-      ["BB Row","4x12/10/8/6",""],
       ["Rope Facepulls","3x15",""],
     ]},
-    {title:"B -- Press (UB-HI)",ex:[
-      ["BB or DB Bench Press","5x8/8/5/5/5","top set target"],
-      ["Seated DB Shoulder Press","4x8",""],
+    {title:"B -- Press (UB-HI) ~25 min",ex:[
+      ["BB or DB Bench Press","5x8/8/5/5/5","top set target -- main lift"],
+      ["Seated DB Shoulder Press","4x8","superset with dips"],
       ["Weighted Dips","3x failure",""],
       ["Rope Pushdowns","3x12",""],
     ]},
-    {title:"C -- Dynamic upper (UB-DY)",ex:[
-      ["DB Push Press","4x10/8/6/6",""],
-      ["Banded Pulldown","3x15",""],
-      ["Bench Supported SA Row","4x10/side",""],
-      ["DB Bent Over Ys","3x15",""],
-      ["TRX Rows","3x12",""],
+    {title:"C -- Dynamic finisher ~12 min -- superset",ex:[
+      ["DB Push Press","3x10/8/6",""],
+      ["Bench Supported SA Row","3x10/side","superset with push press"],
     ]},
   ]},
   'w10s2': {groups:[
@@ -1147,12 +1162,20 @@ function buildExHtml(sid, type, name) {
     }
     groupsHtml += '<div class="ex-group"><div class="ex-group-title">' + group.title + '</div>' + rowsHtml + '</div>';
   }
+  // Estimate session duration for lift days (main lift ~18min, each accessory ~5min)
+  var durNote = '';
+  if (type === 'lift') {
+    var totalEx = 0;
+    for (var dg = 0; dg < allGroups.length; dg++) { totalEx += allGroups[dg].ex.length; }
+    var estMin = 18 + Math.max(0, totalEx - 1) * 5;
+    durNote = '<div style="font-size:11px;color:var(--txt3);margin-bottom:8px;padding:6px 8px;background:var(--bg2);border-radius:6px">Est. ~' + estMin + ' min. Superset the paired accessories noted below to stay efficient.</div>';
+  }
   var html = '';
   html += '<div class="collapsible-toggle" onclick="toggleCollapsible(\'ex-' + sid + '\')">';
   html += '<span class="collapsible-label">Exercise detail</span>';
   html += '<span class="collapsible-arrow" id="arr-ex-' + sid + '">&#8964;</span>';
   html += '</div>';
-  html += '<div class="collapsible-body" id="ex-' + sid + '">' + groupsHtml + '</div>';
+  html += '<div class="collapsible-body" id="ex-' + sid + '">' + durNote + groupsHtml + '</div>';
   return html;
 }
 
@@ -1607,7 +1630,37 @@ async function runAnalysis() {
 }
 
 // ─── NUTRITION ────────────────────────────────────────────────────────────────
-function getMT(idx) { return MACRO_BY_LOAD[WEEKS[idx].load] || MACRO_BY_LOAD.moderate; }
+function getMT(idx) {
+  var base = MACRO_BY_LOAD[WEEKS[idx].load] || MACRO_BY_LOAD.moderate;
+  var goal = (appData.profile && appData.profile.goal) || 'baseline';
+  if (goal === 'baseline') return base;
+  // Recalculate from current weight + goal
+  var wt = getCurrentWeight();
+  var baselineWt = 167.5;
+  // Scale the baseline calorie figure by weight ratio (maintenance roughly tracks bodyweight)
+  var scaled = Math.round(base.kcal * (wt / baselineWt));
+  // Apply goal multiplier to calories
+  var mult = goal === 'cut' ? 0.83 : goal === 'gain' ? 1.10 : 1.0; // recomp = maintenance
+  var kcal = Math.round(scaled * mult);
+  // Protein: 1.0 g/lb bodyweight, floor 150g; on a cut bump to 1.1 g/lb to protect muscle
+  var proPerLb = goal === 'cut' ? 1.1 : 1.0;
+  var pro = Math.max(150, Math.round(wt * proPerLb));
+  // Fat: ~0.4 g/lb, floor 60g
+  var fat = Math.max(60, Math.round(wt * 0.4));
+  // Carbs: remainder of calories after protein (4 kcal/g) and fat (9 kcal/g)
+  var carb = Math.max(120, Math.round((kcal - pro * 4 - fat * 9) / 4));
+  var goalLabel = goal === 'cut' ? 'Fat loss' : goal === 'gain' ? 'Lean gain' : 'Recomposition';
+  var goalReason = goal === 'cut'
+    ? 'Gradual deficit (~17% below maintenance) from your logged weight of ' + wt + ' lbs. Protein raised to ' + proPerLb + ' g/lb to protect muscle in the deficit. Expect ~0.5-0.75 lb/wk loss; if faster, eat more.'
+    : goal === 'gain'
+    ? 'Gradual surplus (~10% above maintenance) from your logged weight of ' + wt + ' lbs. Aim for ~0.25-0.5 lb/wk gain; faster than that is mostly fat.'
+    : 'Maintenance calories from your logged weight of ' + wt + ' lbs -- the recomposition sweet spot. Scale-weight should stay roughly flat while body composition shifts.';
+  return {
+    kcal: kcal, carb: carb, pro: pro, fat: fat,
+    label: goalLabel + ' -- ' + base.label.split('--')[0].trim() + ' (live, ' + wt + ' lbs)',
+    reason: goalReason + ' ' + base.reason
+  };
+}
 
 function getSessionComposition(wk) {
   var lift = 0, swim = 0, run = 0, bike = 0, brick = 0, rest = 0;
@@ -1652,7 +1705,7 @@ function renderNutrition() {
 
 function setTool(tool) {
   activeTool = tool;
-  var tools = ['manual','photo','search','barcode'];
+  var tools = ['manual','photo','search','barcode','describe'];
   for (var i = 0; i < tools.length; i++) {
     var t = tools[i];
     var btn = document.getElementById('tool' + t.charAt(0).toUpperCase() + t.slice(1));
@@ -1661,7 +1714,9 @@ function setTool(tool) {
   document.getElementById('photoPanel').classList.toggle('open', tool === 'photo');
   document.getElementById('searchPanel').classList.toggle('open', tool === 'search');
   document.getElementById('barcodePanel').classList.toggle('open', tool === 'barcode');
+  document.getElementById('describePanel').classList.toggle('open', tool === 'describe');
   if (tool === 'search') document.getElementById('searchInput').focus();
+  if (tool === 'describe') document.getElementById('describeInput').focus();
   if (tool === 'barcode') startBarcodeScanner();
   else stopBarcodeScanner();
 }
@@ -2037,6 +2092,7 @@ function saveProfile() {
   if (!appData.profile) appData.profile = {};
   var h = document.getElementById('bmHeight').value;
   if (h) appData.profile.height = parseFloat(h);
+  appData.profile.goal = document.getElementById('bmGoal').value;
   saveData();
 }
 
@@ -2044,7 +2100,16 @@ function loadProfile() {
   if (appData.profile && appData.profile.height) {
     document.getElementById('bmHeight').value = appData.profile.height;
   }
+  if (appData.profile && appData.profile.goal) {
+    document.getElementById('bmGoal').value = appData.profile.goal;
+  }
   renderMetricsHistory();
+}
+
+function getCurrentWeight() {
+  var metrics = appData.metrics || [];
+  if (metrics.length > 0) return metrics[metrics.length - 1].weight;
+  return 167.5; // baseline fallback
 }
 
 function logBodyMetric() {
@@ -2062,6 +2127,7 @@ function logBodyMetric() {
   document.getElementById('bmWeight').value = '';
   document.getElementById('bmBF').value = '';
   renderMetricsHistory();
+  if (document.getElementById('page-nutrition').classList.contains('active')) renderNutrition();
   showToast('Measurement logged');
 }
 
@@ -2186,6 +2252,49 @@ async function lookupBarcode(code) {
     results.style.display = 'block';
   }
   loading.style.display = 'none';
+}
+
+// ─── NATURAL LANGUAGE FOOD ENTRY ──────────────────────────────────────────────
+async function estimateDescribed() {
+  var desc = document.getElementById('describeInput').value.trim();
+  if (!desc) { showToast('Describe what you ate first'); return; }
+  var status = document.getElementById('describeStatus');
+  var result = document.getElementById('describeResult');
+  status.style.display = 'block'; result.style.display = 'none';
+  var prompt = 'You are a sports dietitian. Estimate the total nutritional content of this described meal. Respond ONLY with a JSON object, no text before or after, no markdown. Format: {"kcal":0,"carb":0,"pro":0,"fat":0,"summary":"short restatement of what was logged","notes":"any assumptions about portion sizes"}. Round to whole numbers. Sum all items into single totals. Meal described: ' + desc;
+  try {
+    var r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:500, messages:[{role:'user', content:prompt}]})});
+    var d = await r.json();
+    var raw = d.content && d.content.filter(function(c){ return c.type === 'text'; }).map(function(c){ return c.text; }).join('');
+    var clean = raw.replace(/```json|```/g, '').trim();
+    var parsed = JSON.parse(clean);
+    document.getElementById('de-kcal').value = parsed.kcal || 0;
+    document.getElementById('de-carb').value = parsed.carb || 0;
+    document.getElementById('de-pro').value = parsed.pro || 0;
+    document.getElementById('de-fat').value = parsed.fat || 0;
+    document.getElementById('describeNote').textContent = (parsed.summary || '') + (parsed.notes ? ' -- ' + parsed.notes : '');
+    result.style.display = 'block';
+  } catch(e) {
+    document.getElementById('de-kcal').value = ''; document.getElementById('de-carb').value = '';
+    document.getElementById('de-pro').value = ''; document.getElementById('de-fat').value = '';
+    document.getElementById('describeNote').textContent = 'Could not estimate -- try rephrasing or enter values manually.';
+    result.style.display = 'block';
+  }
+  status.style.display = 'none';
+}
+
+function addDescribedMeal() {
+  var kcal = parseFloat(document.getElementById('de-kcal').value) || 0;
+  var carb = parseFloat(document.getElementById('de-carb').value) || 0;
+  var pro = parseFloat(document.getElementById('de-pro').value) || 0;
+  var fat = parseFloat(document.getElementById('de-fat').value) || 0;
+  if (!kcal && !carb && !pro && !fat) { showToast('Estimate or enter values first'); return; }
+  var note = (document.getElementById('describeNote').textContent.split(' -- ')[0]) || document.getElementById('describeInput').value.slice(0, 40);
+  var slot = parseInt(document.getElementById('describeMealSlot').value) || 0;
+  addFoodItemToSlot(slot, note, kcal, carb, pro, fat, 'search');
+  document.getElementById('describeInput').value = '';
+  document.getElementById('describeResult').style.display = 'none';
+  setTool('manual');
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
