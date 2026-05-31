@@ -1953,6 +1953,40 @@ function handlePhotoSelect(e) {
   reader.readAsDataURL(file);
 }
 
+// ─── ROBUST JSON EXTRACTION (shared by photo + describe) ──────────────────────
+function extractMacroJSON(raw) {
+  if (!raw) return null;
+  // 1. Try to find a {...} block anywhere in the response
+  var first = raw.indexOf('{');
+  var last = raw.lastIndexOf('}');
+  if (first >= 0 && last > first) {
+    var candidate = raw.slice(first, last + 1);
+    try { return JSON.parse(candidate); } catch (e) { /* fall through */ }
+  }
+  // 2. Try stripping markdown fences then parse
+  try {
+    var cleaned = raw.replace(/```json|```/g, '').trim();
+    return JSON.parse(cleaned);
+  } catch (e) { /* fall through */ }
+  // 3. Last resort: pull the first number after each macro keyword
+  function grab(keys) {
+    for (var k = 0; k < keys.length; k++) {
+      var re = new RegExp(keys[k] + '[^0-9]{0,15}([0-9]+(?:\\.[0-9]+)?)', 'i');
+      var m = raw.match(re);
+      if (m) return Math.round(parseFloat(m[1]));
+    }
+    return null;
+  }
+  var kcal = grab(['kcal','calorie','energy']);
+  var carb = grab(['carb']);
+  var pro = grab(['protein','\\bpro\\b']);
+  var fat = grab(['fat']);
+  if (kcal !== null || carb !== null || pro !== null || fat !== null) {
+    return {kcal: kcal||0, carb: carb||0, pro: pro||0, fat: fat||0, summary: '', notes: 'Parsed from partial response -- double-check the numbers.'};
+  }
+  return null;
+}
+
 async function analysePhoto(dataUrl) {
   var status = document.getElementById('photoStatus'); var result = document.getElementById('photoResult');
   status.style.display = 'block'; status.textContent = 'AI is analysing your meal...';
@@ -1962,8 +1996,8 @@ async function analysePhoto(dataUrl) {
     var r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:400, messages:[{role:'user', content:[{type:'image', source:{type:'base64', media_type:mediaType, data:base64}},{type:'text', text:prompt}]}]})});
     var d = await r.json();
     var raw = d.content && d.content.filter(function(c) { return c.type === 'text'; }).map(function(c) { return c.text; }).join('');
-    var clean = raw.replace(/```json|```/g, '').trim();
-    var parsed = JSON.parse(clean);
+    var parsed = extractMacroJSON(raw);
+    if (!parsed) throw new Error('parse failed');
     document.getElementById('pr-kcal').value = parsed.kcal || 0;
     document.getElementById('pr-carb').value = parsed.carb || 0;
     document.getElementById('pr-pro').value = parsed.pro || 0;
@@ -2261,13 +2295,13 @@ async function estimateDescribed() {
   var status = document.getElementById('describeStatus');
   var result = document.getElementById('describeResult');
   status.style.display = 'block'; result.style.display = 'none';
-  var prompt = 'You are a sports dietitian. Estimate the total nutritional content of this described meal. Respond ONLY with a JSON object, no text before or after, no markdown. Format: {"kcal":0,"carb":0,"pro":0,"fat":0,"summary":"short restatement of what was logged","notes":"any assumptions about portion sizes"}. Round to whole numbers. Sum all items into single totals. Meal described: ' + desc;
+  var prompt = 'You are a sports dietitian estimating meal macros. Break the meal into its component items, estimate each, then SUM into single totals. Your entire reply must be one JSON object and nothing else -- no preamble, no markdown fences, no closing remark. Schema: {"kcal":number,"carb":number,"pro":number,"fat":number,"summary":"one-line restatement","notes":"portion assumptions"}. All values whole numbers, totals for the full meal. If an item is ambiguous, assume a typical single serving rather than skipping it. Meal: ' + desc;
   try {
-    var r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:500, messages:[{role:'user', content:prompt}]})});
+    var r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:700, messages:[{role:'user', content:prompt}]})});
     var d = await r.json();
     var raw = d.content && d.content.filter(function(c){ return c.type === 'text'; }).map(function(c){ return c.text; }).join('');
-    var clean = raw.replace(/```json|```/g, '').trim();
-    var parsed = JSON.parse(clean);
+    var parsed = extractMacroJSON(raw);
+    if (!parsed) throw new Error('parse failed');
     document.getElementById('de-kcal').value = parsed.kcal || 0;
     document.getElementById('de-carb').value = parsed.carb || 0;
     document.getElementById('de-pro').value = parsed.pro || 0;
