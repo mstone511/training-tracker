@@ -2299,9 +2299,16 @@ async function estimateDescribed() {
   try {
     var r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:700, messages:[{role:'user', content:prompt}]})});
     var d = await r.json();
-    var raw = d.content && d.content.filter(function(c){ return c.type === 'text'; }).map(function(c){ return c.text; }).join('');
+    // Surface API-level errors explicitly instead of failing silently
+    if (d && d.error) {
+      throw new Error('API error: ' + (d.error.message || d.error.type || 'unknown'));
+    }
+    if (!d || !d.content) {
+      throw new Error('Unexpected API response: ' + JSON.stringify(d).slice(0, 200));
+    }
+    var raw = d.content.filter(function(c){ return c.type === 'text'; }).map(function(c){ return c.text; }).join('');
     var parsed = extractMacroJSON(raw);
-    if (!parsed) throw new Error('parse failed');
+    if (!parsed) throw new Error('Could not read macros from: ' + raw.slice(0, 200));
     document.getElementById('de-kcal').value = parsed.kcal || 0;
     document.getElementById('de-carb').value = parsed.carb || 0;
     document.getElementById('de-pro').value = parsed.pro || 0;
@@ -2311,7 +2318,7 @@ async function estimateDescribed() {
   } catch(e) {
     document.getElementById('de-kcal').value = ''; document.getElementById('de-carb').value = '';
     document.getElementById('de-pro').value = ''; document.getElementById('de-fat').value = '';
-    document.getElementById('describeNote').textContent = 'Could not estimate -- try rephrasing or enter values manually.';
+    document.getElementById('describeNote').textContent = String(e && e.message ? e.message : e) + ' -- you can still enter values manually below.';
     result.style.display = 'block';
   }
   status.style.display = 'none';
