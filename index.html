@@ -243,6 +243,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
     </div>
     <button class="btn" style="width:100%;margin-top:4px" onclick="syncFromDrive()">Sync now</button>
     <div class="sync-status" id="syncStatus"></div>
+<div id="reviewQueue" style="display:none;margin-top:10px"></div>
   </div>
 </div>
 <div class="stat-row">
@@ -656,20 +657,19 @@ function buildWCHtml(sid, type, name) {
 // ─── DATA: EXERCISE DETAIL ───────────────────────────────────────────────────
 var EX_DATA = {
   'w1s1': {groups:[
-    {title:"A -- BB Back Squat (max effort)",ex:[
-      ["BB Back Squat","5x8/8/5/5/5","Top set ~245 lbs, 3-sec descent"],
+    {title:"A -- Primary (superset A1+A2, rest 60-90s after pair)",ex:[
+      ["A1. BB Back Squat","5x 8/8/5/5/5","245 top set"],
+      ["A2. Slider Body Saws (CORE)","3-4x 10 total","good 10 all sets"],
     ]},
-    {title:"B -- BB RDL (LB-DY hinge)",ex:[
-      ["BB RDL","3-4x8/8/6/6","hip hinge, soft knee, load the hamstrings"],
-      ["BB Kickstand RDL","3x8/leg","single-leg variation"],
-      ["Slider Hamstring Curls","3x10",""],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. Deficit Reverse Lunges","3x 5/leg","155 lb BB"],
+      ["B2. Pallof Press w/ Twists (CORE)","3x 10/side","25 lb cable"],
     ]},
-    {title:"C -- Squat accessory",ex:[
-      ["Deficit Reverse Lunges","3x5/leg","2-3in deficit"],
-      ["Slider Side Lunges","3x8/side",""],
-      ["Alt Jump Lunges","3x10","explosive"],
-      ["Foot Elevated Glute Bridges","3x12","pause at top"],
-      ["Heel Elevated Squat Holds","3x30 sec","heels on plate"],
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. Slider Side Lunges","3x 10/side","26 lb KB"],
+      ["C2. Alt. Jumping Lunges","3x (BW)",""],
+      ["D1. Foot Elevated Glute Bridges","3x 10/leg","BW"],
+      ["D2. Heel Elevated Squat Holds","3x 30-40 sec","BW"],
     ]},
   ]},
   'w1s2': {groups:[
@@ -681,407 +681,542 @@ var EX_DATA = {
     ]},
   ]},
   'w1s3': {groups:[
-    {title:"A -- Pull compound (UB-HI)",ex:[
-      ["Pull Ups","4x12/10/8/6","add weight if over 12 bodyweight reps"],
-      ["SA Landmine Row","4x8/side","brace hard"],
-      ["BB Row","4x10",""],
-      ["Seated DB Shoulder Press","4x8",""],
-      ["Weighted Dips","3x failure",""],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. Pull Ups (assisted if needed)","4x 12/10/8/6",""],
+      ["A2. DB Z Press","4x 12/10/8/6",""],
     ]},
-    {title:"B -- Dynamic upper (UB-DY)",ex:[
-      ["DB Z Press seated overhead","4x10/8/8/6",""],
-      ["DB Incline Fly","3x12",""],
-      ["Deficit Push Ups","3x10","hands on plates"],
-      ["DB Bent Over Ys","3x15",""],
-      ["Incline Bench Curls","3x12",""],
-      ["DB Reverse Flyes","3x15",""],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. SA Landmine Row","3x 10/8/6 (side)",""],
+      ["B2. Deficit Push Ups","3x (max quality reps)",""],
+    ]},
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. DB Incline Chest Fly","3x 12/10/8",""],
+      ["C2. DB T Raises","3x 5-6",""],
+      ["D1. Incline Bench Curls","3x 12",""],
+      ["D2. DB Reverse Flyes","3x 15",""],
     ]},
   ]},
   'w1s4': {groups:[
     {title:"Bike Zone 2",ex:[
-      ["Warm-up spin","5 min easy","90+ RPM, low resistance"],
+      ["Warm-up spin","5 min easy","90+ RPM low resistance"],
       ["Z2 steady state","35 min","HR 130-143 bpm"],
       ["Cool-down spin","5 min easy",""],
     ]},
   ]},
   'w1s5': {groups:[
-    {title:"A -- Full body (FB-A) ~30 min",ex:[
-      ["BB Reverse Lunge","4x12/12/8/8",""],
-      ["SL BB RDL","4x8/8/6/6","single leg"],
-      ["Bench Supported Row","4x10","chest on incline bench"],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. BB Rev. Lunge","4x 12/12/8/8","155"],
+      ["A2. Plate Bear Crawl Pull Through","4x 10 total","45 lb plate"],
     ]},
-    {title:"B -- Conditioning AMRAP 12 min",ex:[
-      ["MB Split Squat Jumps","6 reps","superset all 4 -- no rest within round"],
-      ["Sprinter Sit Ups","10 reps",""],
-      ["SA DB Snatch","5 per side",""],
-      ["Row","8 cals",""],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. SL BB RDL","4x 8/8/6/6 per leg","115"],
+      ["B2. Bench Supported Incline DB Row","4x 12","45"],
     ]},
-    {title:"C -- Running prep (RP-SL) ~15 min -- superset pairs",ex:[
-      ["BB Split Squats","3x8/side","front foot elevated"],
-      ["SL Kickstand RDL","3x8/side","superset with split squats"],
-      ["KB Half Kneeling Chop","2x10/side","superset with climbers"],
-      ["Slider Wide MTN Climbers","2x12",""],
+    {title:"C -- Circuit finisher (4 rounds, record time)",ex:[
+      ["C1. MB Split Squat Jumps","20 total","16-20 lb MB"],
+      ["C2. Sprinter Sit Ups (CORE)","20 total","BW"],
+      ["C3. SA DB Snatch","10/arm","30-35 lb DB"],
+      ["C4. Row","8 cal","fast as possible"],
     ]},
   ]},
   'w1s6': {groups:[
     {title:"Run Zone 2",ex:[
       ["Target distance","1.5 mi",""],
-      ["Target HR","130-143 bpm","Z2 -- conversational pace throughout"],
-      ["Expected pace","~10:30-11:30 per mile","aerobic capacity leads musculoskeletal tolerance"],
-      ["Rule","If HR over 143 -- slow down or walk","No exceptions weeks 1-8"],
+      ["Target HR","130-143 bpm","Z2 conversational pace"],
+      ["Expected pace","~10:30-11:30/mi","aerobic capacity leads tissue tolerance"],
+      ["Rule","HR over 143 = slow down/walk","no exceptions wks 1-8"],
     ]},
   ]},
   'w2s1': {groups:[
-    {title:"A -- BB Back Squat (LB-HI)",ex:[
-      ["BB Back Squat","5x8/6/5/5/5","push top set vs wk 1"],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. BB Back Squat","5x 8/6/5/5/5","8x225, 5x255"],
+      ["A2. Hanging Leg Raises (CORE)","4x 10-15 total",""],
     ]},
-    {title:"B -- BB RDL (LB-HI)",ex:[
-      ["BB RDL","4x8/8/5/5","8x175 to 5x225 target range"],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB RDL","4x 8/8/5/5","8x195, 5x235"],
+      ["B2. Slider Body Saws (CORE)","3x 10-15",""],
     ]},
-    {title:"C -- Dynamic lower (LB-DY)",ex:[
-      ["DB Bulgarian Split Squat","4x8/8/6/6","rear foot elevated"],
-      ["SA Plank Hold","3x30 sec/side",""],
-      ["BB Kickstand RDL","4x8/leg",""],
-      ["Slider Body Saws","3x10",""],
-      ["Slider Hamstring Curls","3x10",""],
-      ["Alt Lunge Jumps","3x10",""],
-      ["Plyo SL Glute Bridge","3x8/side",""],
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. DB Walking Lunges","4x 6/5/4/4 per side","103"],
+      ["D1. Leg Curl Machine","3x 10-15 (2s pause)","to failure, lying 70"],
+      ["D2. Seated/Standing Calf Raise","3x 20","15x115"],
     ]},
   ]},
   'w2s3': {groups:[
-    {title:"A -- Press (UB-PR) ~25 min",ex:[
-      ["Seated BB Press","4x8","top set target -- main lift"],
-      ["Banded Bench Press","4x8",""],
-      ["Skullcrushers to Poliquin","3x10","superset with curls"],
-      ["Cross Body Hammer Curls","3x12",""],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. Seated BB Press","4x 8","12x75, 10x85, 8x95"],
+      ["A2. Banded Pallof Press w/ Raise (CORE)","4x 8-10/side","red band"],
     ]},
-    {title:"B -- Pendlay Row (UB-PR) ~20 min",ex:[
-      ["Pendlay Row","4x6-8","top set target -- explosive concentric"],
-      ["Banded Pulldown","3x15","superset with row"],
-      ["Rope or V-Bar Pushdowns","3x12",""],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. Pendlay Row","4x 6-8","8x175"],
+      ["B2. Evil Wheel w/ BB (CORE)","4x 8-10",""],
     ]},
-    {title:"C -- Dynamic finisher ~15 min -- superset",ex:[
-      ["DB Push Press","3x10/8/6",""],
-      ["Bench Supported SA Row","3x10/side","superset with push press"],
-      ["DB Bent Over Ys","2x15",""],
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. Banded Bench Press","3x 8-10","9x135"],
+      ["C2. Bench Plate/DB W Press","3x 10","9x100"],
+      ["D1. Skullcrushers to Poliquin Press","3x 12 to failure","50"],
+      ["D2. Rev Curls","3x failure","60"],
+      ["D3. SA Cross Body Hammer Curls","3x 8-10/arm","22.5"],
     ]},
   ]},
   'w3s2': {groups:[
     {title:"CSS Baseline Test",ex:[
-      ["400m Time Trial","1x400m","max effort, record time to the second"],
-      ["Rest","10 min","full passive rest, do not skip"],
-      ["200m Time Trial","1x200m","max effort, record time"],
-      ["Calculate CSS","(400m pace + 200m pace) divided by 2","CSS pace per 100m for all future intervals"],
+      ["400m Time Trial","1x400m","max effort, record to the second"],
+      ["Rest","10 min","full passive rest"],
+      ["200m Time Trial","1x200m","max effort"],
+      ["Calculate CSS","(400 pace + 200 pace) / 2","pace per 100m for all intervals"],
     ]},
   ]},
   'w3s3': {groups:[
-    {title:"A -- Pull (UB-HI)",ex:[
-      ["Weighted Pull Ups","AMRAP bodyweight then add weight","top set weight"],
-      ["Hollow Rocks","3x12",""],
-      ["BB Row","4x12/10/8/6",""],
-      ["Rope Facepulls","3x15",""],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. L Sit Pull Ups","4x 8",""],
+      ["A2. Plate Bus Drivers (CORE)","4x 30 sec",""],
     ]},
-    {title:"B -- Press (UB-HI)",ex:[
-      ["BB or DB Bench Press","5x8/8/5/5/5","top set target"],
-      ["Seated DB Shoulder Press","4x8",""],
-      ["Weighted Dips","3x failure",""],
-      ["Rope Pushdowns","3x12",""],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. Banded Bench Press","4x 12","grey band ~115"],
+      ["B2. Light BB Leg Lifts (CORE)","4x 12",""],
+    ]},
+    {title:"C/D -- Accessory",ex:[
+      ["C1. Seated Facepulls to Press","3x 12",""],
+      ["C2. American Sit Ups (CORE)","3x 10",""],
+      ["D1. MB Stir The Pot (CORE)","3x 10",""],
+      ["D2. MB In and Outs (CORE)","3x 10",""],
     ]},
   ]},
   'w4s1': {groups:[
-    {title:"A -- BB Back Squat (LB-HI)",ex:[
-      ["BB Back Squat","5x8/6/5/5/5","push top set from wk 2"],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. BB Back Squat","5x 8/6/5/5/5","push top set from wk 2"],
+      ["A2. Hanging Leg Raises (CORE)","4x 10-15 total",""],
     ]},
-    {title:"B -- BB RDL (LB-HI)",ex:[
-      ["BB RDL","4x8/8/5/5","8x185 to 5x235 target range"],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB RDL","4x 8/8/5/5","record top weight"],
+      ["B2. Slider Body Saws (CORE)","3x 10-15",""],
     ]},
-    {title:"C -- Dynamic lower (LB-DY)",ex:[
-      ["DB Bulgarian Split Squat","4x8/8/6/6",""],
-      ["SA Plank Hold","3x30 sec/side",""],
-      ["BB Kickstand RDL","4x8/leg",""],
-      ["Side Star Plank","3x20 sec/side",""],
-      ["Leg Extensions","3x12-15",""],
-      ["Slider Hamstring Curls","3x10",""],
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. DB Walking Lunges","4x 6/5/4/4 per side",""],
+      ["D1. Leg Curl Machine","3x 10-15 (2s pause)","to failure"],
+      ["D2. Seated/Standing Calf Raise","3x 20",""],
     ]},
   ]},
   'w4s2': {groups:[
     {title:"CSS Intervals",ex:[
       ["Warm-up easy swim","200m","Z2"],
-      ["CSS intervals","6x50m","at CSS pace, 20 sec rest, hold pace not faster"],
-      ["Easy cool-down","100m",""],
+      ["CSS intervals","6x50m","at CSS pace, 20s rest, hold pace"],
+      ["Cool-down","100m easy",""],
     ]},
   ]},
   'w4s3': {groups:[
-    {title:"A -- Pull (UB-HI)",ex:[
-      ["Weighted Pull Ups","AMRAP bodyweight + weighted sets","top set reps"],
-      ["Hollow Rocks","3x12",""],
-      ["BB Row","4x12/10/8/6",""],
-      ["Rope Facepulls","3x15",""],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. Weighted Pull Ups","4-6 sets AMRAP","6x25 (RPE 6-7)"],
+      ["A2. Hollow Rocks (CORE)","4x 20 total",""],
     ]},
-    {title:"B -- Press (UB-HI)",ex:[
-      ["BB or DB Bench Press","5x8/8/5/5/5","top set target"],
-      ["Seated DB Shoulder Press","4x8",""],
-      ["Weighted Dips","3x failure",""],
-      ["Rope Pushdowns","3x12",""],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB or DB Bench Press","5x 8/8/5/5/5","10x155, 5x175 (spotter)"],
+      ["B2. Rope Facepulls","4x 10-12","heavier each set, 50"],
     ]},
-    {title:"C -- Dynamic upper (UB-DY)",ex:[
-      ["DB Push Press","4x10/8/6/6",""],
-      ["Banded Pulldown","3x15",""],
-      ["DB Bent Over Ys","3x15",""],
-      ["TRX Rows","3x12",""],
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. BB Row","4x 12/10/8/6","12x135, 6-8x145"],
+      ["C2. Seated DB Shoulder Press","4x 8","heavy 8, 85"],
+      ["D1. Weighted Dips","3x failure",""],
+      ["D2. Rope/V-Bar Pushdowns","3x 8-12","heavier each set, rope 45"],
     ]},
   ]},
   'w5s1': {groups:[
-    {title:"A -- BB Back Squat (LB-SQ)",ex:[
-      ["BB Back Squat","5x8/8/5/5/5","attempt top set PR"],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. BB Back Squat","5x 8/8/5/5/5","attempt top-set PR"],
+      ["A2. Slider Body Saws (CORE)","3-4x 10 total",""],
     ]},
-    {title:"B -- Squat accessory",ex:[
-      ["Deficit Reverse Lunges","3x5/leg",""],
-      ["Slider Side Lunges","3x8/side",""],
-      ["Alt Jump Lunges","3x10",""],
-      ["Foot Elevated Glute Bridges","3x12",""],
-      ["Heel Elevated Squat Holds","3x30 sec",""],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. Deficit Reverse Lunges","3x 5/leg","155 lb BB"],
+      ["B2. Pallof Press w/ Twists (CORE)","3x 10/side","25 lb cable"],
+    ]},
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. Slider Side Lunges","3x 10/side","26 lb KB"],
+      ["C2. Alt. Jumping Lunges","3x (BW)",""],
+      ["D1. Foot Elevated Glute Bridges","3x 10/leg","BW"],
+      ["D2. Heel Elevated Squat Holds","3x 30-40 sec","BW"],
     ]},
   ]},
   'w5s3': {groups:[
-    {title:"A -- Press (UB-PR) ~28 min",ex:[
-      ["Seated BB Press","4x8","top set target -- main lift"],
-      ["Banded Bench Press","4x8",""],
-      ["Skullcrushers to Poliquin","3x10","superset with curls"],
-      ["Rev Curls","3x12",""],
-      ["Evil Wheel BB","3x8","ab wheel from knees"],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. Seated BB Press","4x 8","12x75, 10x85, 8x95"],
+      ["A2. Banded Pallof Press w/ Raise (CORE)","4x 8-10/side","red band"],
     ]},
-    {title:"B -- Pull (UB-PL) ~25 min -- superset pairs",ex:[
-      ["L Sit Pull Ups","4x8","top set reps"],
-      ["Plate Bus Drivers","3x10","superset with pull-ups"],
-      ["Seated Facepulls to Press","3x15",""],
-      ["MB Stir The Pot","3x10 per direction","core finisher"],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. Pendlay Row","4x 6-8","8x175"],
+      ["B2. Evil Wheel w/ BB (CORE)","4x 8-10",""],
+    ]},
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. Banded Bench Press","3x 8-10","9x135"],
+      ["C2. Bench Plate/DB W Press","3x 10","9x100"],
+      ["D1. Skullcrushers to Poliquin Press","3x 12 to failure","50"],
+      ["D2. Rev Curls","3x failure","60"],
+      ["D3. SA Cross Body Hammer Curls","3x 8-10/arm","22.5"],
+    ]},
+  ]},
+  'trainer_5th_fullbody': {groups:[
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. Deficit BB Rev. Lunge / Deadlift","3-4x 12/10/8/8","DL: 12x135, 10x185, 9x225, 7x250, 7x275, 4x295"],
+      ["A2. KB SA Hollow Rocks (CORE)","3x 8/side","10"],
+    ]},
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. Nordics or Samurais","3-4x 3-8",""],
+      ["B2. KB Cyclist Squats","3-4x 10-15",""],
+    ]},
+    {title:"C -- KB circuit (4 rounds, 30 on / 40 off)",ex:[
+      ["C1. KB Goblet Side Lunge or Cossack Squat","30 sec","26-44 lb KB"],
+      ["C2. KB Swings","30 sec","35-44 lb KB"],
+      ["C3. KB Crossovers","30 sec","26-35 lb KB"],
+      ["C4. KB Crunch Ups (CORE)","30 sec","15-26 lb KB"],
+    ]},
+  ]},
+  'trainer_4th_fullbody': {groups:[
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. Box Step Ups","4x 12/12/10/10",""],
+      ["A2. Rope Wood Chop low-to-high (CORE)","3x 10/side",""],
+    ]},
+    {title:"B -- Secondary (superset B1+B2+B3)",ex:[
+      ["B1. Landmine Curtsy Lunge","3x 8/side",""],
+      ["B2. Landmine SA Push Press","3x 5-8",""],
+      ["B3. Landmine Rotations (CORE)","3x 20 total",""],
+    ]},
+    {title:"C -- Circuit (4 rounds, record time)",ex:[
+      ["C1. TRX Hamstring Curls","3x 10",""],
+      ["C2. TRX MTN Climbers (CORE)","3x 20 total","BW"],
+      ["C3. Plyo Push Ups","3x max reps",""],
+      ["C4. Ski Erg","20 sec sprint",""],
+    ]},
+  ]},
+  'trainer_7th_upper': {groups:[
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. L Sit Pull Ups","4x 8",""],
+      ["A2. Plate Bus Drivers (CORE)","4x 30 sec",""],
+    ]},
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. Banded Bench Press","4x 12","grey band ~115"],
+      ["B2. Light BB Leg Lifts (CORE)","4x 12",""],
+    ]},
+    {title:"C/D -- Accessory",ex:[
+      ["C1. Seated Facepulls to Press","3x 12",""],
+      ["C2. American Sit Ups (CORE)","3x 10",""],
+      ["D1. MB Stir The Pot (CORE)","3x 10",""],
+      ["D2. MB In and Outs (CORE)","3x 10",""],
     ]},
   ]},
   'w7s1': {groups:[
-    {title:"A -- BB Back Squat (LB-HI)",ex:[
-      ["BB Back Squat","5x8/6/5/5/5","8x185 to 5x225 target"],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. BB Back Squat","5x 8/6/5/5/5","8x225, 5x255"],
+      ["A2. Hanging Leg Raises (CORE)","4x 10-15 total",""],
     ]},
-    {title:"B -- BB RDL (LB-HI)",ex:[
-      ["BB RDL","4x8/8/5/5","8x175 to 5x225"],
-      ["Slider Body Saws","3x10",""],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB RDL","4x 8/8/5/5","8x195, 5x235"],
+      ["B2. Slider Body Saws (CORE)","3x 10-15",""],
     ]},
-    {title:"C -- Dynamic lower (LB-DY)",ex:[
-      ["DB Walking Lunges","4x6/5/4/4",""],
-      ["DB Bulgarian Split Squat","4x8/8/6/6",""],
-      ["SA Plank Hold","3x30 sec/side",""],
-      ["BB Kickstand RDL","4x8/leg",""],
-      ["Side Star Plank","3x20 sec/side",""],
-      ["Leg Curl Machine","3x10-15",""],
-      ["Seated or Standing Calf Raise","4x15",""],
-      ["Leg Extensions","3x12-15",""],
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. DB Walking Lunges","4x 6/5/4/4 per side","103"],
+      ["D1. Leg Curl Machine","3x 10-15 (2s pause)","to failure"],
+      ["D2. Seated/Standing Calf Raise","3x 20","15x115"],
     ]},
   ]},
   'w7s3': {groups:[
-    {title:"A -- Pull (UB-HI) ~25 min",ex:[
-      ["Weighted Pull Ups","AMRAP bodyweight + weighted sets","top set reps -- main lift"],
-      ["BB Row","4x12/10/8/6","superset with hollow rocks"],
-      ["Hollow Rocks","3x12",""],
-      ["Rope Facepulls","3x15",""],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. Weighted Pull Ups","4-6 sets AMRAP","6x25 (RPE 6-7)"],
+      ["A2. Hollow Rocks (CORE)","4x 20 total",""],
     ]},
-    {title:"B -- Press (UB-HI) ~25 min",ex:[
-      ["BB or DB Bench Press","5x8/8/5/5/5","top set target -- main lift"],
-      ["Seated DB Shoulder Press","4x8","superset with dips"],
-      ["Weighted Dips","3x failure",""],
-      ["Rope or V-Bar Pushdowns","3x12",""],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB or DB Bench Press","5x 8/8/5/5/5","10x155, 5x175"],
+      ["B2. Rope Facepulls","4x 10-12","heavier each set, 50"],
     ]},
-    {title:"C -- Dynamic finisher ~12 min -- superset",ex:[
-      ["DB Push Press","3x10/8/6",""],
-      ["Bench Supported SA Row","3x10/side","superset with push press"],
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. BB Row","4x 12/10/8/6","12x135, 6-8x145"],
+      ["C2. Seated DB Shoulder Press","4x 8","85"],
+      ["D1. Weighted Dips","3x failure",""],
+      ["D2. Rope/V-Bar Pushdowns","3x 8-12","rope 45"],
     ]},
   ]},
   'w9s1': {groups:[
-    {title:"A -- BB Back Squat (LB-HI)",ex:[
-      ["BB Back Squat","5x8/6/5/5/5","push top set -- highest load week"],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. BB Back Squat","5x 8/6/5/5/5","push top set, highest-load week"],
+      ["A2. Hanging Leg Raises (CORE)","4x 10-15 total",""],
     ]},
-    {title:"B -- BB RDL (LB-HI)",ex:[
-      ["BB RDL","4x8/8/5/5","push top set -- record weight"],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB RDL","4x 8/8/5/5","record top weight"],
+      ["B2. Slider Body Saws (CORE)","3x 10-15",""],
     ]},
-    {title:"C -- Dynamic lower (LB-DY)",ex:[
-      ["DB Bulgarian Split Squat","4x8/8/6/6",""],
-      ["SA Plank Hold","3x30 sec/side",""],
-      ["BB Kickstand RDL","4x8/leg",""],
-      ["Side Star Plank","3x20 sec/side",""],
-      ["Leg Extensions","3x12-15",""],
-      ["Slider Hamstring Curls","3x10",""],
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. DB Walking Lunges","4x 6/5/4/4 per side",""],
+      ["D1. Leg Curl Machine","3x 10-15 (2s pause)","to failure"],
+      ["D2. Seated/Standing Calf Raise","3x 20",""],
     ]},
   ]},
   'w9s3': {groups:[
-    {title:"A -- Pull (UB-HI) ~25 min",ex:[
-      ["Weighted Pull Ups","AMRAP + weighted sets","top set reps -- main lift"],
-      ["BB Row","4x12/10/8/6","superset with hollow rocks"],
-      ["Hollow Rocks","3x12",""],
-      ["Rope Facepulls","3x15",""],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. Weighted Pull Ups","4-6 sets AMRAP","record top set"],
+      ["A2. Hollow Rocks (CORE)","4x 20 total",""],
     ]},
-    {title:"B -- Press (UB-HI) ~25 min",ex:[
-      ["BB or DB Bench Press","5x8/8/5/5/5","top set target -- main lift"],
-      ["Seated DB Shoulder Press","4x8","superset with dips"],
-      ["Weighted Dips","3x failure",""],
-      ["Rope Pushdowns","3x12",""],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB or DB Bench Press","5x 8/8/5/5/5","record top weight"],
+      ["B2. Rope Facepulls","4x 10-12","heavier each set"],
     ]},
-    {title:"C -- Dynamic finisher ~12 min -- superset",ex:[
-      ["DB Push Press","3x10/8/6",""],
-      ["Bench Supported SA Row","3x10/side","superset with push press"],
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. BB Row","4x 12/10/8/6",""],
+      ["C2. Seated DB Shoulder Press","4x 8",""],
+      ["D1. Weighted Dips","3x failure",""],
+      ["D2. Rope/V-Bar Pushdowns","3x 8-12",""],
     ]},
   ]},
   'w10s2': {groups:[
     {title:"CSS Retest #1",ex:[
-      ["400m Time Trial","1x400m max effort","compare to Week 3 baseline"],
+      ["400m Time Trial","1x400m max","compare to Week 3"],
       ["Rest","10 min passive",""],
-      ["200m Time Trial","1x200m max effort",""],
-      ["Calculate new CSS pace","record improvement %","expect 2-4% improvement from wk 3"],
+      ["200m Time Trial","1x200m max",""],
+      ["New CSS pace","record improvement %","expect 2-4% from wk 3"],
     ]},
   ]},
   'w11s1': {groups:[
-    {title:"A -- BB Back Squat (LB-HI)",ex:[
-      ["BB Back Squat","5x8/6/5/5/5","peak load week -- push top set"],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. BB Back Squat","5x 8/6/5/5/5","peak load, push top set"],
+      ["A2. Hanging Leg Raises (CORE)","4x 10-15 total",""],
     ]},
-    {title:"B -- BB RDL (LB-HI)",ex:[
-      ["BB RDL","4x8/8/5/5","peak load week -- push top set, record weight"],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB RDL","4x 8/8/5/5","record top weight"],
+      ["B2. Slider Body Saws (CORE)","3x 10-15",""],
     ]},
-    {title:"C -- Dynamic lower (LB-DY)",ex:[
-      ["DB Bulgarian Split Squat","4x8/8/6/6",""],
-      ["SA Plank Hold","3x30 sec/side",""],
-      ["BB Kickstand RDL","4x8/leg",""],
-      ["Side Star Plank","3x20 sec/side",""],
-      ["Leg Extensions","3x12-15",""],
-      ["Slider Hamstring Curls","3x10",""],
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. DB Walking Lunges","4x 6/5/4/4 per side",""],
+      ["D1. Leg Curl Machine","3x 10-15","to failure"],
+      ["D2. Seated/Standing Calf Raise","3x 20",""],
     ]},
   ]},
   'w11s3': {groups:[
-    {title:"A -- Pull (UB-HI)",ex:[
-      ["Weighted Pull Ups","AMRAP + weighted sets","top set reps -- peak week"],
-      ["Hollow Rocks","3x12",""],
-      ["BB Row","4x12/10/8/6",""],
-      ["Rope Facepulls","3x15",""],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. Weighted Pull Ups","4-6 sets AMRAP","peak load"],
+      ["A2. Hollow Rocks (CORE)","4x 20 total",""],
     ]},
-    {title:"B -- Press (UB-HI)",ex:[
-      ["BB or DB Bench Press","5x8/8/5/5/5","top set target -- peak week"],
-      ["Seated DB Shoulder Press","4x8",""],
-      ["Weighted Dips","3x failure",""],
-      ["Rope Pushdowns","3x12",""],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB or DB Bench Press","5x 8/8/5/5/5","record top weight"],
+      ["B2. Rope Facepulls","4x 10-12",""],
     ]},
-    {title:"C -- Dynamic upper (UB-DY)",ex:[
-      ["DB Push Press","4x10/8/6/6",""],
-      ["Banded Pulldown","3x15",""],
-      ["DB Bent Over Ys","3x15",""],
-      ["TRX Rows","3x12",""],
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. BB Row","4x 12/10/8/6",""],
+      ["C2. Seated DB Shoulder Press","4x 8",""],
+      ["D1. Weighted Dips","3x failure",""],
+      ["D2. Rope/V-Bar Pushdowns","3x 8-12",""],
     ]},
   ]},
   'w13s1': {groups:[
-    {title:"A -- BB Back Squat (LB-HI, -30% accessory)",ex:[
-      ["BB Back Squat","5x8/6/5/5/5","top set -- accessory volume cut 30% this phase"],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. BB Back Squat","5x 8/6/5/5/5","top set, accessory volume -30%"],
+      ["A2. Hanging Leg Raises (CORE)","3x 10-15 total",""],
     ]},
-    {title:"B -- BB RDL (LB-HI)",ex:[
-      ["BB RDL","4x8/8/5/5","top set -- record weight"],
-      ["Slider Body Saws","2x10","reduced volume"],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB RDL","4x 8/8/5/5","record top weight"],
+      ["B2. Slider Body Saws (CORE)","3x 10-15",""],
     ]},
-    {title:"C -- Dynamic lower reduced",ex:[
-      ["DB Bulgarian Split Squat","3x8/8/6","30% less volume vs Phase 2"],
-      ["BB Kickstand RDL","3x8/leg",""],
-      ["Slider Hamstring Curls","2x10",""],
+    {title:"C -- Accessory (reduced -30%)",ex:[
+      ["C1. DB Walking Lunges","3x 6/5/4 per side",""],
+      ["D1. Leg Curl Machine","2x 10-15",""],
     ]},
   ]},
   'w13s3': {groups:[
-    {title:"A -- Pull (UB-HI, -30% accessory)",ex:[
-      ["Weighted Pull Ups","AMRAP + weighted sets","top set reps"],
-      ["BB Row","3x10/8/6","reduced vs Phase 2"],
-      ["Rope Facepulls","2x15",""],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. Weighted Pull Ups","4 sets AMRAP","accessory volume -30%"],
+      ["A2. Hollow Rocks (CORE)","3x 20 total",""],
     ]},
-    {title:"B -- Press (UB-HI)",ex:[
-      ["BB or DB Bench Press","4x8/8/5/5","top set target"],
-      ["Seated DB Shoulder Press","3x8","reduced volume"],
-      ["Weighted Dips","2x failure",""],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB or DB Bench Press","4x 8/8/5/5","record top weight"],
+      ["B2. Rope Facepulls","3x 10-12",""],
+    ]},
+    {title:"C -- Accessory (reduced)",ex:[
+      ["C1. BB Row","3x 10/8/6",""],
+      ["D1. Weighted Dips","2x failure",""],
     ]},
   ]},
   'w14s6': {groups:[
     {title:"Brick -- first ever",ex:[
-      ["Bike -- Z2","30 min","HR 130-143, normal ride effort"],
-      ["Transition T2","under 2 min","rack bike, swap shoes, go -- practice fast"],
-      ["Run -- Z2","10 min","HR 130-143, first 2 min will feel wrong -- heavy legs normal"],
+      ["Bike -- Z2","30 min","HR 130-143"],
+      ["Transition T2","under 2 min","rack bike, swap shoes, go"],
+      ["Run -- Z2","10 min","first 2 min feels wrong, heavy legs normal"],
     ]},
     {title:"Key notes",ex:[
       ["Do not stop at transition","--","keep moving even if slow"],
-      ["Run pace expectation","slower than normal","cycling pre-fatigues the legs"],
-      ["HR management","HR may spike at run start","let it settle within 3-4 min"],
+      ["Run pace","slower than normal","cycling pre-fatigues legs"],
+      ["HR management","may spike at run start","let it settle 3-4 min"],
     ]},
   ]},
   'w15s2': {groups:[
     {title:"CSS Retest #2",ex:[
-      ["400m Time Trial","1x400m max effort","3rd data point"],
+      ["400m Time Trial","1x400m max","3rd data point"],
       ["Rest","10 min passive",""],
-      ["200m Time Trial","1x200m max effort",""],
-      ["Calculate new CSS","record vs wk 3 + wk 10","expect 3-5% total improvement from wk 3"],
+      ["200m Time Trial","1x200m max",""],
+      ["New CSS","vs wk 3 + wk 10","expect 3-5% from wk 3"],
     ]},
   ]},
   'w16s1': {groups:[
-    {title:"A -- BB Back Squat (LB-HI)",ex:[
-      ["BB Back Squat","5x8/6/5/5/5","top set -- Phase 3 peak"],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. BB Back Squat","5x 8/6/5/5/5","Phase 3 peak"],
+      ["A2. Hanging Leg Raises (CORE)","4x 10-15 total",""],
     ]},
-    {title:"B -- BB RDL (LB-HI)",ex:[
-      ["BB RDL","4x8/8/5/5","top set -- record weight"],
-      ["Slider Body Saws","2x10",""],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB RDL","4x 8/8/5/5","record top weight"],
+      ["B2. Slider Body Saws (CORE)","3x 10-15",""],
     ]},
-    {title:"C -- Dynamic lower reduced",ex:[
-      ["DB Bulgarian Split Squat","3x8/8/6",""],
-      ["BB Kickstand RDL","3x8/leg",""],
-      ["Slider Hamstring Curls","2x10",""],
+    {title:"C/D -- Accessory",ex:[
+      ["C1. DB Walking Lunges","4x 6/5/4/4 per side",""],
+      ["D1. Leg Curl Machine","3x 10-15",""],
+      ["D2. Seated/Standing Calf Raise","3x 20",""],
     ]},
   ]},
   'w16s3': {groups:[
-    {title:"A -- Pull (UB-HI)",ex:[
-      ["Weighted Pull Ups","AMRAP + weighted sets","top set reps"],
-      ["BB Row","3x10/8/6",""],
-      ["Rope Facepulls","2x15",""],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. Weighted Pull Ups","4-6 sets AMRAP",""],
+      ["A2. Hollow Rocks (CORE)","4x 20 total",""],
     ]},
-    {title:"B -- Press (UB-HI)",ex:[
-      ["BB or DB Bench Press","4x8/8/5/5","top set target"],
-      ["Seated DB Shoulder Press","3x8",""],
-      ["Weighted Dips","2x failure",""],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB or DB Bench Press","5x 8/8/5/5/5","record top weight"],
+      ["B2. Rope Facepulls","4x 10-12",""],
+    ]},
+    {title:"C/D -- Accessory",ex:[
+      ["C1. BB Row","4x 12/10/8/6",""],
+      ["C2. Seated DB Shoulder Press","4x 8",""],
+      ["D1. Weighted Dips","3x failure",""],
     ]},
   ]},
   'w18s5': {groups:[
-    {title:"A -- Pull (UB-HI, Phase 4 maintenance)",ex:[
-      ["Weighted Pull Ups","AMRAP + weighted sets","top set reps -- 2 lifts/wk now"],
-      ["BB Row","3x10/8/6",""],
-      ["Rope Facepulls","2x15",""],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. Weighted Pull Ups","4 sets AMRAP","Phase 4, 2 lifts/wk"],
+      ["A2. Hollow Rocks (CORE)","3x 20 total",""],
     ]},
-    {title:"B -- Press (UB-HI)",ex:[
-      ["BB or DB Bench Press","4x8/8/5/5","top set target"],
-      ["Seated DB Shoulder Press","3x8",""],
-      ["Weighted Dips","2x failure",""],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB or DB Bench Press","4x 8/8/5/5","record top weight"],
+      ["B2. Rope Facepulls","3x 10-12",""],
+    ]},
+    {title:"C -- Accessory",ex:[
+      ["C1. BB Row","3x 10/8/6",""],
+      ["D1. Weighted Dips","2x failure",""],
     ]},
   ]},
   'w20s2': {groups:[
     {title:"CSS Final Retest",ex:[
-      ["400m Time Trial","1x400m max effort","final benchmark"],
+      ["400m Time Trial","1x400m max","final benchmark"],
       ["Rest","10 min passive",""],
-      ["200m Time Trial","1x200m max effort",""],
-      ["Calculate final CSS","total % improvement from wk 3","expect 5-8% total improvement"],
+      ["200m Time Trial","1x200m max",""],
+      ["Final CSS","total % from wk 3","expect 5-8% total"],
     ]},
   ]},
   'w20s5': {groups:[
-    {title:"A -- Pull (UB-HI, pre-taper)",ex:[
-      ["Weighted Pull Ups","AMRAP + weighted sets","top set reps"],
-      ["BB Row","3x10/8/6",""],
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. Weighted Pull Ups","4 sets AMRAP","pre-taper"],
+      ["A2. Hollow Rocks (CORE)","3x 20 total",""],
     ]},
-    {title:"B -- Press (UB-HI)",ex:[
-      ["BB or DB Bench Press","4x8/8/5/5","top set target"],
-      ["Seated DB Shoulder Press","3x8",""],
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB or DB Bench Press","4x 8/8/5/5","record top weight"],
+      ["B2. Rope Facepulls","3x 10-12",""],
+    ]},
+  ]},
+  'w18s1': {groups:[
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. BB Back Squat","5x 8/6/5/5/5","8x225, 5x255"],
+      ["A2. Hanging Leg Raises (CORE)","4x 10-15 total",""],
+    ]},
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB RDL","4x 8/8/5/5","8x195, 5x235"],
+      ["B2. Slider Body Saws (CORE)","3x 10-15",""],
+    ]},
+    {title:"C -- Accessory (hypertrophy)",ex:[
+      ["C1. DB Walking Lunges","4x 6/5/4/4 per side","103"],
+      ["D1. Leg Curl Machine","3x 10-15 (2s pause)","to failure"],
+      ["D2. Seated/Standing Calf Raise","3x 20","15x115"],
+    ]},
+  ]},
+  'w20s1': {groups:[
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. BB Back Squat","5x 8/6/5/5/5","8x225, 5x255"],
+      ["A2. Hanging Leg Raises (CORE)","4x 10-15 total",""],
+    ]},
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB RDL","4x 8/8/5/5","8x195, 5x235"],
+      ["B2. Slider Body Saws (CORE)","3x 10-15",""],
+    ]},
+    {title:"C -- Accessory (hypertrophy)",ex:[
+      ["C1. DB Walking Lunges","4x 6/5/4/4 per side","103"],
+      ["D1. Leg Curl Machine","3x 10-15 (2s pause)","to failure"],
+      ["D2. Seated/Standing Calf Raise","3x 20","15x115"],
+    ]},
+  ]},
+  'w19s1': {groups:[
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. DB Bulgarian Split Squat","4x 8/8/6/6 per leg","BB 8x95/115, 6x135"],
+      ["A2. SA Plank Hold low (CORE)","4x 20-30 sec/side",""],
+    ]},
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB Kickstand RDL","4x 8/leg (3s negative)","8x115/135/155/175"],
+      ["B2. Side Star Plank (CORE)","4x 20-30 sec/side",""],
+    ]},
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. Leg Extension","3x 20",""],
+      ["C2. Alt. Lunge Jumps","3x 20","BW"],
+      ["D1. Slider/TRX Hamstring Curls","3x 10","BW"],
+      ["D2. Plyo SL Glute Bridge","3x 5/leg","BW"],
+    ]},
+  ]},
+  'w21s1': {groups:[
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. DB Bulgarian Split Squat","4x 8/8/6/6 per leg","BB 8x95/115, 6x135"],
+      ["A2. SA Plank Hold low (CORE)","4x 20-30 sec/side",""],
+    ]},
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. BB Kickstand RDL","4x 8/leg (3s negative)","8x115/135/155/175"],
+      ["B2. Side Star Plank (CORE)","4x 20-30 sec/side",""],
+    ]},
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. Leg Extension","3x 20",""],
+      ["C2. Alt. Lunge Jumps","3x 20","BW"],
+      ["D1. Slider/TRX Hamstring Curls","3x 10","BW"],
+      ["D2. Plyo SL Glute Bridge","3x 5/leg","BW"],
+    ]},
+  ]},
+  'w19s5': {groups:[
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. BB or DB Push Press / Push Jerk","4x 10/8/6/6","95-125 working weight"],
+      ["A2. Banded Straight Arm Pulldown","4x 10-15",""],
+    ]},
+    {title:"B -- Secondary (superset B1+B2+B3)",ex:[
+      ["B1. Bench Supported SA Row","4x 12/12/10/8",""],
+      ["B2. DB Bent Over Y's","4x 10-15","5-10 lb max"],
+      ["B3. DB Side Plank Pull Through (CORE)","4x 8-10/side","5-15 lb"],
+    ]},
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. KB/Plate Alt. Push Ups","3x 12-16 total",""],
+      ["C2. DB/EZ Bar Skullcrushers","3x 10-15","fast reps"],
+      ["D1. TRX Rows","3x failure",""],
+      ["D2. TRX Bicep Curls","3x failure",""],
+    ]},
+  ]},
+  'w22s1': {groups:[
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. BB or DB Push Press / Push Jerk","4x 10/8/6/6","95-125 working weight"],
+      ["A2. Banded Straight Arm Pulldown","4x 10-15",""],
+    ]},
+    {title:"B -- Secondary (superset B1+B2+B3)",ex:[
+      ["B1. Bench Supported SA Row","4x 12/12/10/8",""],
+      ["B2. DB Bent Over Y's","4x 10-15","5-10 lb max"],
+      ["B3. DB Side Plank Pull Through (CORE)","4x 8-10/side","5-15 lb"],
+    ]},
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. KB/Plate Alt. Push Ups","3x 12-16 total",""],
+      ["C2. DB/EZ Bar Skullcrushers","3x 10-15","fast reps"],
+      ["D1. TRX Rows","3x failure",""],
+      ["D2. TRX Bicep Curls","3x failure",""],
     ]},
   ]},
   'w22s6': {groups:[
     {title:"Race day -- sprint triathlon",ex:[
-      ["Swim","750m","seed mid-pack, sight every 6-8 strokes, go out controlled"],
-      ["T1","target under 3 min","wetsuit off, helmet on, shoes on, go"],
-      ["Bike","race distance","hold ~75-80% of FTP, do not blow up early"],
-      ["T2","target under 2 min","rack bike, swap shoes, hat and race belt on"],
-      ["Run","5 km","first km will feel awful off bike -- normal, settle into pace by km 2"],
+      ["Swim","750m","seed mid-pack, sight every 6-8 strokes"],
+      ["T1","target under 3 min","wetsuit off, helmet on, go"],
+      ["Bike","race distance","hold ~75-80% FTP, do not blow up"],
+      ["T2","target under 2 min","rack bike, swap shoes"],
+      ["Run","5 km","first km awful off bike, settle by km 2"],
     ]},
   ]}
 };
@@ -1141,11 +1276,141 @@ var CHEST_ARMS_ADDON = {
   'w22s3': {title:"Chest + arms (very light -- race week pump)", ex:[["DB Bench Press or Push-ups","2x10","light -- maintenance only, 3-4 RIR"],["DB Curl","2x12","light -- pump only"],["Tricep Pushdown or Dips","2x12","light -- pump only"]]}
 };
 
+// ─── FORWARD-ONLY PERIODIZATION (completion-aware) ────────────────────────────
+// A week is "complete" when >=80% of its sessions are checked done.
+function isWeekComplete(wkNum) {
+  var wd = appData['wk' + wkNum];
+  if (!wd || !wd.sessions) return false;
+  var wkObj = null;
+  for (var i = 0; i < WEEKS.length; i++) { if (WEEKS[i].n === wkNum) { wkObj = WEEKS[i]; break; } }
+  if (!wkObj) return false;
+  var total = wkObj.sessions.length;
+  if (total === 0) return false;
+  var done = 0;
+  for (var s = 0; s < wkObj.sessions.length; s++) {
+    var sid = wkObj.sessions[s].id;
+    if (wd.sessions[sid] && wd.sessions[sid].done) done++;
+  }
+  return (done / total) >= 0.8;
+}
+
+// Current position = first week that isn't complete. Everything before is locked.
+function getCurrentWeekNum() {
+  for (var i = 0; i < WEEKS.length; i++) {
+    if (!isWeekComplete(WEEKS[i].n)) return WEEKS[i].n;
+  }
+  return WEEKS[WEEKS.length - 1].n; // all complete -> last week
+}
+
+// Decide whether a given week should get triathlon adaptation.
+// Rule (option 3): Phases 1-2 = his programming as-written (no adaptation).
+// Phase 3 = trim accessory volume. Phase 4 = maintenance loading.
+// Only applied to uncompleted weeks at/after current position.
+function getPhaseAdaptation(wkObj) {
+  var wkNum = wkObj.n;
+  // Completed (locked) weeks: never adapt -- show exactly as performed.
+  if (isWeekComplete(wkNum)) return {mode: 'locked', note: ''};
+  var current = getCurrentWeekNum();
+  // Past the current position is impossible if complete; uncompleted past weeks still adapt.
+  var phase = wkObj.phase;
+  if (phase === 'Phase 1' || phase === 'Phase 2') {
+    return {mode: 'asWritten', note: ''};
+  }
+  if (phase === 'Phase 3') {
+    return {mode: 'trimAccessory', note: 'Phase 3 adaptation: primary + secondary lifts and core kept as your trainer prescribes; accessory (C/D) volume trimmed ~25% to manage fatigue as endurance volume rises.'};
+  }
+  // Phase 4 / Race week
+  return {mode: 'maintenance', note: 'Phase 4 adaptation: trainer\'s core lifts and movement patterns kept, but loads shift to maintenance (preserve muscle, avoid race-week fatigue) and accessory volume reduced.'};
+}
+
+// Apply the adaptation to a detail object's groups, returning adapted groups.
+// IMPORTANT: every exercise stays VISIBLE. Adaptation annotates rather than removes,
+// so the full session is always shown -- trimmed/maintenance items are marked, not hidden.
+function applyAdaptation(groups, adapt) {
+  if (adapt.mode === 'locked' || adapt.mode === 'asWritten') return groups;
+  var out = [];
+  for (var g = 0; g < groups.length; g++) {
+    var grp = groups[g];
+    var title = grp.title || '';
+    var isAccessory = title.indexOf('Accessory') >= 0 || title.indexOf('accessory') >= 0 || title.indexOf('Circuit') >= 0 || title.indexOf('circuit') >= 0 || title.indexOf('finisher') >= 0 || title.indexOf('C/D') >= 0 || title.indexOf('C --') >= 0 || title.indexOf('D --') >= 0 || title.indexOf('C -') >= 0;
+    if (adapt.mode === 'trimAccessory' && isAccessory) {
+      // Keep ALL exercises; mark the lowest-priority ones (last ~25%) as optional.
+      var dropFrom = Math.max(2, Math.ceil(grp.ex.length * 0.75));
+      var marked = grp.ex.map(function(e, idx) {
+        if (idx >= dropFrom) {
+          return [e[0] + '  [optional this phase]', e[1], e[2]];
+        }
+        return e;
+      });
+      out.push({title: grp.title, ex: marked});
+    } else if (adapt.mode === 'maintenance') {
+      if (isAccessory) {
+        // Keep all; mark second half as optional and the whole block light.
+        var half = Math.max(1, Math.ceil(grp.ex.length * 0.5));
+        var markedM = grp.ex.map(function(e, idx) {
+          if (idx >= half) return [e[0] + '  [optional -- maintenance]', e[1], e[2]];
+          return [e[0], e[1], (e[2] ? e[2] + ' -- ' : '') + 'light/maintenance'];
+        });
+        out.push({title: grp.title, ex: markedM});
+      } else {
+        // Primary/secondary: keep all movements, annotate maintenance loading on the main lift.
+        var adj = grp.ex.map(function(e, idx) {
+          if (idx === 0) return [e[0], e[1], (e[2] ? e[2] + ' -- ' : '') + 'maintenance load (~80%, leave 3-4 reps in tank)'];
+          return e;
+        });
+        out.push({title: grp.title, ex: adj});
+      }
+    } else {
+      out.push(grp);
+    }
+  }
+  return out;
+}
+
+var EX_ALIAS = {
+  'w5s5': 'trainer_5th_fullbody',   // Phase 1 FB-B -> deadlift work-capacity day
+  'w8s6': 'trainer_4th_fullbody',   // Phase 2 FB-A -> landmine work-capacity day
+  'w3s3': 'trainer_7th_upper'       // align to trainer's latest 7th upper session
+};
+
 function buildExHtml(sid, type, name) {
-  var detail = EX_DATA[sid] || getGenericExDetail(type, name);
+  var detail = EX_DATA[sid] || (EX_ALIAS[sid] && EX_DATA[EX_ALIAS[sid]]) || getGenericExDetail(type, name);
   if (!detail) return '';
   // Clone groups so we can append chest+arms addon without mutating source
   var allGroups = detail.groups.slice();
+  // Find the week this session belongs to, for phase adaptation
+  var wkObj = null;
+  for (var wq = 0; wq < WEEKS.length; wq++) {
+    for (var sq = 0; sq < WEEKS[wq].sessions.length; sq++) {
+      if (WEEKS[wq].sessions[sq].id === sid) { wkObj = WEEKS[wq]; break; }
+    }
+    if (wkObj) break;
+  }
+  var adaptNote = '';
+  // Synced-from-trainer reconciliation note
+  var syncReconcileNote = '';
+  if (wkObj) {
+    var thisSession = null;
+    for (var ts = 0; ts < wkObj.sessions.length; ts++) {
+      if (wkObj.sessions[ts].id === sid) { thisSession = wkObj.sessions[ts]; break; }
+    }
+    if (thisSession && thisSession.synced) {
+      var sp = thisSession.syncedPhase || wkObj.phase;
+      var adaptDesc = (sp === 'Phase 1' || sp === 'Phase 2') ? 'shown as your trainer prescribes' : (sp === 'Phase 3') ? 'accessory volume will be trimmed for this phase' : 'maintenance loading applies for this race-prep phase';
+      syncReconcileNote = '<div style="font-size:11px;color:var(--green-txt);background:var(--green-bg);border-radius:6px;padding:6px 8px;margin-bottom:8px;line-height:1.5">Synced from trainer into ' + sp + ' -- ' + adaptDesc + '.</div>';
+    }
+  }
+  if (wkObj && type === 'lift') {
+    var adapt = getPhaseAdaptation(wkObj);
+    allGroups = applyAdaptation(allGroups, adapt);
+    if (adapt.note) {
+      adaptNote = '<div style="font-size:11px;color:var(--amber-txt);background:var(--amber-bg);border-radius:6px;padding:6px 8px;margin-bottom:8px;line-height:1.5">' + adapt.note + '</div>';
+    } else if (adapt.mode === 'locked') {
+      adaptNote = '<div style="font-size:11px;color:var(--txt3);margin-bottom:8px">Completed week -- shown as performed (locked, not adapted).</div>';
+    } else if (adapt.mode === 'asWritten') {
+      adaptNote = '<div style="font-size:11px;color:var(--txt3);margin-bottom:8px">Phase 1-2: your trainer\'s programming as written.</div>';
+    }
+  }
   if (CHEST_ARMS_ADDON[sid]) { allGroups = allGroups.concat([CHEST_ARMS_ADDON[sid]]); }
   var groupsHtml = '';
   for (var g = 0; g < allGroups.length; g++) {
@@ -1162,13 +1427,14 @@ function buildExHtml(sid, type, name) {
     }
     groupsHtml += '<div class="ex-group"><div class="ex-group-title">' + group.title + '</div>' + rowsHtml + '</div>';
   }
-  // Estimate session duration for lift days (main lift ~18min, each accessory ~5min)
-  var durNote = '';
+  // Estimate session duration. Trainer's sessions are supersetted (paired A1+A2 etc),
+  // so estimate per GROUP (~13 min/group incl. rest) rather than per exercise.
+  var durNote = syncReconcileNote;
   if (type === 'lift') {
-    var totalEx = 0;
-    for (var dg = 0; dg < allGroups.length; dg++) { totalEx += allGroups[dg].ex.length; }
-    var estMin = 18 + Math.max(0, totalEx - 1) * 5;
-    durNote = '<div style="font-size:11px;color:var(--txt3);margin-bottom:8px;padding:6px 8px;background:var(--bg2);border-radius:6px">Est. ~' + estMin + ' min. Superset the paired accessories noted below to stay efficient.</div>';
+    durNote += adaptNote;
+    var nGroups = allGroups.length;
+    var estMin = 10 + nGroups * 13; // 10 min warm-up/transition + ~13 min per supersetted block
+    durNote += '<div style="font-size:11px;color:var(--txt3);margin-bottom:8px;padding:6px 8px;background:var(--bg2);border-radius:6px">Est. ~' + estMin + ' min. Movements paired A1+A2, B1+B2 are SUPERSETS -- alternate them, rest 60-90s after each pair.</div>';
   }
   var html = '';
   html += '<div class="collapsible-toggle" onclick="toggleCollapsible(\'ex-' + sid + '\')">';
@@ -1456,48 +1722,281 @@ async function syncFromDrive() {
     var buf = await res.arrayBuffer();
     if (typeof XLSX === 'undefined') { status.textContent = 'Spreadsheet parser not loaded. Check internet connection.'; return; }
     var wb = XLSX.read(buf, {type:'array'});
-    var merged = parseSessions(wb);
-    status.textContent = (merged.added === 0 && merged.updated === 0) ? 'Up to date -- no new sessions found.' : 'Sync complete -- ' + merged.added + ' new session' + (merged.added !== 1 ? 's' : '') + ' added, ' + merged.updated + ' updated.';
+    var parsed = parseTrainerTemplates(wb);
+    if (!parsed.length) { status.textContent = 'Could not parse any sessions from the sheet -- the layout may have changed. Tell Claude how the columns are arranged.'; return; }
+    pendingReviewQueue = buildReviewQueue(parsed);
+    pendingParsedTemplates = parsed;
+    if (pendingReviewQueue.length === 0) {
+      status.textContent = 'Up to date -- no changes in your trainer\'s sheet since last sync (' + parsed.length + ' sessions checked).';
+      // refresh stored snapshot anyway (in case of first run with all matching)
+      snapshotTemplates(parsed);
+    } else {
+      var nNew = pendingReviewQueue.filter(function(q){return q.type==='new';}).length;
+      var nChg = pendingReviewQueue.filter(function(q){return q.type==='changed';}).length;
+      status.textContent = 'Found ' + nNew + ' new and ' + nChg + ' changed session' + ((nNew+nChg)!==1?'s':'') + ' in your trainer\'s sheet. Review below before anything is added.';
+      renderReviewQueue();
+    }
     var now = new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
     appData.lastSync = now; document.getElementById('syncLastLabel').textContent = 'last synced ' + now;
     saveData(); renderTraining();
   } catch(e) { status.textContent = 'Sync failed: ' + e.message; }
 }
-function parseSessions(wb) {
-  var added = 0, updated = 0;
+function parseTrainerTemplates(wb) {
+  // Option 2: parse his sheet into named session TEMPLATES (title -> movement blocks).
+  // Handles his side-by-side layout: multiple sessions across the same rows, each
+  // occupying a span of columns starting at its title cell.
+  var templates = [];
+  var titleKeywords = ['session','focus','lower body','upper body','running prep','conditioning','work capacity'];
+  var slotRe = /^([A-E][1-5])\.?\s+(.+)/i; // A1. Movement, B2. Movement, etc.
+
   for (var si = 0; si < wb.SheetNames.length; si++) {
     var ws = wb.Sheets[wb.SheetNames[si]];
-    var rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
-    if (rows.length < 2) continue;
-    var headers = rows[0].map(function(h) { return String(h).toLowerCase().trim(); });
-    var wkIdx = headers.findIndex(function(h) { return h.indexOf('week') >= 0; });
-    var nameIdx = headers.findIndex(function(h) { return h.indexOf('session') >= 0 || h.indexOf('exercise') >= 0 || h.indexOf('name') >= 0; });
-    var dayIdx = headers.findIndex(function(h) { return h.indexOf('day') >= 0; });
-    var notesIdx = headers.findIndex(function(h) { return h.indexOf('note') >= 0 || h.indexOf('detail') >= 0; });
-    if (wkIdx < 0 || nameIdx < 0) continue;
-    for (var r = 1; r < rows.length; r++) {
-      var row = rows[r];
-      var wkNum = parseInt(row[wkIdx]);
-      if (!wkNum || wkNum < 1 || wkNum > 22) continue;
-      var sessName = String(row[nameIdx] || '').trim();
-      if (!sessName) continue;
-      var day = dayIdx >= 0 ? String(row[dayIdx] || '').trim() : '';
-      var notes = notesIdx >= 0 ? String(row[notesIdx] || '').trim() : '';
-      var wkObj = null;
-      for (var wi = 0; wi < WEEKS.length; wi++) { if (WEEKS[wi].n === wkNum) { wkObj = WEEKS[wi]; break; } }
-      if (!wkObj) continue;
-      var existing = null;
-      for (var ei = 0; ei < wkObj.sessions.length; ei++) { if (wkObj.sessions[ei].name.toLowerCase() === sessName.toLowerCase()) { existing = wkObj.sessions[ei]; break; } }
-      if (existing) { if (notes && notes !== existing.detail) { existing.detail = notes; updated++; } }
-      else {
-        var n2 = sessName.toLowerCase();
-        var typeGuess = n2.indexOf('swim') >= 0 ? 'swim' : n2.indexOf('run') >= 0 ? 'run' : (n2.indexOf('bike') >= 0 || n2.indexOf('cycl') >= 0) ? 'bike' : n2.indexOf('brick') >= 0 ? 'brick' : 'lift';
-        wkObj.sessions.push({id:'sync_w'+wkNum+'_'+r, name:sessName, type:typeGuess, day:day, detail:notes, fields:[{k:'notes_only',l:'Notes / stats'}], synced:true});
-        added++;
+    var grid = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+    if (!grid.length) continue;
+
+    for (var r = 0; r < grid.length; r++) {
+      var row = grid[r] || [];
+      // Identify title cells in this row
+      for (var col = 0; col < row.length; col++) {
+        var cell = String(row[col] || '').trim();
+        if (!cell) continue;
+        var low = cell.toLowerCase();
+        var isTitle = titleKeywords.some(function(k){ return low.indexOf(k) >= 0; });
+        // Avoid catching header words / movement rows
+        if (!isTitle) continue;
+        if (low.indexOf('primary') >= 0 || low.indexOf('secondary') >= 0 || low.indexOf('accessory') >= 0 || low.indexOf('warm up') >= 0) continue;
+        // Skip if same title already started at this column on a previous adjacent row (merged repeats)
+        var existingAtCol = templates.find(function(t){ return t._sheet === si && t._col === col && t.title === cell; });
+        if (existingAtCol) continue;
+
+        // Determine this session's column span: from `col` up to the next title cell on this row
+        var spanEnd = row.length;
+        for (var cc = col + 1; cc < row.length; cc++) {
+          var c2 = String(row[cc] || '').trim().toLowerCase();
+          if (c2 && titleKeywords.some(function(k){ return c2.indexOf(k) >= 0; }) && c2.indexOf('primary') < 0 && c2.indexOf('secondary') < 0 && c2.indexOf('accessory') < 0) { spanEnd = cc; break; }
+        }
+
+        // Walk downward collecting movements within [col, spanEnd)
+        var movements = [];
+        for (var rr = r + 1; rr < grid.length; rr++) {
+          var drow = grid[rr] || [];
+          // stop if we hit another title row (a title cell anywhere in this session's span)
+          var hitNextTitle = false, hitCooldown = false;
+          for (var dc = col; dc < spanEnd; dc++) {
+            var dcell = String(drow[dc] || '').trim();
+            var dlow = dcell.toLowerCase();
+            if (!dcell) continue;
+            if (dlow.indexOf('cool down') >= 0 || dlow.indexOf('final time') >= 0 || dlow.indexOf('rest and recover') >= 0) { hitCooldown = true; }
+            var dIsTitle = titleKeywords.some(function(k){ return dlow.indexOf(k) >= 0; }) && dlow.indexOf('primary') < 0 && dlow.indexOf('secondary') < 0 && dlow.indexOf('accessory') < 0 && dlow.indexOf('movement') < 0;
+            if (dIsTitle) { hitNextTitle = true; }
+            var m = dcell.match(slotRe);
+            if (m) {
+              // sets/reps/weight: scan rightward within span, collect non-empty cells
+              // (his blank-column spacing varies between side-by-side sessions)
+              var vals = [];
+              for (var vx = dc + 1; vx < spanEnd && vals.length < 3; vx++) {
+                var v = String(drow[vx] || '').trim();
+                if (v) vals.push(v);
+              }
+              movements.push({slot: m[1].toUpperCase(), name: m[2].trim(), sets: vals[0] || '', reps: vals[1] || '', weight: vals[2] || ''});
+            }
+          }
+          if (hitNextTitle || hitCooldown) break;
+        }
+
+        if (movements.length > 0) {
+          templates.push({ title: cell, movements: movements, _sheet: si, _col: col });
+        }
       }
     }
   }
-  return {added:added, updated:updated};
+  // strip internal fields
+  return templates.map(function(t){ return {title: t.title, movements: t.movements}; });
+}
+
+// ─── OPTION 2: TEMPLATE RECONCILIATION (surfaces for approval, never auto-applies) ──
+function normalizeTitle(s) {
+  return String(s || '').toLowerCase()
+    .replace(/[0-9]+\/[0-9]+\/[0-9]+/g, '')   // strip dates
+    .replace(/\b(session|focus|the|with|and|work|capacity)\b/g, '')
+    .replace(/[^a-z ]/g, ' ')                    // strip punctuation/em-dashes
+    .replace(/\s+/g, ' ').trim();
+}
+
+// Does a trainer template title correspond to an app session?
+function titlesMatch(trainerTitle, appSessionName) {
+  var a = normalizeTitle(trainerTitle);
+  var b = normalizeTitle(appSessionName);
+  if (!a || !b) return false;
+  if (a === b) return true;
+  // token-overlap: match if the distinctive body-region + intensity tokens align
+  var keyTokens = ['lower','upper','body','high','intensity','dynamic','pull','press','squat','leg','running','prep','conditioning','full'];
+  function keyset(x){ return keyTokens.filter(function(k){ return x.indexOf(k) >= 0; }).join(' '); }
+  var ka = keyset(a), kb = keyset(b);
+  return ka.length > 0 && ka === kb;
+}
+
+function templateSignature(tmpl) {
+  // A stable string of its movements for change-detection
+  return tmpl.movements.map(function(m){ return m.slot+':'+m.name+':'+m.sets+':'+m.reps+':'+m.weight; }).join('|');
+}
+
+function buildReviewQueue(parsedTemplates) {
+  var prior = appData.trainerTemplates || {};   // title -> signature (last approved)
+  var queue = [];
+  for (var i = 0; i < parsedTemplates.length; i++) {
+    var t = parsedTemplates[i];
+    var sig = templateSignature(t);
+    var priorSig = prior[t.title];
+    if (priorSig === undefined) {
+      queue.push({type: 'new', title: t.title, template: t, signature: sig});
+    } else if (priorSig !== sig) {
+      queue.push({type: 'changed', title: t.title, template: t, signature: sig});
+    }
+    // unchanged -> nothing to surface
+  }
+  return queue;
+}
+
+// Map a template title to the EX_DATA keys / weeks that use it (for changed templates).
+function templateUsedInWeeks(title) {
+  // Match against session names in uncompleted weeks only
+  var hits = [];
+  var low = title.toLowerCase();
+  for (var w = 0; w < WEEKS.length; w++) {
+    if (isWeekComplete(WEEKS[w].n)) continue;
+    for (var s = 0; s < WEEKS[w].sessions.length; s++) {
+      var sn = WEEKS[w].sessions[s].name.toLowerCase();
+      // loose match on key terms
+      if (low.indexOf('lower body high') >= 0 && sn.indexOf('high intensity') >= 0 && sn.indexOf('lower') < 0 && WEEKS[w].sessions[s].detail && WEEKS[w].sessions[s].detail.indexOf('LB-HI') >= 0) hits.push({wk: WEEKS[w].n, id: WEEKS[w].sessions[s].id});
+      else if (sn === low) hits.push({wk: WEEKS[w].n, id: WEEKS[w].sessions[s].id});
+    }
+  }
+  return hits;
+}
+
+// Convert a parsed template into EX_DATA group format
+function templateToGroups(t) {
+  var groups = [];
+  var byGroup = {A:[], B:[], C:[], D:[], E:[]};
+  for (var i = 0; i < t.movements.length; i++) {
+    var m = t.movements[i];
+    var letter = m.slot.charAt(0).toUpperCase();
+    if (!byGroup[letter]) byGroup[letter] = [];
+    var scheme = (m.sets ? m.sets + 'x ' : '') + (m.reps || '');
+    var isCore = /core|plank|hollow|sit up|saw|pallof|leg raise|stir|wheel|bus driver|crunch|wood chop|rotation/i.test(m.name);
+    byGroup[letter].push([m.slot + '. ' + m.name + (isCore ? ' (CORE)' : ''), scheme.trim() || '--', m.weight || '']);
+  }
+  var titles = {A:'A -- Primary (superset)', B:'B -- Secondary (superset)', C:'C -- Accessory', D:'D -- Accessory', E:'E -- Accessory'};
+  ['A','B','C','D','E'].forEach(function(L){
+    if (byGroup[L] && byGroup[L].length) groups.push({title: titles[L], ex: byGroup[L]});
+  });
+  return groups;
+}
+
+// Review-queue state
+var pendingReviewQueue = [];
+var pendingParsedTemplates = [];
+
+function snapshotTemplates(parsed) {
+  if (!appData.trainerTemplates) appData.trainerTemplates = {};
+  for (var i = 0; i < parsed.length; i++) {
+    appData.trainerTemplates[parsed[i].title] = templateSignature(parsed[i]);
+  }
+  saveData();
+}
+
+function renderReviewQueue() {
+  var host = document.getElementById('reviewQueue');
+  if (!host) return;
+  if (!pendingReviewQueue.length) { host.innerHTML = ''; host.style.display = 'none'; return; }
+  host.style.display = 'block';
+  var html = '<div style="font-size:13px;font-weight:600;margin:10px 0 6px">Review changes from your trainer</div>';
+  html += '<div style="font-size:11px;color:var(--txt3);margin-bottom:10px">Nothing is added to your program until you approve it. Completed weeks are never affected.</div>';
+  for (var i = 0; i < pendingReviewQueue.length; i++) {
+    var q = pendingReviewQueue[i];
+    var badge = q.type === 'new' ? '<span style="color:var(--green-txt);background:var(--green-bg);padding:1px 6px;border-radius:4px;font-size:10px">NEW</span>' : '<span style="color:var(--amber-txt);background:var(--amber-bg);padding:1px 6px;border-radius:4px;font-size:10px">CHANGED</span>';
+    html += '<div style="border:0.5px solid var(--border2);border-radius:var(--r);padding:10px;margin-bottom:8px">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:13px;font-weight:500">' + q.title + '</span>' + badge + '</div>';
+    // movement preview
+    html += '<div style="font-size:11px;color:var(--txt2);line-height:1.6;margin-bottom:8px">';
+    for (var mi = 0; mi < q.template.movements.length; mi++) {
+      var m = q.template.movements[mi];
+      var isCore = /core|plank|hollow|sit up|saw|pallof|leg raise|stir|wheel|bus driver|crunch|wood chop|rotation/i.test(m.name);
+      html += m.slot + '. ' + m.name + (isCore ? ' (core)' : '') + (m.sets ? ' &mdash; ' + m.sets + 'x' + (m.reps||'') : '') + (m.weight ? ' @ ' + m.weight : '') + '<br>';
+    }
+    html += '</div>';
+    if (q.type === 'new') {
+      html += '<div style="font-size:11px;color:var(--txt3);margin-bottom:6px">New session not yet in your program. Choose a week to slot it into (upcoming weeks only):</div>';
+      html += '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">';
+      html += '<select id="slotWeek_' + i + '" style="font-size:12px;padding:5px 6px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt)">';
+      for (var w = 0; w < WEEKS.length; w++) { if (!isWeekComplete(WEEKS[w].n)) html += '<option value="' + WEEKS[w].n + '">Week ' + WEEKS[w].n + ' (' + WEEKS[w].phase + ')</option>'; }
+      html += '</select>';
+      html += '<button class="btn" style="font-size:11px;padding:5px 10px;background:var(--txt);color:var(--bg);border-color:var(--txt)" onclick="approveQueueItem(' + i + ')">Add to week</button>';
+      html += '<button class="btn" style="font-size:11px;padding:5px 10px" onclick="dismissQueueItem(' + i + ')">Skip</button>';
+      html += '</div>';
+    } else {
+      html += '<div style="font-size:11px;color:var(--txt3);margin-bottom:6px">Updates this session everywhere it appears in your upcoming weeks. Completed weeks keep what you logged.</div>';
+      html += '<div style="display:flex;gap:6px"><button class="btn" style="font-size:11px;padding:5px 10px;background:var(--txt);color:var(--bg);border-color:var(--txt)" onclick="approveQueueItem(' + i + ')">Apply update</button>';
+      html += '<button class="btn" style="font-size:11px;padding:5px 10px" onclick="dismissQueueItem(' + i + ')">Keep current</button></div>';
+    }
+    html += '</div>';
+  }
+  host.innerHTML = html;
+}
+
+function approveQueueItem(i) {
+  var q = pendingReviewQueue[i];
+  if (!q) return;
+  var groups = templateToGroups(q.template);
+  if (q.type === 'new') {
+    var sel = document.getElementById('slotWeek_' + i);
+    var wkNum = sel ? parseInt(sel.value) : null;
+    if (!wkNum) { showToast('Pick a week first'); return; }
+    var wkObj = null;
+    for (var w = 0; w < WEEKS.length; w++) { if (WEEKS[w].n === wkNum) { wkObj = WEEKS[w]; break; } }
+    if (!wkObj || isWeekComplete(wkNum)) { showToast('That week is locked'); return; }
+    var newId = 'synced_' + wkNum + '_' + Date.now();
+    var n2 = q.title.toLowerCase();
+    var typeGuess = n2.indexOf('swim') >= 0 ? 'swim' : n2.indexOf('run') >= 0 ? 'run' : (n2.indexOf('bike')>=0||n2.indexOf('cycl')>=0) ? 'bike' : 'lift';
+    wkObj.sessions.push({id:newId, name:q.title, type:typeGuess, day:'', detail:'Synced from trainer', fields:[{k:'notes_only',l:'Notes / stats'}], synced:true, syncedPhase:wkObj.phase});
+    EX_DATA[newId] = {groups: groups};
+    showToast('Added to Week ' + wkNum);
+  } else {
+    // changed: update EX_DATA everywhere this title is used in uncompleted weeks
+    var applied = 0;
+    for (var w2 = 0; w2 < WEEKS.length; w2++) {
+      if (isWeekComplete(WEEKS[w2].n)) continue;
+      for (var s = 0; s < WEEKS[w2].sessions.length; s++) {
+        if (titlesMatch(q.title, WEEKS[w2].sessions[s].name)) {
+          EX_DATA[WEEKS[w2].sessions[s].id] = {groups: groups};
+          WEEKS[w2].sessions[s].synced = true;
+          WEEKS[w2].sessions[s].syncedPhase = WEEKS[w2].phase;
+          applied++;
+        }
+      }
+    }
+    showToast(applied > 0 ? 'Updated in ' + applied + ' upcoming week(s)' : 'Not currently scheduled -- saved for when it is');
+  }
+  // record the approved signature so it won't resurface
+  if (!appData.trainerTemplates) appData.trainerTemplates = {};
+  appData.trainerTemplates[q.title] = q.signature;
+  saveData();
+  pendingReviewQueue.splice(i, 1);
+  // reindex remaining (rebuild) -- re-render
+  renderReviewQueue();
+  renderTraining();
+}
+
+function dismissQueueItem(i) {
+  var q = pendingReviewQueue[i];
+  if (!q) return;
+  // record signature so a dismissed change doesn't nag every sync (treat as acknowledged)
+  if (!appData.trainerTemplates) appData.trainerTemplates = {};
+  appData.trainerTemplates[q.title] = q.signature;
+  saveData();
+  pendingReviewQueue.splice(i, 1);
+  renderReviewQueue();
 }
 
 // ─── TRAINING ─────────────────────────────────────────────────────────────────
