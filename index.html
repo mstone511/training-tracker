@@ -1621,7 +1621,7 @@ async function runAnalysis() {
   var prevAI = appData['wk' + (wk.n - 1)] && appData['wk' + (wk.n - 1)].ai ? appData['wk' + (wk.n - 1)].ai.slice(0, 300) + '...' : 'none';
   var prompt = 'Expert exercise physiologist reviewing training for Matt (167.5 lbs, 14.8% BF, conjugate-trained). 22-week hypertrophy-to-sprint-triathlon program. Week ' + wk.n + '/22 (' + wk.phase + ': ' + wk.focus + ', load: ' + wk.load + '). HR zones (Karvonen RHR 55 max 180): Z2 130-143, Z3 143-155, Z4 155-168. Recent run 5.45km/30min avg 165bpm (Z4) after 1yr off. Z2 run pace ~10:30-11:30/mi.\nWeek ' + wk.n + ' data:\n' + summary + '\nPrev week: ' + prevAI + '\nDirect review max 200 words: 1) completion + skipped 2) HR zone compliance -- flag Z3/Z4 runs that should be Z2 3) strength progression 4) swim CSS changes 5) one specific next-week adjustment. Numbers only.';
   try {
-    var r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:1000, messages:[{role:'user', content:prompt}]})});
+    var r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-5-20250929', max_tokens:1000, messages:[{role:'user', content:prompt}]})});
     var d = await r.json();
     var t = d.content && d.content.filter(function(c) { return c.type === 'text'; }).map(function(c) { return c.text; }).join('\n') || 'Analysis unavailable.';
     txt.textContent = t; wd.ai = t; saveData();
@@ -1932,7 +1932,7 @@ async function runNutAnalysis() {
   }
   var prompt = 'Sports dietitian reviewing weekly nutrition for Matt (baseline 167.5 lbs, 14.8% BF, 81.4 lbs SMM; goal: body recomposition -- build/maintain muscle especially legs while supporting sprint triathlon training). ' + metricsCtx + ' Week ' + wk.n + '/22, load: ' + wk.load + '. Targets: ' + mt.kcal + ' kcal / ' + mt.carb + 'g C / ' + mt.pro + 'g P / ' + mt.fat + 'g F. ' + mt.reason + '\nLogged days:\n' + (days.join('\n') || 'No days logged yet.') + '\nPost-workout smoothie = 380 kcal / 42g C / 40g P / 7g F.\nDirect feedback max 200 words: 1) protein compliance 2) carb-to-training match 3) obvious under/over-eating days 4) IF weight trend data exists, comment on whether current calorie target aligns with the recomposition goal and recommend a specific kcal adjustment if the trend suggests it 5) one practical adjustment. Numbers only.';
   try {
-    var r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:1000, messages:[{role:'user', content:prompt}]})});
+    var r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-5-20250929', max_tokens:1000, messages:[{role:'user', content:prompt}]})});
     var d = await r.json();
     var t = d.content && d.content.filter(function(c) { return c.type === 'text'; }).map(function(c) { return c.text; }).join('\n') || 'Analysis unavailable.';
     txt.textContent = t; wd.nutAi = t; saveData();
@@ -1993,7 +1993,7 @@ async function analysePhoto(dataUrl) {
   var base64 = dataUrl.split(',')[1]; var mediaType = dataUrl.split(';')[0].split(':')[1];
   var prompt = 'You are a sports dietitian. Analyse this meal photo and estimate the nutritional content for the portion shown. Respond ONLY with a JSON object, no text before or after, no markdown. Format: {"kcal":0,"carb":0,"pro":0,"fat":0,"description":"brief description","confidence":"low/medium/high","notes":"any caveats"}';
   try {
-    var r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:400, messages:[{role:'user', content:[{type:'image', source:{type:'base64', media_type:mediaType, data:base64}},{type:'text', text:prompt}]}]})});
+    var r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-5-20250929', max_tokens:400, messages:[{role:'user', content:[{type:'image', source:{type:'base64', media_type:mediaType, data:base64}},{type:'text', text:prompt}]}]})});
     var d = await r.json();
     var raw = d.content && d.content.filter(function(c) { return c.type === 'text'; }).map(function(c) { return c.text; }).join('');
     var parsed = extractMacroJSON(raw);
@@ -2297,7 +2297,7 @@ async function estimateDescribed() {
   status.style.display = 'block'; result.style.display = 'none';
   var prompt = 'You are a sports dietitian estimating meal macros. Break the meal into its component items, estimate each, then SUM into single totals. Your entire reply must be one JSON object and nothing else -- no preamble, no markdown fences, no closing remark. Schema: {"kcal":number,"carb":number,"pro":number,"fat":number,"summary":"one-line restatement","notes":"portion assumptions"}. All values whole numbers, totals for the full meal. If an item is ambiguous, assume a typical single serving rather than skipping it. Meal: ' + desc;
   try {
-    var r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:700, messages:[{role:'user', content:prompt}]})});
+    var r = await fetch('https://api.anthropic.com/v1/messages', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-5-20250929', max_tokens:700, messages:[{role:'user', content:prompt}]})});
     var d = await r.json();
     // Surface API-level errors explicitly instead of failing silently
     if (d && d.error) {
