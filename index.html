@@ -243,7 +243,6 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
     </div>
     <button class="btn" style="width:100%;margin-top:4px" onclick="syncFromDrive()">Sync now</button>
     <div class="sync-status" id="syncStatus"></div>
-<div id="reviewQueue" style="display:none;margin-top:10px"></div>
   </div>
 </div>
 <div class="stat-row">
@@ -1368,9 +1367,15 @@ function applyAdaptation(groups, adapt) {
 }
 
 var EX_ALIAS = {
-  'w5s5': 'trainer_5th_fullbody',   // Phase 1 FB-B -> deadlift work-capacity day
-  'w8s6': 'trainer_4th_fullbody',   // Phase 2 FB-A -> landmine work-capacity day
-  'w3s3': 'trainer_7th_upper'       // align to trainer's latest 7th upper session
+  // Deadlift-based 5th session (work-capacity, posterior chain) -- recurring through Phases 1-2
+  'w5s5': 'trainer_5th_fullbody',
+  'w9s5': 'trainer_5th_fullbody',
+  'w10s5': 'trainer_5th_fullbody',
+  // Landmine-based 4th session (work-capacity) -- Phase 2
+  'w8s6': 'trainer_4th_fullbody',
+  // 7th upper session (L-sit pull, banded bench, core-heavy) -- recurring upper option
+  'w3s3': 'trainer_7th_upper',
+  'w8s3': 'trainer_7th_upper'
 };
 
 function buildExHtml(sid, type, name) {
@@ -1475,7 +1480,7 @@ var WEEKS = [
 {n:3,phase:'Phase 1',focus:'Deload + CSS baseline test',load:'deload',sessions:[
 {id:'w3s1',name:'Lower body -- squat deload',type:'lift',day:'Mon',detail:'LB-SQ reduced volume',fields:[{k:'squat_top',l:'Working squat weight (lbs)'}]},
 {id:'w3s2',name:'Swim -- CSS baseline test',type:'swim',day:'Tue',detail:'400m TT, 10 min rest, 200m TT',fields:[{k:'css_400',l:'400m time (mm:ss)'},{k:'css_200',l:'200m time (mm:ss)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
-{id:'w3s3',name:'Upper body -- high intensity',type:'lift',day:'Wed',detail:'UB-HI',fields:[{k:'pullup_reps',l:'Weighted pull-up top set'},{k:'bench_top',l:'Bench press top (lbs)'}]},
+{id:'w3s3',name:'Upper body -- L-sit pull + bench (7th session)',type:'lift',day:'Wed',detail:'UB-HI',fields:[{k:'pullup_reps',l:'Weighted pull-up top set'},{k:'bench_top',l:'Bench press top (lbs)'}]},
 {id:'w3s4',name:'Bike -- Z2 45 min',type:'bike',day:'Thu',detail:'Easy deload effort',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR (bpm)'}]},
 {id:'w3s5',name:'Full body circuit',type:'lift',day:'Fri',detail:'FB-A deload',fields:[{k:'circuit_time',l:'Circuit time (min)'}]},
 {id:'w3s6',name:'Run -- Z2 2 mi',type:'run',day:'Sat',detail:'HR strictly 130-143',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR (bpm)'},{k:'run_pace',l:'Pace (min/mi)'}]},
@@ -1493,7 +1498,7 @@ var WEEKS = [
 {id:'w5s2',name:'Swim -- technique + continuous',type:'swim',day:'Tue',detail:'35 min',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 {id:'w5s3',name:'Upper body -- press + pull',type:'lift',day:'Wed',detail:'UB-PR + UB-PL',fields:[{k:'press_top',l:'Press top (lbs)'},{k:'pullup_reps',l:'Pull-up max reps'}]},
 {id:'w5s4',name:'Bike -- Z2 60 min',type:'bike',day:'Thu',detail:'HR 130-143',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR (bpm)'}]},
-{id:'w5s5',name:'Full body circuit',type:'lift',day:'Fri',detail:'FB-B',fields:[{k:'circuit_time',l:'Circuit time (min)'}]},
+{id:'w5s5',name:'Deadlift work capacity (5th session)',type:'lift',day:'Fri',detail:'FB-B',fields:[{k:'circuit_time',l:'Circuit time (min)'}]},
 {id:'w5s6',name:'Run -- Z2 2.5 mi',type:'run',day:'Sat',detail:'Longest run Phase 1',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR (bpm)'},{k:'run_pace',l:'Pace (min/mi)'}]},
 ]},
 {n:6,phase:'Phase 1',focus:'Deload -- active recovery',load:'deload',sessions:[
@@ -1516,10 +1521,10 @@ var WEEKS = [
 {n:8,phase:'Phase 2',focus:'Second run session added',load:'high',sessions:[
 {id:'w8s1',name:'Lower body -- squat',type:'lift',day:'Mon',detail:'LB-SQ',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
 {id:'w8s2',name:'Swim -- CSS 35 min',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
-{id:'w8s3',name:'Upper body -- press + pull',type:'lift',day:'Wed',detail:'UB-PR + UB-PL',fields:[{k:'press_top',l:'Press top (lbs)'}]},
+{id:'w8s3',name:'Upper body -- L-sit pull + bench (7th session)',type:'lift',day:'Wed',detail:'UB-PR + UB-PL',fields:[{k:'press_top',l:'Press top (lbs)'}]},
 {id:'w8s4',name:'Run -- Z2 easy 2 mi',type:'run',day:'Thu AM',detail:'2nd run/wk, strictly Z2',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR (bpm)'}]},
 {id:'w8s5',name:'Swim -- technique',type:'swim',day:'Thu PM',detail:'30 min, 6h+ after run',fields:[{k:'swim_min',l:'Duration (min)'}]},
-{id:'w8s6',name:'Full body circuit',type:'lift',day:'Fri',detail:'FB-A',fields:[{k:'circuit_time',l:'Circuit time (min)'}]},
+{id:'w8s6',name:'Landmine work capacity (4th session)',type:'lift',day:'Fri',detail:'FB-A',fields:[{k:'circuit_time',l:'Circuit time (min)'}]},
 {id:'w8s7',name:'Run 3 mi + Z3 bike 40 min',type:'run',day:'Sat',detail:'Run first, first Z3 bike',fields:[{k:'run_dist',l:'Run distance (mi)'},{k:'run_avghr',l:'Run avg HR'},{k:'bike_avghr',l:'Bike avg HR'}]},
 {id:'w8s8',name:'Swim -- continuous 35 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
@@ -1528,7 +1533,7 @@ var WEEKS = [
 {id:'w9s2',name:'Swim -- CSS 40 min',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w9s3',name:'Upper body -- high intensity',type:'lift',day:'Wed',detail:'UB-HI + UB-DY',fields:[{k:'pullup_reps',l:'Pull-up reps'},{k:'bench_top',l:'Bench top (lbs)'}]},
 {id:'w9s4',name:'Swim -- technique 30 min',type:'swim',day:'Thu',detail:'Technique only',fields:[{k:'swim_min',l:'Duration (min)'}]},
-{id:'w9s5',name:'Full body circuit',type:'lift',day:'Fri',detail:'FB-B',fields:[{k:'circuit_time',l:'Circuit time (min)'}]},
+{id:'w9s5',name:'Deadlift work capacity (5th session)',type:'lift',day:'Fri',detail:'FB-B',fields:[{k:'circuit_time',l:'Circuit time (min)'}]},
 {id:'w9s6',name:'Run Z2 3 mi + Bike Z2 60 min',type:'run',day:'Sat',detail:'Run then bike Z2',fields:[{k:'run_dist',l:'Run distance (mi)'},{k:'run_avghr',l:'Run avg HR'},{k:'bike_min',l:'Bike duration (min)'}]},
 {id:'w9s7',name:'Swim -- continuous 40 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
@@ -1537,7 +1542,7 @@ var WEEKS = [
 {id:'w10s2',name:'Swim -- CSS retest #1',type:'swim',day:'Tue',detail:'400m TT + 200m TT',fields:[{k:'css_400',l:'400m time (mm:ss)'},{k:'css_200',l:'200m time (mm:ss)'},{k:'css_pace',l:'New CSS pace (/100m)'}]},
 {id:'w10s3',name:'Upper body -- press',type:'lift',day:'Wed',detail:'UB-PR',fields:[{k:'press_top',l:'Press top (lbs)'}]},
 {id:'w10s4',name:'Run Z2 + Swim technique',type:'run',day:'Thu',detail:'Short run AM, swim PM 30 min',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'swim_min',l:'Swim duration (min)'}]},
-{id:'w10s5',name:'Full body + running prep',type:'lift',day:'Fri',detail:'FB-A + RP-SL',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
+{id:'w10s5',name:'Deadlift work capacity (5th session)',type:'lift',day:'Fri',detail:'FB-A + RP-SL',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
 {id:'w10s6',name:'Run Z2 3.5 mi + Z3 bike 45 min',type:'run',day:'Sat',detail:'Within safe spike threshold',fields:[{k:'run_dist',l:'Run distance (mi)'},{k:'run_avghr',l:'Run avg HR'},{k:'run_pace',l:'Pace (min/mi)'}]},
 {id:'w10s7',name:'Swim -- continuous 40 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
@@ -1724,18 +1729,20 @@ async function syncFromDrive() {
     var wb = XLSX.read(buf, {type:'array'});
     var parsed = parseTrainerTemplates(wb);
     if (!parsed.length) { status.textContent = 'Could not parse any sessions from the sheet -- the layout may have changed. Tell Claude how the columns are arranged.'; return; }
-    pendingReviewQueue = buildReviewQueue(parsed);
-    pendingParsedTemplates = parsed;
-    if (pendingReviewQueue.length === 0) {
-      status.textContent = 'Up to date -- no changes in your trainer\'s sheet since last sync (' + parsed.length + ' sessions checked).';
-      // refresh stored snapshot anyway (in case of first run with all matching)
-      snapshotTemplates(parsed);
+    var result = autoSyncTemplates(parsed);
+    var msg = '';
+    if (result.refreshed > 0) {
+      msg = 'Synced -- updated ' + result.refreshed + ' strength session' + (result.refreshed !== 1 ? 's' : '') + ' across your upcoming weeks to match your trainer\'s latest.';
     } else {
-      var nNew = pendingReviewQueue.filter(function(q){return q.type==='new';}).length;
-      var nChg = pendingReviewQueue.filter(function(q){return q.type==='changed';}).length;
-      status.textContent = 'Found ' + nNew + ' new and ' + nChg + ' changed session' + ((nNew+nChg)!==1?'s':'') + ' in your trainer\'s sheet. Review below before anything is added.';
-      renderReviewQueue();
+      msg = 'Synced -- your strength days already match your trainer\'s sheet.';
     }
+    if (result.lockedSkipped > 0) {
+      msg += ' Completed weeks were left untouched.';
+    }
+    if (result.newTypes.length > 0) {
+      msg += ' Note: your trainer added ' + result.newTypes.length + ' new session type' + (result.newTypes.length !== 1 ? 's' : '') + ' not yet in your program (' + result.newTypes.join(', ') + '). These weren\'t auto-added -- mention them to Claude to weave into the triathlon plan.';
+    }
+    status.textContent = msg;
     var now = new Date().toLocaleDateString('en-US', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
     appData.lastSync = now; document.getElementById('syncLastLabel').textContent = 'last synced ' + now;
     saveData(); renderTraining();
@@ -1841,39 +1848,10 @@ function templateSignature(tmpl) {
   return tmpl.movements.map(function(m){ return m.slot+':'+m.name+':'+m.sets+':'+m.reps+':'+m.weight; }).join('|');
 }
 
-function buildReviewQueue(parsedTemplates) {
-  var prior = appData.trainerTemplates || {};   // title -> signature (last approved)
-  var queue = [];
-  for (var i = 0; i < parsedTemplates.length; i++) {
-    var t = parsedTemplates[i];
-    var sig = templateSignature(t);
-    var priorSig = prior[t.title];
-    if (priorSig === undefined) {
-      queue.push({type: 'new', title: t.title, template: t, signature: sig});
-    } else if (priorSig !== sig) {
-      queue.push({type: 'changed', title: t.title, template: t, signature: sig});
-    }
-    // unchanged -> nothing to surface
-  }
-  return queue;
-}
+
 
 // Map a template title to the EX_DATA keys / weeks that use it (for changed templates).
-function templateUsedInWeeks(title) {
-  // Match against session names in uncompleted weeks only
-  var hits = [];
-  var low = title.toLowerCase();
-  for (var w = 0; w < WEEKS.length; w++) {
-    if (isWeekComplete(WEEKS[w].n)) continue;
-    for (var s = 0; s < WEEKS[w].sessions.length; s++) {
-      var sn = WEEKS[w].sessions[s].name.toLowerCase();
-      // loose match on key terms
-      if (low.indexOf('lower body high') >= 0 && sn.indexOf('high intensity') >= 0 && sn.indexOf('lower') < 0 && WEEKS[w].sessions[s].detail && WEEKS[w].sessions[s].detail.indexOf('LB-HI') >= 0) hits.push({wk: WEEKS[w].n, id: WEEKS[w].sessions[s].id});
-      else if (sn === low) hits.push({wk: WEEKS[w].n, id: WEEKS[w].sessions[s].id});
-    }
-  }
-  return hits;
-}
+
 
 // Convert a parsed template into EX_DATA group format
 function templateToGroups(t) {
@@ -1894,110 +1872,59 @@ function templateToGroups(t) {
   return groups;
 }
 
-// Review-queue state
-var pendingReviewQueue = [];
-var pendingParsedTemplates = [];
+// AUTOMATIC SILENT SYNC: refresh matching strength days in place, no approval.
+// - For each trainer template that maps to a lift day in an UNCOMPLETED week,
+//   replace that day's EX_DATA groups with his latest movements/loading.
+// - Completed weeks are never touched.
+// - Genuinely new session types (no match anywhere in the program) are flagged,
+//   NOT auto-placed -- placement into the periodization is Claude's job.
+function autoSyncTemplates(parsed) {
+  var refreshed = 0, lockedSkipped = 0;
+  var newTypes = [];
+  var matchedAnyWeek = {};
 
-function snapshotTemplates(parsed) {
-  if (!appData.trainerTemplates) appData.trainerTemplates = {};
-  for (var i = 0; i < parsed.length; i++) {
-    appData.trainerTemplates[parsed[i].title] = templateSignature(parsed[i]);
-  }
-  saveData();
-}
+  for (var p = 0; p < parsed.length; p++) {
+    var t = parsed[p];
+    var groups = templateToGroups(t);
+    var matchedSomewhere = false;
+    var matchedInOpenWeek = false;
 
-function renderReviewQueue() {
-  var host = document.getElementById('reviewQueue');
-  if (!host) return;
-  if (!pendingReviewQueue.length) { host.innerHTML = ''; host.style.display = 'none'; return; }
-  host.style.display = 'block';
-  var html = '<div style="font-size:13px;font-weight:600;margin:10px 0 6px">Review changes from your trainer</div>';
-  html += '<div style="font-size:11px;color:var(--txt3);margin-bottom:10px">Nothing is added to your program until you approve it. Completed weeks are never affected.</div>';
-  for (var i = 0; i < pendingReviewQueue.length; i++) {
-    var q = pendingReviewQueue[i];
-    var badge = q.type === 'new' ? '<span style="color:var(--green-txt);background:var(--green-bg);padding:1px 6px;border-radius:4px;font-size:10px">NEW</span>' : '<span style="color:var(--amber-txt);background:var(--amber-bg);padding:1px 6px;border-radius:4px;font-size:10px">CHANGED</span>';
-    html += '<div style="border:0.5px solid var(--border2);border-radius:var(--r);padding:10px;margin-bottom:8px">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:13px;font-weight:500">' + q.title + '</span>' + badge + '</div>';
-    // movement preview
-    html += '<div style="font-size:11px;color:var(--txt2);line-height:1.6;margin-bottom:8px">';
-    for (var mi = 0; mi < q.template.movements.length; mi++) {
-      var m = q.template.movements[mi];
-      var isCore = /core|plank|hollow|sit up|saw|pallof|leg raise|stir|wheel|bus driver|crunch|wood chop|rotation/i.test(m.name);
-      html += m.slot + '. ' + m.name + (isCore ? ' (core)' : '') + (m.sets ? ' &mdash; ' + m.sets + 'x' + (m.reps||'') : '') + (m.weight ? ' @ ' + m.weight : '') + '<br>';
-    }
-    html += '</div>';
-    if (q.type === 'new') {
-      html += '<div style="font-size:11px;color:var(--txt3);margin-bottom:6px">New session not yet in your program. Choose a week to slot it into (upcoming weeks only):</div>';
-      html += '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">';
-      html += '<select id="slotWeek_' + i + '" style="font-size:12px;padding:5px 6px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt)">';
-      for (var w = 0; w < WEEKS.length; w++) { if (!isWeekComplete(WEEKS[w].n)) html += '<option value="' + WEEKS[w].n + '">Week ' + WEEKS[w].n + ' (' + WEEKS[w].phase + ')</option>'; }
-      html += '</select>';
-      html += '<button class="btn" style="font-size:11px;padding:5px 10px;background:var(--txt);color:var(--bg);border-color:var(--txt)" onclick="approveQueueItem(' + i + ')">Add to week</button>';
-      html += '<button class="btn" style="font-size:11px;padding:5px 10px" onclick="dismissQueueItem(' + i + ')">Skip</button>';
-      html += '</div>';
-    } else {
-      html += '<div style="font-size:11px;color:var(--txt3);margin-bottom:6px">Updates this session everywhere it appears in your upcoming weeks. Completed weeks keep what you logged.</div>';
-      html += '<div style="display:flex;gap:6px"><button class="btn" style="font-size:11px;padding:5px 10px;background:var(--txt);color:var(--bg);border-color:var(--txt)" onclick="approveQueueItem(' + i + ')">Apply update</button>';
-      html += '<button class="btn" style="font-size:11px;padding:5px 10px" onclick="dismissQueueItem(' + i + ')">Keep current</button></div>';
-    }
-    html += '</div>';
-  }
-  host.innerHTML = html;
-}
-
-function approveQueueItem(i) {
-  var q = pendingReviewQueue[i];
-  if (!q) return;
-  var groups = templateToGroups(q.template);
-  if (q.type === 'new') {
-    var sel = document.getElementById('slotWeek_' + i);
-    var wkNum = sel ? parseInt(sel.value) : null;
-    if (!wkNum) { showToast('Pick a week first'); return; }
-    var wkObj = null;
-    for (var w = 0; w < WEEKS.length; w++) { if (WEEKS[w].n === wkNum) { wkObj = WEEKS[w]; break; } }
-    if (!wkObj || isWeekComplete(wkNum)) { showToast('That week is locked'); return; }
-    var newId = 'synced_' + wkNum + '_' + Date.now();
-    var n2 = q.title.toLowerCase();
-    var typeGuess = n2.indexOf('swim') >= 0 ? 'swim' : n2.indexOf('run') >= 0 ? 'run' : (n2.indexOf('bike')>=0||n2.indexOf('cycl')>=0) ? 'bike' : 'lift';
-    wkObj.sessions.push({id:newId, name:q.title, type:typeGuess, day:'', detail:'Synced from trainer', fields:[{k:'notes_only',l:'Notes / stats'}], synced:true, syncedPhase:wkObj.phase});
-    EX_DATA[newId] = {groups: groups};
-    showToast('Added to Week ' + wkNum);
-  } else {
-    // changed: update EX_DATA everywhere this title is used in uncompleted weeks
-    var applied = 0;
-    for (var w2 = 0; w2 < WEEKS.length; w2++) {
-      if (isWeekComplete(WEEKS[w2].n)) continue;
-      for (var s = 0; s < WEEKS[w2].sessions.length; s++) {
-        if (titlesMatch(q.title, WEEKS[w2].sessions[s].name)) {
-          EX_DATA[WEEKS[w2].sessions[s].id] = {groups: groups};
-          WEEKS[w2].sessions[s].synced = true;
-          WEEKS[w2].sessions[s].syncedPhase = WEEKS[w2].phase;
-          applied++;
-        }
+    for (var w = 0; w < WEEKS.length; w++) {
+      for (var s = 0; s < WEEKS[w].sessions.length; s++) {
+        if (WEEKS[w].sessions[s].type !== 'lift') continue;
+        if (!titlesMatch(t.title, WEEKS[w].sessions[s].name)) continue;
+        matchedSomewhere = true;
+        if (isWeekComplete(WEEKS[w].n)) { lockedSkipped++; continue; }
+        // Refresh this day's detail in place
+        EX_DATA[WEEKS[w].sessions[s].id] = {groups: groups};
+        WEEKS[w].sessions[s].synced = true;
+        WEEKS[w].sessions[s].syncedPhase = WEEKS[w].phase;
+        refreshed++;
+        matchedInOpenWeek = true;
       }
     }
-    showToast(applied > 0 ? 'Updated in ' + applied + ' upcoming week(s)' : 'Not currently scheduled -- saved for when it is');
+    // Track new session types that don't map anywhere in the program
+    if (!matchedSomewhere) {
+      // ignore his warm-up-only or baseline fragments; only flag real strength sessions
+      var hasMovements = t.movements && t.movements.length >= 2;
+      if (hasMovements) newTypes.push(t.title);
+    }
   }
-  // record the approved signature so it won't resurface
+  // Update the snapshot so we know current state (used only for the "new type" detection memory)
   if (!appData.trainerTemplates) appData.trainerTemplates = {};
-  appData.trainerTemplates[q.title] = q.signature;
+  for (var i = 0; i < parsed.length; i++) { appData.trainerTemplates[parsed[i].title] = templateSignature(parsed[i]); }
   saveData();
-  pendingReviewQueue.splice(i, 1);
-  // reindex remaining (rebuild) -- re-render
-  renderReviewQueue();
   renderTraining();
+  return {refreshed: refreshed, lockedSkipped: lockedSkipped, newTypes: newTypes};
 }
 
-function dismissQueueItem(i) {
-  var q = pendingReviewQueue[i];
-  if (!q) return;
-  // record signature so a dismissed change doesn't nag every sync (treat as acknowledged)
-  if (!appData.trainerTemplates) appData.trainerTemplates = {};
-  appData.trainerTemplates[q.title] = q.signature;
-  saveData();
-  pendingReviewQueue.splice(i, 1);
-  renderReviewQueue();
-}
+
+
+
+
+
+
+
 
 // ─── TRAINING ─────────────────────────────────────────────────────────────────
 function buildSelect() {
