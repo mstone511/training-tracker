@@ -140,7 +140,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
 .day-tab.active{background:var(--txt);color:var(--bg);border-color:var(--txt)}
 .day-tab.has-log{border-color:var(--green-txt);color:var(--green-txt)}
 .day-tab.active.has-log{background:var(--green-txt);color:#fff;border-color:var(--green-txt)}
-.log-toolbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;align-items:center}.log-tool-btn{min-width:60px}
+.log-toolbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;align-items:center}.log-tool-btn{min-width:60px}.skip-btn{flex-shrink:0;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:6px;color:var(--txt3);font-size:15px;cursor:pointer;margin-left:6px}.skip-btn:active{background:var(--bg2)}
 .log-tool-btn{flex:1;padding:8px 2px;border-radius:var(--r);border:0.5px solid var(--border2);background:var(--bg);color:var(--txt);font-size:11px;font-weight:500;cursor:pointer;text-align:center}
 .log-tool-btn:active{background:var(--bg2)}
 .log-tool-btn.active-tool{background:var(--blue-bg);color:var(--blue-txt);border-color:var(--blue-txt)}
@@ -248,6 +248,24 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
 <div class="stat-row">
   <div class="stat"><div class="stat-label">This week</div><div class="stat-val" id="doneCount">0</div><div class="stat-sub" id="doneOf">of 0 sessions</div></div>
   <div class="stat"><div class="stat-label">Completion</div><div class="stat-val" id="pctDone">--</div><div class="stat-sub" id="streakTxt">streak: -- wks</div></div>
+</div>
+<div class="sync-panel" style="margin-bottom:10px">
+  <div class="sync-head" onclick="document.getElementById('schedBody').classList.toggle('open')">
+    <span style="font-size:13px;font-weight:500">&#128197; Program schedule</span>
+    <span style="font-size:12px;color:var(--txt2)" id="schedSummary">--</span>
+  </div>
+  <div class="sync-body" id="schedBody">
+    <div class="sync-field">
+      <label>Program start date</label>
+      <input type="date" id="cfgStart" onchange="onStartChange(this.value)">
+    </div>
+    <div class="sync-field">
+      <label>Target race date (optional -- set when known)</label>
+      <input type="date" id="cfgRace" onchange="onRaceChange(this.value)">
+    </div>
+    <div id="raceProjection" style="font-size:12px;line-height:1.5;margin-top:4px"></div>
+    <div class="sync-help" style="margin-top:8px">Floating schedule: sessions show target dates, but if you miss days the plan slides forward from where you actually are -- nothing is marked failed. Check sessions off as you do them and the dates re-project automatically.</div>
+  </div>
 </div>
 <div class="week-nav">
   <button class="nav-btn" onclick="prevWeek()">&larr;</button>
@@ -1275,6 +1293,258 @@ var CHEST_ARMS_ADDON = {
   'w22s3': {title:"Chest + arms (very light -- race week pump)", ex:[["DB Bench Press or Push-ups","2x10","light -- maintenance only, 3-4 RIR"],["DB Curl","2x12","light -- pump only"],["Tricep Pushdown or Dips","2x12","light -- pump only"]]}
 };
 
+// Build the date label shown on each session card with a status indicator.
+function sessionDateLabel(wkNum, dayLabel, sid, isDone) {
+  var wd = appData[wkey(wkNum)];
+  if (isDone) {
+    var dd = wd && wd.sessions && wd.sessions[sid] && wd.sessions[sid].doneDate;
+    if (dd) return '<span style="color:var(--green-txt)">done ' + fmtDateShort(parseDate(dd)) + '</span>';
+    return '<span style="color:var(--green-txt)">done</span>';
+  }
+  if (isSkipped(wkNum, sid)) {
+    return '<span style="color:var(--txt3)">skipped &middot; tap &#8635; to restore</span>';
+  }
+  // Floating projected date (slides forward if you're behind)
+  var proj = floatingDate(wkNum, dayLabel, sid);
+  if (!proj) return dayLabel;
+  var today = todayLocal();
+  var diff = daysBetween(today, proj);
+  var dow = proj.toLocaleDateString('en-US', {weekday:'short'});
+  var dateTxt = dow + ' ' + fmtDateShort(proj);
+  if (diff === 0) return '<span style="color:var(--amber-txt);font-weight:600">' + dateTxt + ' &middot; TODAY</span>';
+  if (diff < 0) return '<span style="color:var(--txt3)">' + dateTxt + ' &middot; ' + Math.abs(diff) + 'd ago</span>';
+  if (diff <= 7) return dateTxt + ' &middot; in ' + diff + 'd';
+  return dateTxt;
+}
+
+// ─── SCHEDULE CONFIG UI ───────────────────────────────────────────────────────
+function onStartChange(val) {
+  if (!val) return;
+  setProgramConfig('startDate', val);
+  renderSchedule(); renderTraining();
+}
+function onRaceChange(val) {
+  setProgramConfig('raceDate', val);
+  renderSchedule(); renderTraining();
+}
+function loadScheduleConfig() {
+  var s = document.getElementById('cfgStart'); if (s) s.value = getProgramStart();
+  var r = document.getElementById('cfgRace'); if (r) r.value = getRaceDate();
+  renderSchedule();
+}
+function renderSchedule() {
+  var summary = document.getElementById('schedSummary');
+  var proj = document.getElementById('raceProjection');
+  var start = parseDate(getProgramStart());
+  if (summary) {
+    var sh = getLostSlots();
+    summary.textContent = 'starts ' + fmtDateShort(start) + (sh > 0 ? ' &middot; +' + sh + ' slot' + (sh!==1?'s':'') : '');
+  }
+  if (!proj) return;
+  var rp = raceProjection();
+  if (!rp) {
+    proj.innerHTML = '<span style="color:var(--txt3)">Set a race date to see whether your pace keeps you on track.</span>';
+    return;
+  }
+  var planFinishTxt = fmtDate(rp.projFinish);
+  var lost = getLostSlots(); var shiftTxt = lost > 0 ? ' (plan slid forward ' + lost + ' session-slot' + (lost!==1?'s':'') + ' from missed/skipped days, rest days preserved)' : '';
+  if (rp.deltaDays >= 0) {
+    proj.innerHTML = '<span style="color:var(--green-txt)">On track: your plan now projects to finish ' + planFinishTxt + ', leaving a ' + rp.deltaDays + '-day buffer before race day.' + shiftTxt + '</span>';
+  } else {
+    proj.innerHTML = '<span style="color:var(--amber-txt)">Behind: your plan now projects to finish ' + planFinishTxt + ', which is ' + Math.abs(rp.deltaDays) + ' days AFTER your race date.' + shiftTxt + ' Consider an extra session some weeks, or moving the race.</span>';
+  }
+}
+
+// ─── CALENDAR / DATE ENGINE (floating model) ──────────────────────────────────
+// Program is anchored to a start date. Each session has a sequential position.
+// Target dates are computed, but the plan FLOATS: if you fall behind, remaining
+// sessions project forward from today rather than being marked failed.
+var DEFAULT_START = '2026-06-08'; // Monday June 8, 2026
+
+function getProgramStart() {
+  return (appData.config && appData.config.startDate) || DEFAULT_START;
+}
+function getRaceDate() {
+  return (appData.config && appData.config.raceDate) || '';
+}
+function setProgramConfig(key, val) {
+  if (!appData.config) appData.config = {};
+  appData.config[key] = val;
+  saveData();
+}
+
+function parseDate(str) {
+  // 'YYYY-MM-DD' -> Date at local noon (avoid TZ edge shifting the day)
+  if (!str) return null;
+  var p = str.split('-');
+  return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]), 12, 0, 0);
+}
+function fmtDate(d) {
+  if (!d) return '';
+  return d.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+}
+function fmtDateShort(d) {
+  if (!d) return '';
+  return d.toLocaleDateString('en-US', {month:'numeric', day:'numeric'});
+}
+function toISO(d) {
+  var m = ('0' + (d.getMonth()+1)).slice(-2), day = ('0' + d.getDate()).slice(-2);
+  return d.getFullYear() + '-' + m + '-' + day;
+}
+function daysBetween(a, b) {
+  return Math.round((b.getTime() - a.getTime()) / 86400000);
+}
+function todayLocal() {
+  var n = new Date();
+  return new Date(n.getFullYear(), n.getMonth(), n.getDate(), 12, 0, 0);
+}
+
+// Map day-of-week label to an offset within a Mon-start training week.
+var DOW_OFFSET = {'Mon':0,'Tue':1,'Wed':2,'Thu':3,'Fri':4,'Sat':5,'Sun':6};
+
+// SCHEDULED (ideal) date for a session: startDate + (weekIndex*7) + dayOffset.
+function scheduledDate(wkNum, dayLabel) {
+  var start = parseDate(getProgramStart());
+  if (!start) return null;
+  var off = DOW_OFFSET[dayLabel];
+  if (off === undefined) off = 0;
+  var d = new Date(start.getTime());
+  d.setDate(d.getDate() + (wkNum - 1) * 7 + off);
+  return d;
+}
+
+// FLOATING date for an UNCOMPLETED session: if its scheduled date is in the past
+// (you fell behind), project it forward relative to current position so it shows
+// as upcoming rather than overdue-forever. Completed sessions keep their logged date.
+// Skip state helpers
+function isSkipped(wkNum, sid) {
+  var wd = appData[wkey(wkNum)];
+  return !!(wd && wd.sessions && wd.sessions[sid] && wd.sessions[sid].skipped);
+}
+function toggleSkip(sid, wn) {
+  var wd = getWD(wn);
+  if (!wd.sessions[sid]) wd.sessions[sid] = {};
+  var nowSkipped = !wd.sessions[sid].skipped;
+  wd.sessions[sid].skipped = nowSkipped;
+  // find the session's day label to size the push
+  var dayLabel = '';
+  var wkObj = null;
+  for (var i = 0; i < WEEKS.length; i++) { if (WEEKS[i].n === wn) { wkObj = WEEKS[i]; break; } }
+  if (wkObj) { for (var s = 0; s < wkObj.sessions.length; s++) { if (wkObj.sessions[s].id === sid) { dayLabel = wkObj.sessions[s].day; break; } } }
+  if (nowSkipped) {
+    wd.sessions[sid].done = false; delete wd.sessions[sid].doneDate;
+    pushPlanForward();   // lose one training slot -> everyone shifts one Mon-Sat slot
+  } else {
+    // restoring: reclaim one slot
+    setLostSlots(getLostSlots() - 1);
+  }
+  _projectionCache = null;
+  saveData();
+  renderTraining();
+  showToast(nowSkipped ? 'Session crossed off -- plan pushed forward, rest days preserved' : 'Restored -- plan pulled back');
+}
+
+// FLOATING RE-PROJECTION ENGINE (block-shift, preserves rest-day structure)
+// The whole plan keeps its exact Mon-Sat training / Sun-rest shape. Missed or skipped
+// sessions slide the entire remaining block forward by whole days -- never compressing
+// sessions into consecutive days.
+var _projectionCache = null;
+
+// SLOT-QUEUE MODEL: the calendar offers training slots Mon-Sat each week; Sunday is
+// never a slot, so the rest day is structurally guaranteed. Sessions fill slots in
+// program order. Missing/skipping a session costs one slot, pushing every later session
+// forward by exactly one Mon-Sat slot -- preserving the 6-per-week cadence and Sunday
+// rest, never cramming sessions into consecutive non-stop days.
+function getLostSlots() {
+  return (appData.config && appData.config.lostSlots) || 0;
+}
+function setLostSlots(n) {
+  if (!appData.config) appData.config = {};
+  appData.config.lostSlots = Math.max(0, n);
+  saveData();
+}
+
+// The Nth training slot (0-indexed) counting Mon-Sat each week from program start.
+// slot 0 = startDate (assumed Mon), slots 0-5 = Mon-Sat wk1, slot 6 = Mon wk2, etc.
+function dateForSlot(slotIndex) {
+  var start = parseDate(getProgramStart());
+  if (!start) return null;
+  var week = Math.floor(slotIndex / 6);
+  var dayInWeek = slotIndex % 6; // 0=Mon ... 5=Sat
+  var d = new Date(start.getTime());
+  d.setDate(d.getDate() + week * 7 + dayInWeek);
+  return d;
+}
+
+// Each session's IDEAL slot index = (weekNum-1)*6 + dayOffset(Mon=0..Sat=5).
+function idealSlotIndex(wkNum, dayLabel) {
+  var off = {'Mon':0,'Tue':1,'Wed':2,'Thu':3,'Fri':4,'Sat':5}[dayLabel];
+  if (off === undefined) off = 0;
+  return (wkNum - 1) * 6 + off;
+}
+
+// Projected date = ideal slot pushed forward by accumulated lost slots.
+function shiftedDate(wkNum, dayLabel) {
+  return dateForSlot(idealSlotIndex(wkNum, dayLabel) + getLostSlots());
+}
+
+// Auto-catch-up: if the earliest remaining session's projected date is in the past,
+// add lost slots so it lands on/after today -- preserving structure (whole-slot steps).
+function reconcilePlanShift() {
+  var today = todayLocal();
+  for (var w = 0; w < WEEKS.length; w++) {
+    var wd = appData[wkey(WEEKS[w].n)];
+    for (var s = 0; s < WEEKS[w].sessions.length; s++) {
+      var sess = WEEKS[w].sessions[s];
+      var rec = wd && wd.sessions && wd.sessions[sess.id];
+      if (rec && rec.done) continue;
+      if (rec && rec.skipped) continue;
+      // earliest remaining session governs catch-up
+      var guard = 0;
+      while (guard < 400) {
+        var proj = shiftedDate(WEEKS[w].n, sess.day);
+        if (!proj || daysBetween(today, proj) >= 0) break;
+        setLostSlots(getLostSlots() + 1);
+        guard++;
+      }
+      return;
+    }
+  }
+}
+
+// Cross-off / skip pushes everyone forward by exactly one slot (preserve rest cadence).
+function pushPlanForward() {
+  setLostSlots(getLostSlots() + 1);
+}
+
+function floatingDate(wkNum, dayLabel, sid) {
+  var wd = appData[wkey(wkNum)];
+  var logged = wd && wd.sessions && wd.sessions[sid] && wd.sessions[sid].doneDate;
+  if (logged) return parseDate(logged);
+  return shiftedDate(wkNum, dayLabel);
+}
+
+// Projected finish = last session's shifted date (block preserves structure).
+function projectedFinishDate() {
+  var lastWk = WEEKS[WEEKS.length - 1];
+  var lastSess = lastWk.sessions[lastWk.sessions.length - 1];
+  return shiftedDate(lastWk.n, lastSess.day);
+}
+
+// Are we on track for the race? Returns {status, deltaDays} or null if no race set.
+function raceProjection() {
+  var race = parseDate(getRaceDate());
+  if (!race) return null;
+  // Floating projected finish reflects actual pace (completed + slid-forward remaining).
+  var projFinish = projectedFinishDate();
+  if (!projFinish) {
+    var lastWk = WEEKS[WEEKS.length - 1];
+    projFinish = scheduledDate(lastWk.n, lastWk.sessions[lastWk.sessions.length - 1].day);
+  }
+  var delta = daysBetween(projFinish, race); // +ve = race after plan finish (buffer)
+  return {race: race, projFinish: projFinish, deltaDays: delta};
+}
+
 // ─── FORWARD-ONLY PERIODIZATION (completion-aware) ────────────────────────────
 // A week is "complete" when >=80% of its sessions are checked done.
 function isWeekComplete(wkNum) {
@@ -1739,6 +2009,10 @@ async function syncFromDrive() {
     if (result.lockedSkipped > 0) {
       msg += ' Completed weeks were left untouched.';
     }
+    if (result.dateMapped && result.dateMapped.length > 0) {
+      var dm = result.dateMapped.map(function(x){ return x.title.replace(/\s*\d{1,2}\/\d{1,2}\/\d{2,4}/, '') + ' \u2192 wk ' + x.wk; });
+      msg += ' Dated sessions matched to nearest week: ' + dm.join('; ') + '.';
+    }
     if (result.newTypes.length > 0) {
       msg += ' Note: your trainer added ' + result.newTypes.length + ' new session type' + (result.newTypes.length !== 1 ? 's' : '') + ' not yet in your program (' + result.newTypes.join(', ') + '). These weren\'t auto-added -- mention them to Claude to weave into the triathlon plan.';
     }
@@ -1872,6 +2146,33 @@ function templateToGroups(t) {
   return groups;
 }
 
+// Extract a M/D/YY or M/D/YYYY date embedded in a trainer session title.
+function extractTitleDate(title) {
+  var m = String(title || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+  if (!m) return null;
+  var mo = parseInt(m[1]), day = parseInt(m[2]), yr = parseInt(m[3]);
+  if (yr < 100) yr += 2000;
+  return new Date(yr, mo - 1, day, 12, 0, 0);
+}
+
+// Given a trainer date, find the uncompleted lift session in the program whose
+// PROJECTED (slot-shifted) date is nearest to it. Returns {wkNum, sid, dayLabel} or null.
+function nearestSessionToDate(targetDate) {
+  var best = null, bestGap = Infinity;
+  for (var w = 0; w < WEEKS.length; w++) {
+    if (isWeekComplete(WEEKS[w].n)) continue;
+    for (var s = 0; s < WEEKS[w].sessions.length; s++) {
+      var sess = WEEKS[w].sessions[s];
+      if (sess.type !== 'lift') continue;
+      var pd = shiftedDate(WEEKS[w].n, sess.day);
+      if (!pd) continue;
+      var gap = Math.abs(daysBetween(targetDate, pd));
+      if (gap < bestGap) { bestGap = gap; best = {wkNum: WEEKS[w].n, sid: sess.id, dayLabel: sess.day, gapDays: gap}; }
+    }
+  }
+  return best;
+}
+
 // AUTOMATIC SILENT SYNC: refresh matching strength days in place, no approval.
 // - For each trainer template that maps to a lift day in an UNCOMPLETED week,
 //   replace that day's EX_DATA groups with his latest movements/loading.
@@ -1881,6 +2182,7 @@ function templateToGroups(t) {
 function autoSyncTemplates(parsed) {
   var refreshed = 0, lockedSkipped = 0;
   var newTypes = [];
+  var dateMapped = [];
   var matchedAnyWeek = {};
 
   for (var p = 0; p < parsed.length; p++) {
@@ -1903,11 +2205,32 @@ function autoSyncTemplates(parsed) {
         matchedInOpenWeek = true;
       }
     }
-    // Track new session types that don't map anywhere in the program
+    // If title-match found nothing AND the title carries a date, fall back to
+    // nearest-by-date mapping so the dated session still lands on the right week.
     if (!matchedSomewhere) {
-      // ignore his warm-up-only or baseline fragments; only flag real strength sessions
+      var td = extractTitleDate(t.title);
       var hasMovements = t.movements && t.movements.length >= 2;
-      if (hasMovements) newTypes.push(t.title);
+      if (td && hasMovements) {
+        var near = nearestSessionToDate(td);
+        if (near && near.gapDays <= 10) {
+          EX_DATA[near.sid] = {groups: groups};
+          for (var nw = 0; nw < WEEKS.length; nw++) {
+            for (var ns = 0; ns < WEEKS[nw].sessions.length; ns++) {
+              if (WEEKS[nw].sessions[ns].id === near.sid) {
+                WEEKS[nw].sessions[ns].synced = true;
+                WEEKS[nw].sessions[ns].syncedPhase = WEEKS[nw].phase;
+              }
+            }
+          }
+          refreshed++;
+          dateMapped.push({title: t.title, wk: near.wkNum, gap: near.gapDays});
+        } else {
+          newTypes.push(t.title);
+        }
+      } else if (hasMovements) {
+        // undated + unmatched -> genuinely new type for Claude to place
+        newTypes.push(t.title);
+      }
     }
   }
   // Update the snapshot so we know current state (used only for the "new type" detection memory)
@@ -1915,7 +2238,7 @@ function autoSyncTemplates(parsed) {
   for (var i = 0; i < parsed.length; i++) { appData.trainerTemplates[parsed[i].title] = templateSignature(parsed[i]); }
   saveData();
   renderTraining();
-  return {refreshed: refreshed, lockedSkipped: lockedSkipped, newTypes: newTypes};
+  return {refreshed: refreshed, lockedSkipped: lockedSkipped, newTypes: newTypes, dateMapped: dateMapped};
 }
 
 
@@ -1943,6 +2266,8 @@ function prevWeek() { if (curWk > 0) { curWk--; document.getElementById('weekSel
 function nextWeek() { if (curWk < WEEKS.length - 1) { curWk++; document.getElementById('weekSel').value = curWk; renderTraining(); } }
 
 function renderTraining() {
+  reconcilePlanShift();
+  _projectionCache = null;
   var wk = WEEKS[curWk];
   var wd = getWD(wk.n);
   document.getElementById('phaseBadge').textContent = wk.phase;
@@ -1968,9 +2293,12 @@ function renderTraining() {
     var syncBadge = s.synced ? '<span style="font-size:9px;background:var(--green-bg);color:var(--green-txt);padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle">synced</span>' : '';
     html += '<div class="session" id="sc-' + s.id + '">';
     html += '<div class="session-top" onclick="toggleSession(\'' + s.id + '\')">';
-    html += '<div class="check ' + (isDone ? 'done' : '') + '" id="chk-' + s.id + '">' + (isDone ? '&#10003;' : '') + '</div>';
-    html += '<div class="sinfo"><div class="sname">' + s.name + syncBadge + '</div><div class="smeta">' + s.day + (s.detail ? ' &middot; ' + s.detail : '') + '</div></div>';
+    html += '<div class="check ' + (isDone ? 'done' : '') + '" id="chk-' + s.id + '" onclick="event.stopPropagation(); toggleDone(\'' + s.id + '\',' + wk.n + ')">' + (isDone ? '&#10003;' : '') + '</div>';
+    var dInfo = sessionDateLabel(wk.n, s.day, s.id, isDone);
+    var skipped = isSkipped(wk.n, s.id);
+    html += '<div class="sinfo"><div class="sname"' + (skipped ? ' style="opacity:0.5;text-decoration:line-through"' : '') + '>' + s.name + syncBadge + '</div><div class="smeta">' + dInfo + (s.detail ? ' &middot; ' + s.detail : '') + '</div></div>';
     html += '<span class="stag t-' + s.type + '">' + s.type + '</span>';
+    html += '<div class="skip-btn" title="' + (skipped ? 'Restore' : 'Skip') + '" onclick="event.stopPropagation(); toggleSkip(\'' + s.id + '\',' + wk.n + ')">' + (skipped ? '&#8635;' : '&#8855;') + '</div>';
     html += '</div>';
     html += '<div class="session-body" id="bod-' + s.id + '">';
     html += buildExHtml(s.id, s.type, s.name);
@@ -2022,6 +2350,10 @@ function toggleDone(sid, wn) {
   var wd = getWD(wn);
   if (!wd.sessions[sid]) wd.sessions[sid] = {};
   wd.sessions[sid].done = !wd.sessions[sid].done;
+  // Floating model: stamp the actual completion date (or clear it if un-checking)
+  if (wd.sessions[sid].done) { wd.sessions[sid].doneDate = toISO(todayLocal()); }
+  else { delete wd.sessions[sid].doneDate; }
+  _projectionCache = null;
   saveData();
   var isDone = wd.sessions[sid].done;
   var chk = document.getElementById('chk-' + sid);
@@ -2770,6 +3102,7 @@ buildSelect();
 renderTraining();
 loadSyncSettings();
 loadProfile();
+loadScheduleConfig();
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
