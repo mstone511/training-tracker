@@ -1227,6 +1227,55 @@ var EX_DATA = {
       ["D2. TRX Bicep Curls","3x failure",""],
     ]},
   ]},
+  'trainer_2nd_legsquat': {groups:[
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. BB Back Squat","5x 8/8/5/5/5","245 top set"],
+      ["A2. Slider Body Saws (CORE)","3-4x 10 total","good 10 all sets"],
+    ]},
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. Deficit Reverse Lunges","3x 5/leg","155 lb BB"],
+      ["B2. Pallof Press w/ Twists (CORE)","3x 10/side","25 lb cable"],
+    ]},
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. Slider Side Lunges","3x 10/side","26 lb KB"],
+      ["C2. Alt. Jumping Lunges","3x (BW)",""],
+      ["D1. Foot Elevated Glute Bridges","3x 10/leg","BW"],
+      ["D2. Heel Elevated Squat Holds","3x 30-40 sec","BW"],
+    ]},
+  ]},
+  'trainer_6th_upper': {groups:[
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. Seated BB Press","4x 8","12x75, 10x85, 8x95"],
+      ["A2. Banded Pallof Press w/ Raise (CORE)","4x 8-10/side","red band"],
+    ]},
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. Pendlay Row","4x 6-8","8x175"],
+      ["B2. Evil Wheel w/ BB (CORE)","4x 8-10",""],
+    ]},
+    {title:"C/D -- Accessory (hypertrophy)",ex:[
+      ["C1. Banded Bench Press","3x 8-10","9x135"],
+      ["C2. Bench Plate/DB W Press","3x 10","9x100"],
+      ["D1. Skullcrushers to Poliquin Press","3x 12 to failure","50"],
+      ["D2. Rev Curls","3x failure","60"],
+      ["D3. SA Cross Body Hammer Curls","3x 8-10/arm","22.5"],
+    ]},
+  ]},
+  'trainer_running_prep_sl': {groups:[
+    {title:"A -- Primary (superset A1+A2)",ex:[
+      ["A1. BB Split Squats","4x 8/8/6/6 per leg","115-135 start"],
+      ["A2. KB Half Kneeling Chop (CORE)","4x 10/side","20 lb KB"],
+    ]},
+    {title:"B -- Secondary (superset B1+B2)",ex:[
+      ["B1. Goblet Curtsy Lunges","3x 12-16 total","35 lb KB start"],
+      ["B2. Plate Lateral Push Ups","3x 16-20 total",""],
+    ]},
+    {title:"C/D -- Accessory (single-leg / running prep)",ex:[
+      ["C1. SL Kickstand RDL","3x 10/leg",""],
+      ["C2. Split Stance SA DB Push Press","3x 8/side",""],
+      ["D1. Slider Side Lunge","3x 8-10/side",""],
+      ["D2. Slider Wide Mountain Climbers (CORE)","3x 20-30 total",""],
+    ]},
+  ]},
   'w22s6': {groups:[
     {title:"Race day -- sprint triathlon",ex:[
       ["Swim","750m","seed mid-pack, sight every 6-8 strokes"],
@@ -1655,7 +1704,15 @@ var EX_ALIAS = {
   'w8s6': 'trainer_4th_fullbody',
   // 7th upper session (L-sit pull, banded bench, core-heavy) -- recurring upper option
   'w3s3': 'trainer_7th_upper',
-  'w8s3': 'trainer_7th_upper'
+  'w8s3': 'trainer_7th_upper',
+  // 6th upper session (press-focused: seated BB press, Pendlay, evil wheel) -- Phase 2-3 press days
+  'w10s3': 'trainer_6th_upper',
+  'w14s3': 'trainer_6th_upper',
+  // 2nd leg+core squat session (back squat 245, slider saws, pallof) -- Phase 2-3 squat days
+  'w8s1': 'trainer_2nd_legsquat',
+  'w14s1': 'trainer_2nd_legsquat',
+  // Full body running-prep single-leg focus -- Phase 3 running ramp
+  'w14s5': 'trainer_running_prep_sl'
 };
 
 function buildExHtml(sid, type, name) {
@@ -1760,7 +1817,7 @@ var WEEKS = [
 {n:3,phase:'Phase 1',focus:'Deload + CSS baseline test',load:'deload',sessions:[
 {id:'w3s1',name:'Lower body -- squat deload',type:'lift',day:'Mon',detail:'LB-SQ reduced volume',fields:[{k:'squat_top',l:'Working squat weight (lbs)'}]},
 {id:'w3s2',name:'Swim -- CSS baseline test',type:'swim',day:'Tue',detail:'400m TT, 10 min rest, 200m TT',fields:[{k:'css_400',l:'400m time (mm:ss)'},{k:'css_200',l:'200m time (mm:ss)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
-{id:'w3s3',name:'Upper body -- L-sit pull + bench (7th session)',type:'lift',day:'Wed',detail:'UB-HI',fields:[{k:'pullup_reps',l:'Weighted pull-up top set'},{k:'bench_top',l:'Bench press top (lbs)'}]},
+{id:'w3s3',name:'Upper body -- L-sit pull + bench (7th session)',type:'lift',day:'Wed',syncKey:'7th Session - Upperbody Focus',detail:'UB-HI',fields:[{k:'pullup_reps',l:'Weighted pull-up top set'},{k:'bench_top',l:'Bench press top (lbs)'}]},
 {id:'w3s4',name:'Bike -- Z2 45 min',type:'bike',day:'Thu',detail:'Easy deload effort',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR (bpm)'}]},
 {id:'w3s5',name:'Full body circuit',type:'lift',day:'Fri',detail:'FB-A deload',fields:[{k:'circuit_time',l:'Circuit time (min)'}]},
 {id:'w3s6',name:'Run -- Z2 2 mi',type:'run',day:'Sat',detail:'HR strictly 130-143',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR (bpm)'},{k:'run_pace',l:'Pace (min/mi)'}]},
@@ -1799,9 +1856,9 @@ var WEEKS = [
 {id:'w7s7',name:'Swim -- continuous Z2',type:'swim',day:'Sun',detail:'30 min easy',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:8,phase:'Phase 2',focus:'Second run session added',load:'high',sessions:[
-{id:'w8s1',name:'Lower body -- squat',type:'lift',day:'Mon',detail:'LB-SQ',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
+{id:'w8s1',name:'Lower body -- squat + core (2nd session)',type:'lift',day:'Mon',syncKey:'Second Session - Leg(Squat) and Core Focus',detail:'LB-SQ',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
 {id:'w8s2',name:'Swim -- CSS 35 min',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
-{id:'w8s3',name:'Upper body -- L-sit pull + bench (7th session)',type:'lift',day:'Wed',detail:'UB-PR + UB-PL',fields:[{k:'press_top',l:'Press top (lbs)'}]},
+{id:'w8s3',name:'Upper body -- L-sit pull + bench (7th session)',type:'lift',day:'Wed',syncKey:'7th Session - Upperbody Focus',detail:'UB-PR + UB-PL',fields:[{k:'press_top',l:'Press top (lbs)'}]},
 {id:'w8s4',name:'Run -- Z2 easy 2 mi',type:'run',day:'Thu AM',detail:'2nd run/wk, strictly Z2',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR (bpm)'}]},
 {id:'w8s5',name:'Swim -- technique',type:'swim',day:'Thu PM',detail:'30 min, 6h+ after run',fields:[{k:'swim_min',l:'Duration (min)'}]},
 {id:'w8s6',name:'Landmine work capacity (4th session)',type:'lift',day:'Fri',detail:'FB-A',fields:[{k:'circuit_time',l:'Circuit time (min)'}]},
@@ -1820,7 +1877,7 @@ var WEEKS = [
 {n:10,phase:'Phase 2',focus:'CSS retest + run to 3.5 mi',load:'high',sessions:[
 {id:'w10s1',name:'Lower body -- squat',type:'lift',day:'Mon',detail:'LB-SQ',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
 {id:'w10s2',name:'Swim -- CSS retest #1',type:'swim',day:'Tue',detail:'400m TT + 200m TT',fields:[{k:'css_400',l:'400m time (mm:ss)'},{k:'css_200',l:'200m time (mm:ss)'},{k:'css_pace',l:'New CSS pace (/100m)'}]},
-{id:'w10s3',name:'Upper body -- press',type:'lift',day:'Wed',detail:'UB-PR',fields:[{k:'press_top',l:'Press top (lbs)'}]},
+{id:'w10s3',name:'Upper body -- press (6th session)',type:'lift',day:'Wed',syncKey:'6th Session - Upperbody Focus',detail:'UB-PR',fields:[{k:'press_top',l:'Press top (lbs)'}]},
 {id:'w10s4',name:'Run Z2 + Swim technique',type:'run',day:'Thu',detail:'Short run AM, swim PM 30 min',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'swim_min',l:'Swim duration (min)'}]},
 {id:'w10s5',name:'Deadlift work capacity (5th session)',type:'lift',day:'Fri',detail:'FB-A + RP-SL',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
 {id:'w10s6',name:'Run Z2 3.5 mi + Z3 bike 45 min',type:'run',day:'Sat',detail:'Within safe spike threshold',fields:[{k:'run_dist',l:'Run distance (mi)'},{k:'run_avghr',l:'Run avg HR'},{k:'run_pace',l:'Pace (min/mi)'}]},
@@ -1854,11 +1911,11 @@ var WEEKS = [
 {id:'w13s7',name:'Swim -- continuous 45 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:14,phase:'Phase 3',focus:'First brick session',load:'high',sessions:[
-{id:'w14s1',name:'Lower body -- squat',type:'lift',day:'Mon',detail:'LB-SQ',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
+{id:'w14s1',name:'Lower body -- squat + core (2nd session)',type:'lift',day:'Mon',syncKey:'Second Session - Leg(Squat) and Core Focus',detail:'LB-SQ',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
 {id:'w14s2',name:'Swim -- CSS 40 min',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
-{id:'w14s3',name:'Upper body -- press',type:'lift',day:'Wed',detail:'UB-PR',fields:[{k:'press_top',l:'Press top (lbs)'}]},
+{id:'w14s3',name:'Upper body -- press (6th session)',type:'lift',day:'Wed',syncKey:'6th Session - Upperbody Focus',detail:'UB-PR',fields:[{k:'press_top',l:'Press top (lbs)'}]},
 {id:'w14s4',name:'Swim -- technique 35 min',type:'swim',day:'Thu',detail:'Technique only',fields:[{k:'swim_min',l:'Duration (min)'}]},
-{id:'w14s5',name:'Conditioning circuit',type:'lift',day:'Fri',detail:'COND',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
+{id:'w14s5',name:'Running prep -- single leg focus',type:'lift',day:'Fri',syncKey:'Full Body - Running Prep Work - Single Leg Focus',detail:'COND',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
 {id:'w14s6',name:'BRICK -- bike 30 min to run 10 min',type:'brick',day:'Sat',detail:'First brick, all Z2, expect heavy legs',fields:[{k:'bike_min',l:'Bike (min)'},{k:'bike_avghr',l:'Bike avg HR'},{k:'run_min',l:'Run (min)'},{k:'run_avghr',l:'Run avg HR'},{k:'brick_feel',l:'Feel score (1-10)'}]},
 {id:'w14s7',name:'Swim -- continuous 45 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
@@ -2204,7 +2261,9 @@ function autoSyncTemplates(parsed) {
     for (var w = 0; w < WEEKS.length; w++) {
       for (var s = 0; s < WEEKS[w].sessions.length; s++) {
         if (WEEKS[w].sessions[s].type !== 'lift') continue;
-        if (!titlesMatch(t.title, WEEKS[w].sessions[s].name)) continue;
+        var sk = WEEKS[w].sessions[s].syncKey;
+        var skMatch = sk && normalizeTitle(t.title).indexOf(normalizeTitle(sk)) >= 0;
+        if (!skMatch && !titlesMatch(t.title, WEEKS[w].sessions[s].name)) continue;
         matchedSomewhere = true;
         if (isWeekComplete(WEEKS[w].n)) { lockedSkipped++; continue; }
         // Refresh this day's detail in place
