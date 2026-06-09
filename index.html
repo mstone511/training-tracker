@@ -264,7 +264,8 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
       <input type="date" id="cfgRace" onchange="onRaceChange(this.value)">
     </div>
     <div id="raceProjection" style="font-size:12px;line-height:1.5;margin-top:4px"></div>
-    <div class="sync-help" style="margin-top:8px">Floating schedule: sessions show target dates, but if you miss days the plan slides forward from where you actually are -- nothing is marked failed. Check sessions off as you do them and the dates re-project automatically.</div>
+    <button class="btn" style="width:100%;font-size:12px;margin-top:8px" onclick="resetScheduleShift()">Reset schedule to start date (clear all slips)</button>
+    <div class="sync-help" style="margin-top:8px">Floating schedule: sessions show target dates, but if you miss days the plan slides forward from where you actually are -- nothing is marked failed. Check sessions off as you do them and the dates re-project automatically. Use Reset to snap everything back to the start date.</div>
   </div>
 </div>
 <div class="week-nav">
@@ -1379,9 +1380,30 @@ function sessionDateLabel(wkNum, dayLabel, sid, isDone) {
 // ─── SCHEDULE CONFIG UI ───────────────────────────────────────────────────────
 function onStartChange(val) {
   if (!val) return;
+  // Snap to the Monday of the chosen week so the Mon-Sat slot grid lines up.
+  var d = parseDate(val);
+  if (d) {
+    var dow = d.getDay(); // 0=Sun,1=Mon,...,6=Sat
+    // Snap to the NEAREST Monday: Tue-Thu round back to this week's Mon; Fri-Sun round
+    // forward to next Mon (closer, and matches intent of 'start next week').
+    var deltaToMon;
+    if (dow === 1) deltaToMon = 0;          // already Monday
+    else if (dow === 0) deltaToMon = 1;     // Sunday -> next Monday
+    else if (dow <= 4) deltaToMon = 1 - dow; // Tue-Thu -> back to this Monday
+    else deltaToMon = 8 - dow;              // Fri/Sat -> forward to next Monday
+    if (deltaToMon !== 0) { d.setDate(d.getDate() + deltaToMon); val = toISO(d); }
+  }
   setProgramConfig('startDate', val);
+  setLostSlots(0); // explicit re-anchor clears accumulated drift
   renderSchedule(); renderTraining();
+  if (d) showToast('Program start set to ' + fmtDate(parseDate(val)) + ' (Monday). Schedule reset.');
 }
+function resetScheduleShift() {
+  setLostSlots(0);
+  renderSchedule(); renderTraining();
+  showToast('Schedule reset to start date -- all slips cleared');
+}
+
 function onRaceChange(val) {
   setProgramConfig('raceDate', val);
   renderSchedule(); renderTraining();
