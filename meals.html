@@ -111,19 +111,38 @@ var ROTS = [
 var PC = { A:"#4a8fe8", B:"#e8a838", D:"#3dd9a0", S:"#3dd9a0" };
 
 // ─── STATE ─────────────────────────────────────────────────────────────────────
-var state = { weight:164, goal:"gain", view:"plans", plan:"D", rot:2, open:{} };
+var state = { weight:164, goal:"gain", view:"plans", plan:"D", rot:2, open:{},
+  // InBody scan inputs (Tier 2/3). If bmr+ffm present, targets key off them; else weight fallback.
+  inbody:{ date:"", weight:164, bodyFat:null, smm:null, ffm:142.6, bmr:1768, vfa:null },
+  activity:1.55,   // training activity factor (5-6 d/wk); user-adjustable
+  scans:[] };      // history of logged scans for trend
 function load(){ try{ var s=localStorage.getItem("matt_meals_v1"); if(s) state=Object.assign(state,JSON.parse(s)); }catch(e){} }
 function save(){ try{ localStorage.setItem("matt_meals_v1",JSON.stringify(state)); }catch(e){} }
 
 // ─── TARGET MATH (mirrors tracker) ───────────────────────────────────────────────
 function targets(weight, goal){
-  var scaled = Math.round(BASELINE_KCAL * (weight/BASELINE_WT));
-  var kcal = Math.round(scaled * GOAL_MULT[goal]);
-  var p = Math.round(weight*1.0);
-  var f = Math.round(weight*0.45);            // matches the meal-plan build (0.45 g/lb)
-  var c = Math.round((kcal - p*4 - f*9)/4);
-  return { kcal:kcal, c:c, p:p, f:f,
-    day:{ c:c-DINNER.c, p:p-DINNER.p, f:f-DINNER.f } };
+  // Prefer measured BMR + lean mass (InBody) over weight-ratio estimate.
+  var ib = state.inbody || {};
+  var usedBMR = false, kcal, p, f;
+  if (ib.bmr && ib.bmr > 0) {
+    // Calories = measured BMR x activity factor x goal multiplier
+    kcal = Math.round(ib.bmr * (state.activity||1.55) * GOAL_MULT[goal]);
+    usedBMR = true;
+  } else {
+    var scaled = Math.round(BASELINE_KCAL * (weight/BASELINE_WT));
+    kcal = Math.round(scaled * GOAL_MULT[goal]);
+  }
+  // Protein keyed off lean mass (FFM) if available, else total weight
+  if (ib.ffm && ib.ffm > 0) {
+    p = Math.round(ib.ffm * 1.15);   // ~1.15 g per lb lean mass
+  } else {
+    p = Math.round(weight * 1.0);
+  }
+  f = Math.round(weight * 0.45);     // fat floor at 0.45 g/lb total weight
+  var cc = Math.round((kcal - p*4 - f*9)/4);
+  if (cc < 120) cc = 120;            // floor
+  return { kcal:kcal, c:cc, p:p, f:f, usedBMR:usedBMR,
+    day:{ c:cc-DINNER.c, p:p-DINNER.p, f:f-DINNER.f } };
 }
 function mealM(slot, plan, goal){
   var b = MEALS[slot][plan]; var addC = goal==="gain" ? (b.gC||0) : 0;
@@ -191,6 +210,9 @@ function render(){
   }
   app.appendChild(ctrl);
 
+  // InBody scan panel (Tier 2 + 3)
+  renderInBodyPanel(app);
+
   // View toggle
   var vt=el('<div class="row" style="margin-bottom:12px"></div>');
   [["plans","Daily Plans"],["rotation","Weekly Rotation"]].forEach(function(v){
@@ -212,6 +234,176 @@ function macroSpan(m){
     '<span style="color:var(--d)">P:'+Math.round(m.p)+'</span> '+
     '<span style="color:var(--w)">F:'+Math.round(m.f)+'</span> '+
     '<span style="color:var(--tm)">'+kcal(m)+'</span></span>';
+}
+
+var WORKER_PROXY = "https://tracker-ai.msmyers4.workers.dev/";
+
+function handleScanPhoto(e){
+  var file = e.target.files && e.target.files[0];
+  if (!file) return;
+  var status = document.getElementById("ibstatus");
+  if (status) status.textContent = "Reading scan photo...";
+  var reader = new FileReader();
+  reader.onload = function(){
+    var dataUrl = reader.result;
+    var b64 = dataUrl.split(",")[1];
+    var mediaType = (dataUrl.match(/data:([^;]+);/)||[])[1] || "image/jpeg";
+    extractScanFromImage(b64, mediaType, status);
+  };
+  reader.onerror = function(){ if(status) status.textContent = "Could not read the image file."; };
+  reader.readAsDataURL(file);
+}
+
+function extractScanFromImage(b64, mediaType, status){
+  var prompt = "This is an InBody body composition result sheet. Extract these fields and respond with ONLY a JSON object, no prose, no markdown fences. Keys and units: weight (lb), bodyFat (percent body fat, number only), smm (skeletal muscle mass lb), ffm (fat-free mass lb), bmr (basal metabolic rate kcal), vfa (visceral fat area cm2), date (scan date YYYY-MM-DD if visible else empty string). If a field is not visible, use null. Convert kg to lb if the sheet is metric (1 kg = 2.20462 lb).";
+  var body = {
+    model: "claude-sonnet-4-5-20250929",
+    max_tokens: 400,
+    messages: [{ role:"user", content:[
+      { type:"image", source:{ type:"base64", media_type:mediaType, data:b64 } },
+      { type:"text", text:prompt }
+    ]}]
+  };
+  fetch(WORKER_PROXY, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var text = "";
+      if (data && data.content) {
+        for (var i=0;i<data.content.length;i++){ if(data.content[i].type==="text") text += data.content[i].text; }
+      }
+      var scan = parseScanJSON(text);
+      if (!scan){ if(status) status.textContent = "Could not parse the sheet. Enter the numbers manually below."; return; }
+      // Populate the manual fields for confirmation (do NOT auto-apply)
+      var map = ["date","weight","bodyFat","smm","ffm","bmr","vfa"];
+      map.forEach(function(k){
+        var inp = document.getElementById("ib_"+k);
+        if (inp && scan[k] !== null && scan[k] !== undefined && scan[k] !== "") inp.value = scan[k];
+      });
+      if (status) status.innerHTML = '<span style="color:var(--a)">Read the sheet &mdash; check the fields below, then tap Apply.</span>';
+    })
+    .catch(function(err){
+      if (status) status.textContent = "Network error reaching the AI proxy. Enter manually, or check the Worker is up.";
+    });
+}
+
+function parseScanJSON(text){
+  if (!text) return null;
+  // strip markdown fences
+  var t = text.replace(/```json/gi,"").replace(/```/g,"").trim();
+  // grab first {...} block
+  var m = t.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try {
+    var o = JSON.parse(m[0]);
+    return {
+      date: o.date || "",
+      weight: numOrNull(o.weight), bodyFat: numOrNull(o.bodyFat), smm: numOrNull(o.smm),
+      ffm: numOrNull(o.ffm), bmr: numOrNull(o.bmr), vfa: numOrNull(o.vfa)
+    };
+  } catch(e){ return null; }
+}
+function numOrNull(v){ if(v===null||v===undefined||v==="") return null; var n=parseFloat(v); return isNaN(n)?null:n; }
+
+function applyScan(scan){
+  // scan: {date, weight, bodyFat, smm, ffm, bmr, vfa}
+  state.inbody = Object.assign({}, scan);
+  if (scan.weight) state.weight = scan.weight;
+  // log to history (newest first), dedupe by date
+  state.scans = (state.scans||[]).filter(function(s){ return s.date !== scan.date; });
+  state.scans.unshift(Object.assign({}, scan));
+  if (state.scans.length > 24) state.scans = state.scans.slice(0,24);
+  save();
+}
+
+function renderInBodyPanel(app){
+  var ib = state.inbody || {};
+  var panel = el('<div class="card" style="padding:12px 14px;margin-bottom:12px"></div>');
+  var headOpen = !!state.open["_ibpanel"];
+  var head = el('<div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer">'+
+    '<span class="lbl">&#128202; InBody scan &mdash; targets ' + (ib.bmr ? 'keyed off measured BMR + lean mass' : 'using weight estimate') + '</span>'+
+    '<span class="mono" style="font-size:11px;color:var(--a)">' + (headOpen?"&#9660;":"&#9654;") + '</span></div>');
+  head.addEventListener("click",function(){ state.open["_ibpanel"]=!headOpen; save(); render(); });
+  panel.appendChild(head);
+
+  if (headOpen){
+    var body = el('<div style="margin-top:10px"></div>');
+
+    // Photo extraction (Tier 3)
+    body.appendChild(el('<div class="lbl" style="margin-bottom:6px">Scan from photo</div>'));
+    var photoRow = el('<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px"></div>');
+    var fileInp = el('<input type="file" accept="image/*" id="ibphoto" style="display:none">');
+    var photoBtn = el('<button class="btn" style="flex:1">&#128247; Photograph result sheet</button>');
+    photoBtn.addEventListener("click",function(){ fileInp.click(); });
+    fileInp.addEventListener("change",function(e){ handleScanPhoto(e); });
+    photoRow.appendChild(photoBtn);
+    body.appendChild(photoRow);
+    body.appendChild(fileInp);
+    body.appendChild(el('<div id="ibstatus" class="mono" style="font-size:10px;color:var(--tm);min-height:14px;margin-bottom:8px"></div>'));
+
+    body.appendChild(el('<div class="lbl" style="margin:6px 0">Or enter manually (from your PDF sheet)</div>'));
+    var fields = [
+      ["date","Scan date","",  "date"],
+      ["weight","Weight (lb)", ib.weight||"", "number"],
+      ["bodyFat","Body fat %", ib.bodyFat||"", "number"],
+      ["smm","Skeletal muscle mass (lb)", ib.smm||"", "number"],
+      ["ffm","Fat-free mass (lb)", ib.ffm||"", "number"],
+      ["bmr","BMR (kcal)", ib.bmr||"", "number"],
+      ["vfa","Visceral fat area (cm2)", ib.vfa||"", "number"],
+    ];
+    var grid = el('<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>');
+    fields.forEach(function(fd){
+      var wrap = el('<div></div>');
+      wrap.appendChild(el('<div class="lbl" style="margin-bottom:3px;font-size:8px">'+fd[1]+'</div>'));
+      var step = fd[0]==="bmr" ? "1" : "0.1";
+      var inp = el('<input type="'+fd[3]+'" id="ib_'+fd[0]+'" '+(fd[3]==="number"?'step="'+step+'"':'')+' value="'+fd[2]+'" style="font-size:13px;padding:6px 8px">');
+      wrap.appendChild(inp);
+      grid.appendChild(wrap);
+    });
+    body.appendChild(grid);
+
+    // activity factor
+    body.appendChild(el('<div class="lbl" style="margin:10px 0 4px">Activity factor (BMR multiplier) &mdash; '+(state.activity||1.55)+'</div>'));
+    var actRow = el('<div class="row"></div>');
+    [["1.45","Lighter"],["1.55","Current"],["1.65","Heavy"]].forEach(function(a){
+      var on = String(state.activity)===a[0];
+      var b = el('<button class="btn '+(on?"on":"")+'">'+a[1]+'<div class="k">x'+a[0]+'</div></button>');
+      b.addEventListener("click",function(){ state.activity=parseFloat(a[0]); save(); render(); });
+      actRow.appendChild(b);
+    });
+    body.appendChild(actRow);
+
+    var applyBtn = el('<button class="btn on" style="width:100%;margin-top:10px;padding:10px">Apply scan &amp; recompute targets</button>');
+    applyBtn.addEventListener("click",function(){
+      var scan = {
+        date: (document.getElementById("ib_date").value)||(new Date().toISOString().slice(0,10)),
+        weight: parseFloat(document.getElementById("ib_weight").value)||state.weight,
+        bodyFat: parseFloat(document.getElementById("ib_bodyFat").value)||null,
+        smm: parseFloat(document.getElementById("ib_smm").value)||null,
+        ffm: parseFloat(document.getElementById("ib_ffm").value)||null,
+        bmr: parseFloat(document.getElementById("ib_bmr").value)||null,
+        vfa: parseFloat(document.getElementById("ib_vfa").value)||null,
+      };
+      applyScan(scan); render();
+    });
+    body.appendChild(applyBtn);
+    body.appendChild(el('<div class="mono" style="font-size:9px;color:var(--td);margin-top:6px;line-height:1.5">'+
+      'BMR is the best anchor for calories; lean mass (FFM) for protein. InBody BMR is an estimate &mdash; trust your 2-3 week weight trend to confirm the activity factor is right.</div>'));
+
+    // scan history / trend
+    if (state.scans && state.scans.length){
+      body.appendChild(el('<div class="lbl" style="margin:12px 0 6px">Scan history</div>'));
+      var hist = el('<div></div>');
+      state.scans.slice(0,6).forEach(function(s){
+        hist.appendChild(el('<div class="mono" style="font-size:10px;color:var(--tm);display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--b)">'+
+          '<span>'+(s.date||"?")+'</span>'+
+          '<span>'+(s.weight?s.weight+'lb':'')+(s.bodyFat?' &middot; '+s.bodyFat+'%':'')+(s.smm?' &middot; SMM '+s.smm:'')+(s.bmr?' &middot; BMR '+s.bmr:'')+'</span></div>'));
+      });
+      body.appendChild(hist);
+    }
+
+    panel.appendChild(body);
+  }
+  app.appendChild(panel);
 }
 
 function renderPlans(app,t){
