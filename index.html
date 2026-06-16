@@ -684,7 +684,7 @@ var EX_DATA = {
       ["A2. Slider Body Saws (CORE)","3-4x 10 total","good 10 all sets"],
     ]},
     {title:"B -- Secondary (superset B1+B2)",ex:[
-      ["B1. Deficit Reverse Lunges","3x 5/leg","155 lb BB"],
+      ["B1. BB RDL","4x 8/8/5/5","8x195, 5x235"],
       ["B2. Pallof Press w/ Twists (CORE)","3x 10/side","25 lb cable"],
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
@@ -755,7 +755,7 @@ var EX_DATA = {
       ["A2. Hanging Leg Raises (CORE)","4x 10-15 total",""],
     ]},
     {title:"B -- Secondary (superset B1+B2)",ex:[
-      ["B1. BB RDL","4x 8/8/5/5","8x195, 5x235"],
+      ["B1. Deficit Reverse Lunges","3x 5/leg","155 lb BB"],
       ["B2. Slider Body Saws (CORE)","3x 10-15",""],
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
@@ -1741,6 +1741,48 @@ var EX_ALIAS = {
   'w14s5': 'trainer_running_prep_sl'
 };
 
+// Derive logging fields from the day's ACTUAL primary movements (A1/B1, heavy loaded
+// lifts). This keeps what you log perfectly in sync with what's programmed -- including
+// after a Drive re-sync, which updates EX_DATA. Falls back to authored s.fields only if
+// no exercise detail exists for the session.
+function resolveExId(sid){ return EX_DATA[sid] ? sid : (EX_ALIAS[sid] && EX_DATA[EX_ALIAS[sid]] ? EX_ALIAS[sid] : null); }
+
+function deriveFields(sid, sessionType, authored){
+  var rid = resolveExId(sid);
+  var groups = [];
+  if (rid && EX_DATA[rid] && EX_DATA[rid].groups) groups = EX_DATA[rid].groups.slice();
+  // include chest/arms addon movements if this session has one (even with no base detail)
+  if (typeof CHEST_ARMS_ADDON !== 'undefined' && CHEST_ARMS_ADDON[sid]) {
+    groups = groups.concat([CHEST_ARMS_ADDON[sid]]);
+  }
+  // no detail at all -> use authored fallback
+  if (!groups.length) return authored || [];
+  var out = [];
+  var seen = {};
+  for (var g = 0; g < groups.length; g++){
+    var exs = groups[g].ex || [];
+    for (var e = 0; e < exs.length; e++){
+      var name = exs[e][0] || '';
+      var isSlotted = /^[AB]1\./.test(name);
+      // Primary loaded lifts (A1/B1) OR an addon compound press (DB bench/dips) worth logging
+      var isAddonPress = /(bench press|weighted dips|push press)/i.test(name) && !/^[A-D][12]\./.test(name);
+      if (!isSlotted && !isAddonPress) continue;
+      var clean = name.replace(/^[AB]1\.\s*/, '').trim();
+      var lower = clean.toLowerCase();
+      // skip clearly non-loaded / core / time-based primaries
+      if (/(core|pallof|plank|hollow|carry|crawl|saw|sprint|row erg|bike|run)/.test(lower)) continue;
+      // build a stable key from the movement name
+      var key = 'load_' + lower.replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,28);
+      if (seen[key]) continue; seen[key] = 1;
+      out.push({ k:key, l: clean + ' top set (lbs)' });
+    }
+  }
+  // For run/swim/bike conditioning days, keep the authored fields (AMRAP, time, HR, etc.)
+  if (sessionType !== 'lift') return authored || [];
+  // If we somehow derived nothing, fall back to authored
+  return out.length ? out : (authored || []);
+}
+
 function buildExHtml(sid, type, name) {
   var detail = EX_DATA[sid] || (EX_ALIAS[sid] && EX_DATA[EX_ALIAS[sid]]) || getGenericExDetail(type, name);
   if (!detail) return '';
@@ -1833,7 +1875,7 @@ var WEEKS = [
 {id:'w1s6',name:'Run -- Z2 easy 1.5 mi',type:'run',day:'Sat',detail:'HR 130-143, ~10:30-11:30/mi',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR (bpm)'},{k:'run_pace',l:'Pace (min/mi)'}]},
 ]},
 {n:2,phase:'Phase 1',focus:'Strength accumulation + Z2 base',load:'moderate',sessions:[
-{id:'w2s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI + LB-DY',fields:[{k:'squat_top',l:'Squat top set (lbs)'},{k:'rdl_top',l:'RDL top set (lbs)'}]},
+{id:'w2s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',locked:true,detail:'LB-HI + LB-DY',fields:[{k:'squat_top',l:'Squat top set (lbs)'},{k:'rdl_top',l:'RDL top set (lbs)'}]},
 {id:'w2s2',name:'Swim -- technique',type:'swim',day:'Tue',detail:'30 min',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 {id:'w2s3',name:'Upper body -- press focus',type:'lift',day:'Wed',detail:'UB-PR + UB-DY',fields:[{k:'press_top',l:'Press top (lbs)'},{k:'row_top',l:'Pendlay row top (lbs)'}]},
 {id:'w2s4',name:'Bike -- Z2 50 min',type:'bike',day:'Thu',detail:'HR 130-143',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR (bpm)'}]},
@@ -2287,6 +2329,7 @@ function autoSyncTemplates(parsed) {
     for (var w = 0; w < WEEKS.length; w++) {
       for (var s = 0; s < WEEKS[w].sessions.length; s++) {
         if (WEEKS[w].sessions[s].type !== 'lift') continue;
+        if (WEEKS[w].sessions[s].locked) continue;  // manually customized -- never overwrite
         var sk = WEEKS[w].sessions[s].syncKey;
         var skMatch = sk && normalizeTitle(t.title).indexOf(normalizeTitle(sk)) >= 0;
         if (!skMatch && !titlesMatch(t.title, WEEKS[w].sessions[s].name)) continue;
@@ -2386,6 +2429,7 @@ function renderTraining() {
     var sd = wd.sessions[s.id] || {};
     var isDone = !!sd.done;
     var syncBadge = s.synced ? '<span style="font-size:9px;background:var(--green-bg);color:var(--green-txt);padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle">synced</span>' : '';
+    var lockBadge = s.locked ? '<span style="font-size:9px;background:var(--amber-bg);color:var(--amber-txt);padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle" title="Manually customized -- protected from sync">&#128274; custom</span>' : '';
     html += '<div class="session" id="sc-' + s.id + '">';
     html += '<div class="session-top" onclick="toggleSession(\'' + s.id + '\')">';
     html += '<div class="check ' + (isDone ? 'done' : '') + '" id="chk-' + s.id + '" onclick="event.stopPropagation(); toggleDone(\'' + s.id + '\',' + wk.n + ')">' + (isDone ? '&#10003;' : '') + '</div>';
@@ -2398,8 +2442,9 @@ function renderTraining() {
     html += '<div class="session-body" id="bod-' + s.id + '">';
     html += buildExHtml(s.id, s.type, s.name);
     html += buildWCHtml(s.id, s.type, s.name);
-    for (var fi = 0; fi < s.fields.length; fi++) {
-      var f = s.fields[fi];
+    var renderFields = deriveFields(s.id, s.type, s.fields);
+    for (var fi = 0; fi < renderFields.length; fi++) {
+      var f = renderFields[fi];
       var v = (sd.fields && sd.fields[f.k]) || '';
       html += '<div class="field"><label>' + f.l + '</label><input type="text" inputmode="decimal" autocomplete="off" value="' + v.replace(/"/g,'&quot;') + '" placeholder="--" oninput="saveField(\'' + s.id + '\',\'' + wk.n + '\',\'' + f.k + '\',this.value)"></div>';
     }
