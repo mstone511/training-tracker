@@ -1576,25 +1576,13 @@ function shiftedDate(wkNum, dayLabel) {
 // Auto-catch-up: if the earliest remaining session's projected date is in the past,
 // add lost slots so it lands on/after today -- preserving structure (whole-slot steps).
 function reconcilePlanShift() {
-  var today = todayLocal();
-  for (var w = 0; w < WEEKS.length; w++) {
-    var wd = appData[wkey(WEEKS[w].n)];
-    for (var s = 0; s < WEEKS[w].sessions.length; s++) {
-      var sess = WEEKS[w].sessions[s];
-      var rec = wd && wd.sessions && wd.sessions[sess.id];
-      if (rec && rec.done) continue;
-      if (rec && rec.skipped) continue;
-      // earliest remaining session governs catch-up
-      var guard = 0;
-      while (guard < 400) {
-        var proj = shiftedDate(WEEKS[w].n, sess.day);
-        if (!proj || daysBetween(today, proj) >= 0) break;
-        setLostSlots(getLostSlots() + 1);
-        guard++;
-      }
-      return;
-    }
-  }
+  // Auto-advance DISABLED by design: the plan no longer slides forward just because a
+  // scheduled date has passed. An uncompleted session simply shows as overdue ("Xd ago")
+  // until you either do it (stamps the real date) or explicitly cross it off with the
+  // skip button (which pushes the remaining plan forward one slot, preserving rest days).
+  // This prevents one straggler session from dragging the whole downstream plan -- and
+  // keeps out-of-order completion from shifting future weeks.
+  return;
 }
 
 // Cross-off / skip pushes everyone forward by exactly one slot (preserve rest cadence).
