@@ -649,8 +649,11 @@ function getWCKey(type, name) {
 }
 
 function buildWCHtml(sid, type, name) {
+  var gluteNote = (typeof GLUTE_CARDIO !== 'undefined' && GLUTE_CARDIO[sid])
+    ? '<div style="font-size:11px;color:var(--amber-txt);background:var(--amber-bg);border-radius:6px;padding:6px 10px;margin-bottom:8px">&#129529; ' + GLUTE_CARDIO[sid] + '</div>'
+    : '';
   var key = getWCKey(type, name);
-  if (!key || !WC_DATA[key]) return '';
+  if (!key || !WC_DATA[key]) return gluteNote;
   var wc = WC_DATA[key];
   var wuHtml = '';
   for (var i = 0; i < wc.warmup.length; i++) {
@@ -673,7 +676,7 @@ function buildWCHtml(sid, type, name) {
   html += '<div class="wc-sec"><div class="wc-sec-title">Warm-up (5-8 min)</div>' + wuHtml + '</div>';
   html += '<div class="wc-sec"><div class="wc-sec-title">Cool-down / stretch (5 min)</div>' + cdHtml + '</div>';
   html += '</div>';
-  return html;
+  return gluteNote + html;
 }
 
 // ─── DATA: EXERCISE DETAIL ───────────────────────────────────────────────────
@@ -1357,6 +1360,52 @@ var CHEST_ARMS_ADDON = {
   'w22s3': {title:"Chest + arms (very light -- race week pump)", ex:[["DB Bench Press or Push-ups","2x10","light -- maintenance only, 3-4 RIR"],["DB Curl","2x12","light -- pump only"],["Tricep Pushdown or Dips","2x12","light -- pump only"]]}
 };
 
+var GLUTE_ADDON = {
+  'w1s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w2s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w3s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w4s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w5s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w6s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w7s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w8s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w9s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w10s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w11s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w12s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w13s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w14s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w15s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w16s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w17s1': {title:"Glute emphasis (hip-dominant -- heavy)", ex:[["BB Hip Thrust","3-4x 8-10","glute prime -- full lockout, 1s squeeze, progress load weekly"],["Single-Leg Hip Thrust or B-Stance","2x 10/side","unilateral glute, evens L/R"]]},
+  'w1s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+  'w2s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+  'w3s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+  'w4s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+  'w5s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+  'w6s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+  'w7s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+  'w8s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+  'w9s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+  'w10s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+  'w11s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+  'w12s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+  'w13s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+  'w14s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+  'w15s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+  'w16s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+  'w17s3': {title:"Glute accessory (abduction + bridge -- low fatigue)", ex:[["Banded Hip Abduction (seated or standing)","3x 15-20","gluteus medius/minimus -- lean torso forward slightly"],["Glute Bridge March or Frog Pump","3x 15-20","glute med + max, short rest, chase the pump"]]},
+};
+
+// Cardio sessions designated stair climber for glute emphasis (Zone 2). Phase 1
+// where no road-bike specificity is lost (no road bike yet); keeps triathlon aerobic base.
+var GLUTE_CARDIO = {
+  'w1s4': 'Stair climber -- glute emphasis (Zone 2, ~130-143 bpm, 30-40 min steady)',
+  'w3s4': 'Stair climber -- glute emphasis (Zone 2, ~130-143 bpm, 30-40 min steady)',
+  'w5s4': 'Stair climber -- glute emphasis (Zone 2, ~130-143 bpm, 30-40 min steady)',
+};
+
+
 // Build the date label shown on each session card with a status indicator.
 function sessionDateLabel(wkNum, dayLabel, sid, isDone) {
   var wd = appData[wkey(wkNum)];
@@ -1725,8 +1774,9 @@ var EX_ALIAS = {
   // 2nd leg+core squat session (back squat 245, slider saws, pallof) -- Phase 2-3 squat days
   'w8s1': 'trainer_2nd_legsquat',
   'w14s1': 'trainer_2nd_legsquat',
-  // Full body running-prep single-leg focus -- Phase 3 running ramp
-  'w14s5': 'trainer_running_prep_sl'
+  // Full body running-prep single-leg focus (Jay's "Full Body - Running Prep - Single Leg Focus")
+  'w14s5': 'trainer_running_prep_sl',
+  'w2s5': 'trainer_running_prep_sl'
 };
 
 // Derive logging fields from the day's ACTUAL primary movements (A1/B1, heavy loaded
@@ -1743,6 +1793,9 @@ function deriveFields(sid, sessionType, authored){
   if (typeof CHEST_ARMS_ADDON !== 'undefined' && CHEST_ARMS_ADDON[sid]) {
     groups = groups.concat([CHEST_ARMS_ADDON[sid]]);
   }
+  if (typeof GLUTE_ADDON !== 'undefined' && GLUTE_ADDON[sid]) {
+    groups = groups.concat([GLUTE_ADDON[sid]]);
+  }
   // no detail at all -> use authored fallback
   if (!groups.length) return authored || [];
   var out = [];
@@ -1754,7 +1807,8 @@ function deriveFields(sid, sessionType, authored){
       var isSlotted = /^[AB]1\./.test(name);
       // Primary loaded lifts (A1/B1) OR an addon compound press (DB bench/dips) worth logging
       var isAddonPress = /(bench press|weighted dips|push press)/i.test(name) && !/^[A-D][12]\./.test(name);
-      if (!isSlotted && !isAddonPress) continue;
+      var isGlutePrimary = /hip thrust/i.test(name) && !/single|b-stance|b stance/i.test(name) && !/^[A-D][12]\./.test(name);
+      if (!isSlotted && !isAddonPress && !isGlutePrimary) continue;
       var clean = name.replace(/^[AB]1\.\s*/, '').trim();
       var lower = clean.toLowerCase();
       // skip clearly non-loaded / core / time-based primaries
@@ -1810,6 +1864,7 @@ function buildExHtml(sid, type, name) {
     }
   }
   if (CHEST_ARMS_ADDON[sid]) { allGroups = allGroups.concat([CHEST_ARMS_ADDON[sid]]); }
+  if (typeof GLUTE_ADDON !== 'undefined' && GLUTE_ADDON[sid]) { allGroups = allGroups.concat([GLUTE_ADDON[sid]]); }
   var groupsHtml = '';
   for (var g = 0; g < allGroups.length; g++) {
     var group = allGroups[g];
@@ -1867,7 +1922,7 @@ var WEEKS = [
 {id:'w2s2',name:'Swim -- technique',type:'swim',day:'Tue',detail:'30 min',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 {id:'w2s3',name:'Upper body -- press focus',type:'lift',day:'Wed',detail:'UB-PR + UB-DY',fields:[{k:'press_top',l:'Press top (lbs)'},{k:'row_top',l:'Pendlay row top (lbs)'}]},
 {id:'w2s4',name:'Bike -- Z2 50 min',type:'bike',day:'Thu',detail:'HR 130-143',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR (bpm)'}]},
-{id:'w2s5',name:'Full body + running prep',type:'lift',day:'Fri',detail:'FB-B + RP-SL',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
+{id:'w2s5',name:'Full body -- running prep (single-leg focus)',type:'lift',day:'Fri',detail:'Running prep -- single leg',syncKey:'Full Body - Running Prep Work - Single Leg Focus',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
 {id:'w2s6',name:'Run -- Z2 1.75 mi',type:'run',day:'Sat',detail:'HR 130-143',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR (bpm)'},{k:'run_pace',l:'Pace (min/mi)'}]},
 ]},
 {n:3,phase:'Phase 1',focus:'Deload + CSS baseline test',load:'deload',sessions:[
