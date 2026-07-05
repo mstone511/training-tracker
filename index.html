@@ -214,6 +214,16 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
 .day-summary{background:var(--bg2);border-radius:var(--r);padding:8px 10px;font-size:12px;color:var(--txt2);margin-top:10px;line-height:1.6}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a18;color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:999;white-space:nowrap}
 .toast.show{opacity:1}
+
+.notes-block{margin-top:10px;padding-top:10px;border-top:1px solid var(--b)}
+.notes-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.notes-lbl{font-size:11px;color:var(--tm);text-transform:uppercase;letter-spacing:0.04em}
+.rpe-sel{background:var(--bg2);color:var(--tx);border:1px solid var(--b);border-radius:6px;padding:5px 8px;font-size:13px}
+.painflag{background:var(--bg2);color:var(--tm);border:1px solid var(--b);border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer}
+.painflag.on{background:var(--amber-bg);color:var(--amber-txt);border-color:var(--amber-txt)}
+.painloc{width:100%;box-sizing:border-box;background:var(--bg2);color:var(--tx);border:1px solid var(--amber-txt);border-radius:6px;padding:7px 9px;font-size:12px;margin-bottom:8px}
+.note-area{width:100%;box-sizing:border-box;background:var(--bg2);color:var(--tx);border:1px solid var(--b);border-radius:6px;padding:8px 9px;font-size:13px;min-height:52px;resize:vertical;font-family:inherit}
+.note-area::placeholder,.painloc::placeholder{color:var(--td)}
 </style>
 </head>
 <body>
@@ -265,6 +275,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
     </div>
     <div id="raceProjection" style="font-size:12px;line-height:1.5;margin-top:4px"></div>
     <button class="btn" style="width:100%;font-size:12px;margin-top:8px" onclick="resetScheduleShift()">Reset schedule to start date (clear all slips)</button>
+    <button class="btn" style="width:100%;font-size:12px;margin-top:8px" onclick="copyReviewExport()">&#128203; Copy review data for Claude</button>
     <div class="sync-help" style="margin-top:8px">Floating schedule: sessions show target dates, but if you miss days the plan slides forward from where you actually are -- nothing is marked failed. Check sessions off as you do them and the dates re-project automatically. Use Reset to snap everything back to the start date.</div>
   </div>
 </div>
@@ -458,7 +469,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<div id="buildStamp" data-build="2026-06-29b" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-06-29b</div>
+<div id="buildStamp" data-build="2026-07-05" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-05</div>
 </body>
 </html><script>
 
@@ -1994,7 +2005,7 @@ var WEEKS = [
 ]},
 {n:3,phase:'Phase 1',focus:'Deload + CSS baseline test',load:'deload',sessions:[
 {id:'w3s1',name:'Lower body -- squat deload',type:'lift',day:'Mon',syncKey:'Second Session - Leg(Squat) and Core Focus',detail:'LB-SQ reduced volume',fields:[{k:'squat_top',l:'Working squat weight (lbs)'}]},
-{id:'w3s2',name:'Swim -- CSS baseline test',type:'swim',day:'Tue',detail:'400m TT, 10 min rest, 200m TT',fields:[{k:'css_400',l:'400m time (mm:ss)'},{k:'css_200',l:'200m time (mm:ss)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
+{id:'w3s2',name:'Swim -- water adaptation + technique (START HERE, easy)',type:'swim',day:'Tue',detail:'400m TT, 10 min rest, 200m TT',fields:[{k:'css_400',l:'400m time (mm:ss)'},{k:'css_200',l:'200m time (mm:ss)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w3s3',name:'Upper body -- L-sit pull + bench (7th session)',type:'lift',day:'Wed',syncKey:'7th Session - Upperbody Focus',detail:'UB-HI',fields:[{k:'pullup_reps',l:'Weighted pull-up top set'},{k:'bench_top',l:'Bench press top (lbs)'}]},
 {id:'w3s4',name:'Bike -- Z2 45 min',type:'bike',day:'Thu',detail:'Easy deload effort',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR (bpm)'}]},
 {id:'w3s5',name:'Full body circuit',type:'lift',day:'Fri',syncKey:'Full Body - Conditoning Focus with Circuits',detail:'FB-A deload',fields:[{k:'circuit_time',l:'Circuit time (min)'}]},
@@ -2002,7 +2013,7 @@ var WEEKS = [
 ]},
 {n:4,phase:'Phase 1',focus:'Push hypertrophy volume',load:'high',sessions:[
 {id:'w4s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI + LB-DY',fields:[{k:'squat_top',l:'Squat top (lbs)'},{k:'rdl_top',l:'RDL top (lbs)'}]},
-{id:'w4s2',name:'Swim -- CSS intervals',type:'swim',day:'Tue',detail:'6x50m at CSS pace, 20s rest',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
+{id:'w4s2',name:'Swim -- technique drills + short easy sets',type:'swim',day:'Tue',detail:'6x50m at CSS pace, 20s rest',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w4s3',name:'Upper body -- high intensity',type:'lift',day:'Wed',detail:'UB-HI + UB-DY',fields:[{k:'pullup_reps',l:'Pull-up max reps'},{k:'bench_top',l:'Bench press top (lbs)'}]},
 {id:'w4s4',name:'Bike -- Z2 55 min',type:'bike',day:'Thu',detail:'HR 130-143',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR (bpm)'}]},
 {id:'w4s5',name:'Conditioning + running prep',type:'lift',day:'Fri',syncKey:'Full Body - Running Prep Work - Single Leg Focus',detail:'COND + RP-SL',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
@@ -2010,7 +2021,7 @@ var WEEKS = [
 ]},
 {n:5,phase:'Phase 1',focus:'Peak accumulation',load:'peak',sessions:[
 {id:'w5s1',name:'Lower body -- squat and core',type:'lift',day:'Mon',detail:'LB-SQ',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
-{id:'w5s2',name:'Swim -- technique + continuous',type:'swim',day:'Tue',detail:'35 min',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
+{id:'w5s2',name:'Swim -- technique + build continuous easy',type:'swim',day:'Tue',detail:'35 min',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 {id:'w5s3',name:'Upper body -- press + pull',type:'lift',day:'Wed',detail:'UB-PR + UB-PL',fields:[{k:'press_top',l:'Press top (lbs)'},{k:'pullup_reps',l:'Pull-up max reps'}]},
 {id:'w5s4',name:'Bike -- Z2 60 min',type:'bike',day:'Thu',detail:'HR 130-143',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR (bpm)'}]},
 {id:'w5s5',name:'Deadlift work capacity (5th session)',type:'lift',day:'Fri',detail:'FB-B',fields:[{k:'circuit_time',l:'Circuit time (min)'}]},
@@ -2018,7 +2029,7 @@ var WEEKS = [
 ]},
 {n:6,phase:'Phase 1',focus:'Deload -- active recovery',load:'deload',sessions:[
 {id:'w6s1',name:'Lower body -- dynamic light',type:'lift',day:'Mon',syncKey:'Lower Body Dynamic',detail:'LB-DY reduced + chest/arms (light)',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
-{id:'w6s2',name:'Swim -- easy Z2',type:'swim',day:'Tue',detail:'25 min',fields:[{k:'swim_min',l:'Duration (min)'}]},
+{id:'w6s2',name:'Swim -- easy continuous Z2 (build distance)',type:'swim',day:'Tue',detail:'25 min',fields:[{k:'swim_min',l:'Duration (min)'}]},
 {id:'w6s3',name:'Upper body -- dynamic light',type:'lift',day:'Wed',syncKey:'Upper Body Dynamic',detail:'UB-DY',fields:[{k:'bench_top',l:'Working weight (lbs)'}]},
 {id:'w6s4',name:'Bike -- easy Z2',type:'bike',day:'Thu',detail:'40 min easy',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR (bpm)'}]},
 {id:'w6s5',name:'Running prep',type:'lift',day:'Fri',syncKey:'Full Body - Running Prep Work - Single Leg Focus',detail:'RP-SL light',fields:[]},
@@ -2026,16 +2037,16 @@ var WEEKS = [
 ]},
 {n:7,phase:'Phase 2',focus:'Swim to 3x/wk',load:'high',sessions:[
 {id:'w7s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI + LB-DY',fields:[{k:'squat_top',l:'Squat top (lbs)'},{k:'rdl_top',l:'RDL top (lbs)'}]},
-{id:'w7s2',name:'Swim -- technique',type:'swim',day:'Tue',detail:'30 min drill focus',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
+{id:'w7s2',name:'Swim -- technique + continuous easy',type:'swim',day:'Tue',detail:'30 min drill focus',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 {id:'w7s3',name:'Upper body -- high intensity',type:'lift',day:'Wed',detail:'UB-HI + UB-DY',fields:[{k:'pullup_reps',l:'Pull-up max reps'},{k:'bench_top',l:'Bench top (lbs)'}]},
-{id:'w7s4',name:'Swim -- CSS intervals',type:'swim',day:'Thu',detail:'35 min, 3rd swim this week',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
+{id:'w7s4',name:'Swim -- easy aerobic sets',type:'swim',day:'Thu',detail:'35 min, 3rd swim this week',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w7s5',name:'Conditioning + running prep',type:'lift',day:'Fri',syncKey:'Full Body - Running Prep Work - Single Leg Focus',detail:'COND + RP-SL',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
 {id:'w7s6',name:'Run -- Z2 2.5 mi',type:'run',day:'Sat',detail:'HR 130-143',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR (bpm)'},{k:'run_pace',l:'Pace (min/mi)'}]},
 {id:'w7s7',name:'Swim -- continuous Z2',type:'swim',day:'Sun',detail:'30 min easy',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:8,phase:'Phase 2',focus:'Second run session added',load:'high',sessions:[
 {id:'w8s1',name:'Lower body -- squat + core (2nd session)',type:'lift',day:'Mon',syncKey:'Second Session - Leg(Squat) and Core Focus',detail:'LB-SQ',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
-{id:'w8s2',name:'Swim -- CSS 35 min',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
+{id:'w8s2',name:'Swim -- CSS baseline test (first test -- only if stroke feels stable)',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w8s3',name:'Upper body -- L-sit pull + bench (7th session)',type:'lift',day:'Wed',syncKey:'7th Session - Upperbody Focus',detail:'UB-PR + UB-PL',fields:[{k:'press_top',l:'Press top (lbs)'}]},
 {id:'w8s4',name:'Run -- Z2 easy 2 mi',type:'run',day:'Thu AM',detail:'2nd run/wk, strictly Z2',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR (bpm)'}]},
 {id:'w8s5',name:'Swim -- technique',type:'swim',day:'Thu PM',detail:'30 min, 6h+ after run',fields:[{k:'swim_min',l:'Duration (min)'}]},
@@ -2558,6 +2569,23 @@ function renderTraining() {
       var v = (sd.fields && sd.fields[f.k]) || '';
       html += '<div class="field"><label>' + f.l + '</label><input type="text" inputmode="decimal" autocomplete="off" value="' + v.replace(/"/g,'&quot;') + '" placeholder="--" oninput="saveField(\'' + s.id + '\',\'' + wk.n + '\',\'' + f.k + '\',this.value)"></div>';
     }
+    // --- Daily session notes: free-text + session RPE + joint/pain flag ---
+    var noteV = (sd.note || '').replace(/"/g,'&quot;');
+    var rpeV = sd.rpe || '';
+    var painOn = !!sd.pain;
+    var painLocV = (sd.painLoc || '').replace(/"/g,'&quot;');
+    html += '<div class="notes-block">';
+    html += '<div class="notes-row">';
+    html += '<label class="notes-lbl">Session RPE</label>';
+    html += '<select class="rpe-sel" onchange="saveRPE(\'' + s.id + '\',\'' + wk.n + '\',this.value)">';
+    html += '<option value=""' + (rpeV===''?' selected':'') + '>--</option>';
+    for (var r = 1; r <= 10; r++) { html += '<option value="' + r + '"' + (String(rpeV)===String(r)?' selected':'') + '>' + r + '</option>'; }
+    html += '</select>';
+    html += '<button id="painbtn-' + s.id + '" class="painflag' + (painOn?' on':'') + '" onclick="togglePain(\'' + s.id + '\',\'' + wk.n + '\')">&#9888; Joint/pain</button>';
+    html += '</div>';
+    html += '<input id="painloc-' + s.id + '" class="painloc" style="display:' + (painOn?'block':'none') + '" type="text" placeholder="Where? (e.g. left knee, low back)" value="' + painLocV + '" oninput="savePainLoc(\'' + s.id + '\',\'' + wk.n + '\',this.value)">';
+    html += '<textarea class="note-area" placeholder="Notes -- how it felt, load changes, energy, anything to flag at review" oninput="saveNote(\'' + s.id + '\',\'' + wk.n + '\',this.value)">' + noteV + '</textarea>';
+    html += '</div>';
     if (s.type === 'run') {
       var hr = parseInt((sd.fields && sd.fields['run_avghr']) || 0);
       html += '<div class="hr-warn" id="hrw-' + s.id + '" style="display:' + (hr > 143 ? 'block' : 'none') + '">';
@@ -2575,6 +2603,95 @@ function renderTraining() {
 
 function toggleSession(sid) { document.getElementById('bod-' + sid).classList.toggle('open'); }
 
+function buildReviewExport() {
+  var lines = [];
+  lines.push('=== TRAINING REVIEW EXPORT ===');
+  lines.push('Generated: ' + toISO(todayLocal()));
+  var bw = '';
+  if (appData.metrics && appData.metrics.length) {
+    var sorted = appData.metrics.slice().sort(function(a,b){ return (b.ts||0) - (a.ts||0); });
+    for (var mi = 0; mi < sorted.length; mi++) { if (sorted[mi].weight) { bw = sorted[mi].weight; break; } }
+  }
+  if (bw) lines.push('Bodyweight (latest logged): ' + bw + ' lb');
+  lines.push('');
+  for (var wi = 0; wi < WEEKS.length; wi++) {
+    var wk = WEEKS[wi];
+    var wd = appData[wkey(wk.n)];
+    if (!wd || !wd.sessions) continue;
+    var wkLines = [];
+    for (var si = 0; si < wk.sessions.length; si++) {
+      var s = wk.sessions[si];
+      var rec = wd.sessions[s.id];
+      if (!rec) continue;
+      var done = rec.done;
+      var skipped = rec.skipped;
+      if (!done && !skipped && !rec.note && !rec.rpe && !rec.pain && !(rec.fields && Object.keys(rec.fields).length)) continue;
+      var parts = [];
+      parts.push('  [' + s.day + '] ' + s.name + (done ? ' (done ' + (rec.doneDate||'?') + ')' : skipped ? ' (SKIPPED)' : ' (in progress)'));
+      if (rec.fields) {
+        var fk = Object.keys(rec.fields);
+        var loads = [];
+        for (var k = 0; k < fk.length; k++) { if (rec.fields[fk[k]]) loads.push(fk[k].replace(/^load_/,'').replace(/_/g,' ') + '=' + rec.fields[fk[k]]); }
+        if (loads.length) parts.push('    loads: ' + loads.join(', '));
+      }
+      if (rec.rpe) parts.push('    RPE: ' + rec.rpe + '/10');
+      if (rec.pain) parts.push('    !! PAIN/JOINT FLAG' + (rec.painLoc ? ': ' + rec.painLoc : ''));
+      if (rec.note) parts.push('    note: ' + rec.note);
+      wkLines.push(parts.join('\n'));
+    }
+    if (wkLines.length) {
+      lines.push('-- Week ' + wk.n + ' (' + wk.phase + ') --');
+      lines.push(wkLines.join('\n'));
+      lines.push('');
+    }
+  }
+  return lines.join('\n');
+}
+function copyReviewExport() {
+  var txt = buildReviewExport();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(function(){ showToast('Review data copied -- paste to Claude'); },
+      function(){ fallbackCopy(txt); });
+  } else { fallbackCopy(txt); }
+}
+function fallbackCopy(txt) {
+  var ta = document.createElement('textarea');
+  ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); showToast('Review data copied -- paste to Claude'); }
+  catch(e){ showToast('Copy failed -- long-press to select'); }
+  document.body.removeChild(ta);
+}
+function saveNote(sid, wn, v) {
+  var wd = getWD(wn);
+  if (!wd.sessions[sid]) wd.sessions[sid] = {};
+  wd.sessions[sid].note = v;
+  saveData();
+}
+function saveRPE(sid, wn, v) {
+  var wd = getWD(wn);
+  if (!wd.sessions[sid]) wd.sessions[sid] = {};
+  wd.sessions[sid].rpe = v;
+  saveData();
+  var el = document.getElementById('rpeval-' + sid);
+  if (el) el.textContent = v ? ('RPE ' + v) : 'RPE --';
+}
+function togglePain(sid, wn) {
+  var wd = getWD(wn);
+  if (!wd.sessions[sid]) wd.sessions[sid] = {};
+  wd.sessions[sid].pain = !wd.sessions[sid].pain;
+  saveData();
+  var b = document.getElementById('painbtn-' + sid);
+  if (b) b.className = 'painflag' + (wd.sessions[sid].pain ? ' on' : '');
+  var loc = document.getElementById('painloc-' + sid);
+  if (loc) loc.style.display = wd.sessions[sid].pain ? 'block' : 'none';
+}
+function savePainLoc(sid, wn, v) {
+  var wd = getWD(wn);
+  if (!wd.sessions[sid]) wd.sessions[sid] = {};
+  wd.sessions[sid].painLoc = v;
+  saveData();
+}
 function saveField(sid, wn, k, v) {
   var wd = getWD(wn);
   if (!wd.sessions[sid]) wd.sessions[sid] = {};
