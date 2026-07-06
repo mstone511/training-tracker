@@ -304,6 +304,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   <span style="font-size:12px;color:var(--green-txt)">Open &rarr;</span>
 </a>
 <div style="font-size:12px;color:var(--txt3);margin-bottom:10px">Synced to: <span id="nutWeekLabel" style="color:var(--txt2);font-weight:500">Week 1</span> &middot; <button class="btn" style="font-size:11px;padding:3px 8px" onclick="switchTab('training')">change week</button></div>
+<div id="energyFlag" style="display:none;margin-bottom:10px;padding:10px 12px;border-radius:8px;background:var(--amber-bg);border:1px solid var(--amber-txt);font-size:12px;line-height:1.5;color:var(--amber-txt)"></div>
 <div class="sync-panel" style="margin-bottom:10px">
   <div class="sync-head" onclick="document.getElementById('metricsBody').classList.toggle('open')">
     <span style="font-size:13px;font-weight:500">&#9878; Body metrics</span>
@@ -469,7 +470,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<div id="buildStamp" data-build="2026-07-05" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-05</div>
+<div id="buildStamp" data-build="2026-07-06" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-06</div>
 </body>
 </html><script>
 
@@ -864,11 +865,12 @@ var EX_DATA = {
       ["A2. Slider Body Saws (CORE)","3-4x 10 total",""],
     ]},
     {title:"B -- Secondary (superset B1+B2)",ex:[
-      ["B1. Deficit Reverse Lunges","3x 5/leg","155 lb BB"],
+      ["B1. BB RDL","4x 8/8/6/6","progressive load -- trackable hinge anchor"],
       ["B2. Pallof Press w/ Twists (CORE)","3x 10/side","25 lb cable"],
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
-      ["C1. Slider Side Lunges","3x 10/side","26 lb KB"],
+      ["C1. Deficit Reverse Lunges","3x 8/leg","accessory -- unilateral"],
+      ["C2. Slider Side Lunges","3x 10/side","26 lb KB"],
       ["C2. Alt. Jumping Lunges","3x (BW)",""],
       ["D1. Foot Elevated Glute Bridges","3x 10/leg","BW"],
       ["D2. Heel Elevated Squat Holds","3x 30-40 sec","BW"],
@@ -1187,7 +1189,7 @@ var EX_DATA = {
       ["A2. SA Plank Hold low (CORE)","4x 20-30 sec/side",""],
     ]},
     {title:"B -- Secondary (superset B1+B2)",ex:[
-      ["B1. BB Kickstand RDL","4x 8/leg (3s negative)","8x115/135/155/175"],
+      ["B1. BB RDL","4x 8/8/6/6","progressive load -- trackable hinge anchor (was kickstand; bilateral for clean tracking)"],
       ["B2. Side Star Plank (CORE)","4x 20-30 sec/side",""],
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
@@ -1203,7 +1205,7 @@ var EX_DATA = {
       ["A2. SA Plank Hold low (CORE)","4x 20-30 sec/side",""],
     ]},
     {title:"B -- Secondary (superset B1+B2)",ex:[
-      ["B1. BB Kickstand RDL","4x 8/leg (3s negative)","8x115/135/155/175"],
+      ["B1. BB RDL","4x 8/8/6/6","progressive load -- trackable hinge anchor (was kickstand; bilateral for clean tracking)"],
       ["B2. Side Star Plank (CORE)","4x 20-30 sec/side",""],
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
@@ -1253,11 +1255,12 @@ var EX_DATA = {
       ["A2. Slider Body Saws (CORE)","3-4x 10 total","good 10 all sets"],
     ]},
     {title:"B -- Secondary (superset B1+B2)",ex:[
-      ["B1. Deficit Reverse Lunges","3x 5/leg","155 lb BB"],
+      ["B1. BB RDL","4x 8/8/6/6","progressive load -- trackable hinge anchor"],
       ["B2. Pallof Press w/ Twists (CORE)","3x 10/side","25 lb cable"],
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
-      ["C1. Slider Side Lunges","3x 10/side","26 lb KB"],
+      ["C1. Deficit Reverse Lunges","3x 8/leg","accessory -- unilateral"],
+      ["C2. Slider Side Lunges","3x 10/side","26 lb KB"],
       ["C2. Alt. Jumping Lunges","3x (BW)",""],
       ["D1. Foot Elevated Glute Bridges","3x 10/leg","BW"],
       ["D2. Heel Elevated Squat Holds","3x 30-40 sec","BW"],
@@ -1302,7 +1305,7 @@ var EX_DATA = {
       ["A2. SA Plank Hold (low plank, CORE)","4x 20-30s/side","60s"],
     ]},
     {title:"B -- Secondary (superset B1+B2)",ex:[
-      ["B1. BB Kickstand RDL","4x 8/leg (3s negative)","8x115/135/155/175"],
+      ["B1. BB RDL","4x 8/8/6/6","progressive load -- trackable hinge anchor (was kickstand; bilateral for clean tracking)"],
       ["B2. Side Star Plank (CORE)","4x 20-30s/side","30s"],
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
@@ -1891,10 +1894,23 @@ function deriveFields(sid, sessionType, authored){
       var lower = clean.toLowerCase();
       // skip clearly non-loaded / core / time-based primaries
       if (/(core|pallof|plank|hollow|carry|crawl|saw|sprint|row erg|bike|run)/.test(lower)) continue;
-      // build a stable key from the movement name
-      var key = 'load_' + lower.replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,28);
-      if (seen[key]) continue; seen[key] = 1;
-      out.push({ k:key, l: clean + ' top set (lbs)' });
+      // build a stable key stem from the movement name
+      var stem = lower.replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,28);
+      // Classify progression variable: bodyweight/banded movements progress by REPS
+      // (then added load), so they get a reps field + an optional added-load field.
+      // Externally-loaded barbell/DB/KB movements keep a single load field.
+      var isBodyweightOrBanded = /(pull ups?|pull-ups?|chin ups?|l sit|l-sit|dips?|push ?ups?|push-ups?|nordics?|samurais?|banded|trx|bodyweight|\bbw\b|bridge|hollow)/i.test(clean)
+        && !/db bench|bb |barbell|dumbbell|goblet/i.test(lower);
+      if (isBodyweightOrBanded) {
+        var rkey = 'reps_' + stem;
+        if (!seen[rkey]) { seen[rkey] = 1; out.push({ k:rkey, l: clean + ' -- reps @ bodyweight' }); }
+        var akey = 'addl_' + stem;
+        if (!seen[akey]) { seen[akey] = 1; out.push({ k:akey, l: clean + ' -- added load (lbs, optional)' }); }
+      } else {
+        var key = 'load_' + stem;
+        if (seen[key]) continue; seen[key] = 1;
+        out.push({ k:key, l: clean + ' top set (lbs)' });
+      }
     }
   }
   // For run/swim/bike conditioning days, keep the authored fields (AMRAP, time, HR, etc.)
@@ -2592,8 +2608,7 @@ function renderTraining() {
       html += (hr > 143 ? 'HR ' + hr + ' bpm -- above Z2 ceiling (143). Run was Z3/Z4. Ease off next session.' : '');
       html += '</div>';
     }
-    var notes = (sd.notes || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    html += '<textarea placeholder="Notes..." oninput="saveNotes(\'' + s.id + '\',\'' + wk.n + '\',this.value)">' + notes + '</textarea>';
+    // (legacy notes textarea removed -- superseded by structured notes block above)
     html += '<button class="done-btn ' + (isDone ? 'is-done' : '') + '" onclick="toggleDone(\'' + s.id + '\',\'' + wk.n + '\')">' + (isDone ? '&#10003; Completed -- tap to undo' : 'Mark complete') + '</button>';
     html += '</div></div>';
   }
@@ -2637,6 +2652,7 @@ function buildReviewExport() {
       if (rec.rpe) parts.push('    RPE: ' + rec.rpe + '/10');
       if (rec.pain) parts.push('    !! PAIN/JOINT FLAG' + (rec.painLoc ? ': ' + rec.painLoc : ''));
       if (rec.note) parts.push('    note: ' + rec.note);
+      if (rec.notes && rec.notes !== rec.note) parts.push('    note(legacy): ' + rec.notes);
       wkLines.push(parts.join('\n'));
     }
     if (wkLines.length) {
@@ -2807,7 +2823,32 @@ function getSessionComposition(wk) {
   return parts.join(' + ') + ' this week.';
 }
 
+function updateEnergyFlag() {
+  var el = document.getElementById('energyFlag');
+  if (!el) return;
+  var ms = (appData.metrics || []).slice().sort(function(a,b){ return (a.ts||0)-(b.ts||0); });
+  var wts = ms.filter(function(m){ return m.weight; });
+  if (wts.length < 2) { el.style.display='none'; return; }
+  var first = wts[0], last = wts[wts.length-1];
+  var days = Math.max(1, (last.ts - first.ts)/86400000);
+  var rate = (last.weight - first.weight) / (days/7); // lb per week
+  var goal = (appData.config && appData.config.goal) || 'gain';
+  // Lean-gain target ~0.4-0.8 lb/wk. Flag if flat/negative while in gain intent.
+  if (rate < 0.15) {
+    el.style.display='block';
+    el.innerHTML = '&#9888; <b>Energy-availability flag.</b> Bodyweight trend is ' +
+      (rate<=0?'declining':'flat') + ' (' + rate.toFixed(2) + ' lb/wk) over your logged data. ' +
+      'Muscle gain requires a modest surplus (~0.4&ndash;0.8 lb/wk target for you = ~+200&ndash;350 kcal/day above training-adjusted maintenance). ' +
+      'Flat/negative weight means the hypertrophy stimulus is under-fuelled &mdash; add calories (carbs first, given concurrent glycogen demand) before adjusting training.';
+  } else if (rate > 1.0) {
+    el.style.display='block';
+    el.innerHTML = '&#9888; <b>Gain rate high.</b> Bodyweight climbing ' + rate.toFixed(2) + ' lb/wk &mdash; above the ~0.8 lb/wk ceiling for lean gain. Trim surplus slightly to limit fat accrual.';
+  } else {
+    el.style.display='none';
+  }
+}
 function renderNutrition() {
+  updateEnergyFlag();
   var wk = WEEKS[curWk]; var mt = getMT(curWk);
   document.getElementById('nutWeekLabel').textContent = 'Week ' + wk.n + ' ' + wk.phase + ' -- ' + wk.focus;
   document.getElementById('ntPhaseLabel').textContent = wk.phase + ' week ' + wk.n;
