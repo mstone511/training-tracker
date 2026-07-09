@@ -224,6 +224,9 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
 .painloc{width:100%;box-sizing:border-box;background:var(--bg2);color:var(--tx);border:1px solid var(--amber-txt);border-radius:6px;padding:7px 9px;font-size:12px;margin-bottom:8px}
 .note-area{width:100%;box-sizing:border-box;background:var(--bg2);color:var(--tx);border:1px solid var(--b);border-radius:6px;padding:8px 9px;font-size:13px;min-height:52px;resize:vertical;font-family:inherit}
 .note-area::placeholder,.painloc::placeholder{color:var(--td)}
+
+.jay-btn{width:100%;box-sizing:border-box;margin:8px 0;padding:8px 10px;background:var(--bg2);color:var(--tm);border:1px dashed var(--b);border-radius:6px;font-size:12px;cursor:pointer;text-align:center}
+.jay-btn.on{background:var(--green-bg);color:var(--green-txt);border-style:solid;border-color:var(--green-txt)}
 </style>
 </head>
 <body>
@@ -470,7 +473,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<div id="buildStamp" data-build="2026-07-06" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-06</div>
+<div id="buildStamp" data-build="2026-07-06c" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-06c</div>
 </body>
 </html><script>
 
@@ -1620,6 +1623,27 @@ function isSkipped(wkNum, sid) {
   var wd = appData[wkey(wkNum)];
   return !!(wd && wd.sessions && wd.sessions[sid] && wd.sessions[sid].skipped);
 }
+function toggleJaySession(sid, wn) {
+  var wd = getWD(wn);
+  if (!wd.sessions[sid]) wd.sessions[sid] = {};
+  var nowJay = !wd.sessions[sid].jaySession;
+  wd.sessions[sid].jaySession = nowJay;
+  if (nowJay) {
+    // Counts as a completed training day (Jay replaced the programmed work). No push-forward,
+    // no skip. Remains loggable so you can record what you actually did with Jay.
+    wd.sessions[sid].done = true;
+    wd.sessions[sid].skipped = false;
+    if (!wd.sessions[sid].doneDate) wd.sessions[sid].doneDate = toISO(todayLocal());
+  } else {
+    // Un-tagging: revert to not-done (does not auto-skip)
+    wd.sessions[sid].done = false;
+    delete wd.sessions[sid].doneDate;
+  }
+  _projectionCache = null;
+  saveData();
+  renderTraining();
+  showToast(nowJay ? 'Marked as Jay session -- counts as trained, plan unchanged' : 'Jay tag removed');
+}
 function toggleSkip(sid, wn) {
   var wd = getWD(wn);
   if (!wd.sessions[sid]) wd.sessions[sid] = {};
@@ -2029,7 +2053,7 @@ var WEEKS = [
 ]},
 {n:4,phase:'Phase 1',focus:'Push hypertrophy volume',load:'high',sessions:[
 {id:'w4s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI + LB-DY',fields:[{k:'squat_top',l:'Squat top (lbs)'},{k:'rdl_top',l:'RDL top (lbs)'}]},
-{id:'w4s2',name:'Swim -- technique drills + short easy sets',type:'swim',day:'Tue',detail:'6x50m at CSS pace, 20s rest',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
+{id:'w4s2',name:'Swim -- START HERE: water adaptation + technique (easy)',type:'swim',day:'Tue',detail:'6x50m at CSS pace, 20s rest',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w4s3',name:'Upper body -- high intensity',type:'lift',day:'Wed',detail:'UB-HI + UB-DY',fields:[{k:'pullup_reps',l:'Pull-up max reps'},{k:'bench_top',l:'Bench press top (lbs)'}]},
 {id:'w4s4',name:'Bike -- Z2 55 min',type:'bike',day:'Thu',detail:'HR 130-143',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR (bpm)'}]},
 {id:'w4s5',name:'Conditioning + running prep',type:'lift',day:'Fri',syncKey:'Full Body - Running Prep Work - Single Leg Focus',detail:'COND + RP-SL',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
@@ -2062,7 +2086,7 @@ var WEEKS = [
 ]},
 {n:8,phase:'Phase 2',focus:'Second run session added',load:'high',sessions:[
 {id:'w8s1',name:'Lower body -- squat + core (2nd session)',type:'lift',day:'Mon',syncKey:'Second Session - Leg(Squat) and Core Focus',detail:'LB-SQ',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
-{id:'w8s2',name:'Swim -- CSS baseline test (first test -- only if stroke feels stable)',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
+{id:'w8s2',name:'Swim -- CSS baseline test (your FIRST test -- establishes swim zones)',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w8s3',name:'Upper body -- L-sit pull + bench (7th session)',type:'lift',day:'Wed',syncKey:'7th Session - Upperbody Focus',detail:'UB-PR + UB-PL',fields:[{k:'press_top',l:'Press top (lbs)'}]},
 {id:'w8s4',name:'Run -- Z2 easy 2 mi',type:'run',day:'Thu AM',detail:'2nd run/wk, strictly Z2',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR (bpm)'}]},
 {id:'w8s5',name:'Swim -- technique',type:'swim',day:'Thu PM',detail:'30 min, 6h+ after run',fields:[{k:'swim_min',l:'Duration (min)'}]},
@@ -2572,13 +2596,17 @@ function renderTraining() {
     html += '<div class="check ' + (isDone ? 'done' : '') + '" id="chk-' + s.id + '" onclick="event.stopPropagation(); toggleDone(\'' + s.id + '\',' + wk.n + ')">' + (isDone ? '&#10003;' : '') + '</div>';
     var dInfo = sessionDateLabel(wk.n, s.day, s.id, isDone);
     var skipped = isSkipped(wk.n, s.id);
-    html += '<div class="sinfo"><div class="sname"' + (skipped ? ' style="opacity:0.5;text-decoration:line-through"' : '') + '>' + s.name + syncBadge + '</div><div class="smeta">' + dInfo + (s.detail ? ' &middot; ' + s.detail : '') + '</div></div>';
+    var isJay = !!(sd && sd.jaySession);
+    var jayBadge = isJay ? '<span style="font-size:9px;background:var(--green-bg);color:var(--green-txt);padding:1px 6px;border-radius:3px;margin-left:4px;vertical-align:middle">\uD83C\uDFCB Jay session</span>' : '';
+    html += '<div class="sinfo"><div class="sname"' + (skipped ? ' style="opacity:0.5;text-decoration:line-through"' : '') + '>' + s.name + syncBadge + jayBadge + '</div><div class="smeta">' + dInfo + (s.detail ? ' &middot; ' + s.detail : '') + '</div></div>';
     html += '<span class="stag t-' + s.type + '">' + s.type + '</span>';
     html += '<div class="skip-btn" title="' + (skipped ? 'Restore' : 'Skip') + '" onclick="event.stopPropagation(); toggleSkip(\'' + s.id + '\',' + wk.n + ')">' + (skipped ? '&#8635;' : '&#8855;') + '</div>';
     html += '</div>';
     html += '<div class="session-body" id="bod-' + s.id + '">';
     html += buildExHtml(s.id, s.type, s.name);
     html += buildWCHtml(s.id, s.type, s.name);
+    var isJayBody = !!(sd && sd.jaySession);
+    html += '<button class="jay-btn' + (isJayBody ? ' on' : '') + '" onclick="event.stopPropagation(); toggleJaySession(\'' + s.id + '\',' + wk.n + ')">' + (isJayBody ? '\u2713 Trained with Jay (tap to undo)' : '\uD83C\uDFCB Did this as a Jay session instead') + '</button>';
     var renderFields = deriveFields(s.id, s.type, s.fields);
     for (var fi = 0; fi < renderFields.length; fi++) {
       var f = renderFields[fi];
@@ -2642,7 +2670,8 @@ function buildReviewExport() {
       var skipped = rec.skipped;
       if (!done && !skipped && !rec.note && !rec.rpe && !rec.pain && !(rec.fields && Object.keys(rec.fields).length)) continue;
       var parts = [];
-      parts.push('  [' + s.day + '] ' + s.name + (done ? ' (done ' + (rec.doneDate||'?') + ')' : skipped ? ' (SKIPPED)' : ' (in progress)'));
+      var jayMark = rec.jaySession ? ' [JAY SESSION -- replaced programmed work]' : '';
+      parts.push('  [' + s.day + '] ' + s.name + (done ? ' (done ' + (rec.doneDate||'?') + ')' : skipped ? ' (SKIPPED)' : ' (in progress)') + jayMark);
       if (rec.fields) {
         var fk = Object.keys(rec.fields);
         var loads = [];
@@ -3505,7 +3534,27 @@ function addDescribedMeal() {
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
+function computeCurrentWeek() {
+  // Which program week does today fall in? Based on program start + elapsed days,
+  // adjusted for schedule slips (lostSlots shifts the calendar forward). Clamped to
+  // the range of real weeks, and never past the last week.
+  try {
+    var startISO = getProgramStart();
+    if (!startISO) return 0;
+    var start = parseDate(startISO);
+    var today = todayLocal();
+    var elapsedDays = daysBetween(start, today); // positive if today is after start
+    if (elapsedDays < 0) return 0; // program hasn't started yet -> week 1
+    // account for forward slips: each lost slot delays the calendar ~1 day on average,
+    // but weeks are 7 calendar days regardless, so compute raw week then cap.
+    var wkIndex = Math.floor(elapsedDays / 7);
+    if (wkIndex < 0) wkIndex = 0;
+    if (wkIndex > WEEKS.length - 1) wkIndex = WEEKS.length - 1;
+    return wkIndex;
+  } catch (e) { return 0; }
+}
 loadData();
+curWk = computeCurrentWeek();
 buildSelect();
 renderTraining();
 loadSyncSettings();
