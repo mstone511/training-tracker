@@ -50,7 +50,7 @@
 <script>
 // ─── MODEL: targets recompute from weight + goal (same formulas as the tracker) ────
 var BASELINE_KCAL = 2748, BASELINE_WT = 167.5;     // tracker's anchor
-var PLAN_BASELINE_WT = 164;                         // weight the food templates were built at
+var PLAN_BASELINE_WT = 165.5;                         // weight the food templates were built at
 var DINNER = { c:70, p:70, f:45, cal:965 };
 var SMOOTHIE = { name:"Recovery Smoothie (2 banana, 3/4c nonfat oat milk)", m:{c:86,p:43,f:5}, gC:0 };
 
@@ -61,36 +61,36 @@ var GOAL_LABEL = { recomp:"Recomposition", gain:"Lean Gain" };
 // Daytime meals per plan (Recomp baseline; gC = carbs added for Lean Gain). Built at 164 lb.
 var MEALS = {
   breakfast:{
-    D:{name:"3 Eggs + Toast + Banana + Oats",m:{c:78,p:24,f:12},gC:24,
-       items:["3 whole eggs scrambled (nonstick, no added oil)","2 slices Ezekiel/sprouted toast","1 medium banana","1/2 cup cooked oats + cinnamon"],
-       gain:["Bump oats to 1 cup cooked","+1 tbsp honey/maple on oats"]},
-    A:{name:"Oats + 2 Eggs + Banana + Berries",m:{c:80,p:22,f:12},gC:22,
-       items:["1 cup rolled oats cooked in water","1 banana, sliced","2 whole eggs scrambled (nonstick)","1/2 cup blueberries"],
-       gain:["+1 slice Ezekiel toast + 1 tsp jam","+1/4 cup extra oats"]},
-    B:{name:"Overnight Oats + Whey + Chia",m:{c:78,p:24,f:12},gC:24,
-       items:["Overnight oats: 3/4 cup oats + 1 cup oat milk + 1 scoop whey + 1 tbsp chia","1/2 banana","1/2 cup strawberries"],
-       gain:["Bump oats to 1 cup + 1/4 cup more oat milk","+1 tbsp honey"]},
+    D:{name:"4 Eggs + Toast + Nut Butter + Banana",m:{c:60,p:26,f:22},gC:18,
+       items:["4 whole eggs scrambled (nonstick, no added oil)","2 slices Ezekiel/sprouted toast","1 tbsp natural peanut/almond butter","1 medium banana"],
+       gain:["Add 1/2 cup cooked oats + cinnamon","+1 tsp honey"]},
+    A:{name:"Oats + 3 Eggs + Almond Butter + Berries",m:{c:60,p:26,f:22},gC:18,
+       items:["3/4 cup rolled oats cooked in water","3 whole eggs scrambled (nonstick)","1 tbsp almond butter stirred into oats","1/2 cup blueberries"],
+       gain:["Bump oats to 1 cup","+1/2 banana sliced in"]},
+    B:{name:"Overnight Oats + Whey + Chia + PB",m:{c:60,p:26,f:22},gC:18,
+       items:["Overnight oats: 3/4 cup oats + 1 cup lactose-free/oat milk + 1 scoop whey isolate + 1 tbsp chia","1 tbsp peanut butter","1/2 cup strawberries"],
+       gain:["Bump oats to 1 cup + splash more milk","+1 tsp honey"]},
   },
   snack1:{
-    D:{name:"1/2c Greek Yogurt + 1/2 Apple",m:{c:16,p:11,f:1},gC:20,
-       items:["1/2 cup nonfat Greek yogurt","1/2 medium apple, sliced","cinnamon"],
+    D:{name:"Greek Yogurt + Almonds + Apple",m:{c:18,p:12,f:10},gC:8,
+       items:["3/4 cup nonfat Greek yogurt","14 almonds (~1/2 oz)","1/2 medium apple, sliced + cinnamon"],
+       gain:["Use a whole apple","+1 rice cake"]},
+    A:{name:"Greek Yogurt + Walnuts + Apple",m:{c:18,p:12,f:10},gC:8,
+       items:["3/4 cup nonfat Greek yogurt","1/2 oz walnuts","1/2 apple, sliced + cinnamon"],
        gain:["Use a whole apple","+1 large rice cake"]},
-    A:{name:"1/2c Greek Yogurt + 1/2 Apple",m:{c:14,p:11,f:1},gC:18,
-       items:["1/2 cup nonfat Greek yogurt","1/2 medium apple, sliced","cinnamon"],
-       gain:["Use a whole apple","+1 large rice cake"]},
-    B:{name:"Rice Cake + Jam + Greek Yogurt",m:{c:20,p:6,f:1},gC:16,
-       items:["1 rice cake + 1 tsp jam","1/2 cup nonfat Greek yogurt + cinnamon"],
+    B:{name:"Rice Cake + PB + Greek Yogurt",m:{c:18,p:12,f:10},gC:8,
+       items:["1 rice cake + 1 tbsp peanut butter","1/2 cup nonfat Greek yogurt + cinnamon"],
        gain:["+1 second rice cake + 1/2 banana"]},
   },
   lunch:{
-    D:{name:"Egg Fried Rice + Chicken",m:{c:90,p:18,f:8},gC:26,
-       items:["2.5 oz diced chicken + 1 egg scrambled into 1.5 cups jasmine rice","1 cup stir-fry vegetables","1/2 tsp sesame oil + soy + sriracha"],
+    D:{name:"Egg Fried Rice + Chicken + Avocado",m:{c:86,p:24,f:18},gC:24,
+       items:["3 oz diced chicken + 1 egg scrambled into 1.5 cups jasmine rice","1 cup stir-fry vegetables","1/4 avocado sliced on top","1/2 tsp sesame oil + soy + sriracha"],
        gain:["Bump rice to 2.25 cups cooked","+1/2 cup pineapple in stir-fry"]},
-    A:{name:"Chicken + Jasmine Rice + Broccoli",m:{c:92,p:20,f:8},gC:28,
-       items:["3 oz grilled chicken breast","1.75 cups cooked jasmine rice","1 cup roasted broccoli (1/2 tsp olive oil)"],
-       gain:["Bump rice to 2.5 cups cooked","+1 small roasted sweet potato"]},
-    B:{name:"Turkey Quinoa Bowl + Beans",m:{c:88,p:21,f:8},gC:28,
-       items:["1.5 cups cooked quinoa + 3 oz ground turkey (93% lean)","1/2 cup black beans","Roasted peppers & onions","2 tbsp salsa verde + lime"],
+    A:{name:"Chicken + Jasmine Rice + Broccoli + Avocado",m:{c:86,p:24,f:18},gC:24,
+       items:["3.5 oz grilled chicken breast","1.5 cups cooked jasmine rice","1 cup roasted broccoli (1 tsp olive oil)","1/4 avocado"],
+       gain:["Bump rice to 2.25 cups cooked","+1 small roasted sweet potato"]},
+    B:{name:"Turkey Quinoa Bowl + Beans + Avocado",m:{c:86,p:24,f:18},gC:24,
+       items:["1.5 cups cooked quinoa + 3.5 oz ground turkey (93% lean)","1/2 cup black beans","Roasted peppers & onions","1/4 avocado + 2 tbsp salsa verde + lime"],
        gain:["Bump quinoa to 2.25 cups cooked","+1/2 cup extra black beans"]},
   },
 };
@@ -113,35 +113,26 @@ var PC = { A:"#4a8fe8", B:"#e8a838", D:"#3dd9a0", S:"#3dd9a0" };
 // ─── STATE ─────────────────────────────────────────────────────────────────────
 var state = { weight:164, goal:"gain", view:"plans", plan:"D", rot:2, open:{},
   // InBody scan inputs (Tier 2/3). If bmr+ffm present, targets key off them; else weight fallback.
-  inbody:{ date:"", weight:164, bodyFat:null, smm:null, ffm:142.6, bmr:1768, vfa:null },
+  inbody:{ date:"2026-07-11", weight:165.5, bodyFat:11.1, smm:84.0, ffm:147.1, bmr:1812, vfa:null },
   activity:1.55,   // training activity factor (5-6 d/wk); user-adjustable
-  scans:[] };      // history of logged scans for trend
+  scans:[{date:"2026-07-11",weight:165.5,bodyFat:11.1,smm:84.0,ffm:147.1,bmr:1812,vfa:null},{date:"2026-01-28",weight:167.5,bodyFat:14.8,smm:81.4,ffm:142.6,bmr:1768,vfa:46.9}] };      // history of logged scans for trend
 function load(){ try{ var s=localStorage.getItem("matt_meals_v1"); if(s) state=Object.assign(state,JSON.parse(s)); }catch(e){} }
 function save(){ try{ localStorage.setItem("matt_meals_v1",JSON.stringify(state)); }catch(e){} }
 
 // ─── TARGET MATH (mirrors tracker) ───────────────────────────────────────────────
+// Explicit trainer-aligned targets (set July 2026 from InBody + trainer guidance).
+// Gain = muscle-growth surplus (trainer band 3000-3200); recomp = lower-carb hold.
+var EXPLICIT_TARGETS = {
+  gain:   { p:175, c:370, f:100 },   // 3080 kcal -- protein topped, surplus carb-driven
+  recomp: { p:175, c:300, f:95 },    // 2755 kcal -- maintenance-ish, leaner carb
+  fatloss:{ p:180, c:230, f:85 }     // 2405 kcal -- protein-sparing deficit
+};
 function targets(weight, goal){
-  // Prefer measured BMR + lean mass (InBody) over weight-ratio estimate.
   var ib = state.inbody || {};
-  var usedBMR = false, kcal, p, f;
-  if (ib.bmr && ib.bmr > 0) {
-    // Calories = measured BMR x activity factor x goal multiplier
-    kcal = Math.round(ib.bmr * (state.activity||1.55) * GOAL_MULT[goal]);
-    usedBMR = true;
-  } else {
-    var scaled = Math.round(BASELINE_KCAL * (weight/BASELINE_WT));
-    kcal = Math.round(scaled * GOAL_MULT[goal]);
-  }
-  // Protein keyed off lean mass (FFM) if available, else total weight
-  if (ib.ffm && ib.ffm > 0) {
-    p = Math.round(ib.ffm * 1.15);   // ~1.15 g per lb lean mass
-  } else {
-    p = Math.round(weight * 1.0);
-  }
-  f = Math.round(weight * 0.45);     // fat floor at 0.45 g/lb total weight
-  var cc = Math.round((kcal - p*4 - f*9)/4);
-  if (cc < 120) cc = 120;            // floor
-  return { kcal:kcal, c:cc, p:p, f:f, usedBMR:usedBMR,
+  var t = EXPLICIT_TARGETS[goal] || EXPLICIT_TARGETS.gain;
+  var p = t.p, cc = t.c, f = t.f;
+  var kcal = p*4 + cc*4 + f*9;
+  return { kcal:kcal, c:cc, p:p, f:f, usedBMR:!!(ib.bmr),
     day:{ c:cc-DINNER.c, p:p-DINNER.p, f:f-DINNER.f } };
 }
 function mealM(slot, plan, goal){
