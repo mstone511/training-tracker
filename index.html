@@ -329,7 +329,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
       <div class="sync-help">When set to anything other than baseline, calorie + macro targets recalculate from your most recent logged weight.</div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-      <div><label style="display:block;font-size:12px;color:var(--txt2);margin-bottom:4px">Weight (lbs)</label><input type="number" id="bmWeight" inputmode="decimal" placeholder="167.5" style="width:100%;font-size:13px;height:34px;padding:0 8px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt)"></div>
+      <div><label style="display:block;font-size:12px;color:var(--txt2);margin-bottom:4px">Weight (lbs)</label><input type="number" id="bmWeight" inputmode="decimal" placeholder="165.5" style="width:100%;font-size:13px;height:34px;padding:0 8px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt)"></div>
       <div><label style="display:block;font-size:12px;color:var(--txt2);margin-bottom:4px">Body fat % (opt)</label><input type="number" id="bmBF" inputmode="decimal" placeholder="14.8" style="width:100%;font-size:13px;height:34px;padding:0 8px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt)"></div>
     </div>
     <button class="btn" style="width:100%" onclick="logBodyMetric()">Log today's measurement</button>
@@ -342,10 +342,10 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   <div class="macro-phase" id="ntLoadLabel">Moderate load</div>
   <div class="macro-reason" id="ntReason"></div>
   <div class="macro-grid">
-    <div class="macro-card c-kcal"><div class="val" id="nt-kcal">2,748</div><div class="lbl">kcal</div><div class="sub" id="nt-kcal-sub">maintenance + training</div></div>
-    <div class="macro-card c-pro"><div class="val" id="nt-pro">161g</div><div class="lbl">protein</div><div class="sub">floor -- always hit this</div></div>
-    <div class="macro-card c-carb"><div class="val" id="nt-carb">355g</div><div class="lbl">carbs</div><div class="sub" id="nt-carb-sub">primary fuel</div></div>
-    <div class="macro-card c-fat"><div class="val" id="nt-fat">76g</div><div class="lbl">fat</div><div class="sub">floor: 65g always</div></div>
+    <div class="macro-card c-kcal"><div class="val" id="nt-kcal">3,080</div><div class="lbl">kcal</div><div class="sub" id="nt-kcal-sub">maintenance + training</div></div>
+    <div class="macro-card c-pro"><div class="val" id="nt-pro">175g</div><div class="lbl">protein</div><div class="sub">floor -- always hit this</div></div>
+    <div class="macro-card c-carb"><div class="val" id="nt-carb">370g</div><div class="lbl">carbs</div><div class="sub" id="nt-carb-sub">primary fuel</div></div>
+    <div class="macro-card c-fat"><div class="val" id="nt-fat">100g</div><div class="lbl">fat</div><div class="sub">floor: 65g always</div></div>
   </div>
   <div class="adj-note" id="ntAdjNote"></div>
 </div>
@@ -473,7 +473,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<div id="buildStamp" data-build="2026-07-06c" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-06c</div>
+<div id="buildStamp" data-build="2026-07-11" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-11</div>
 </body>
 </html><script>
 
@@ -2789,7 +2789,7 @@ async function runAnalysis() {
     return s.name + ' [' + s.type + '] ' + (sd.done ? 'DONE' : 'NOT DONE') + ' -- ' + (flds || 'no stats') + ' -- notes: ' + (sd.notes || 'none');
   }).join('\n');
   var prevAI = appData['wk' + (wk.n - 1)] && appData['wk' + (wk.n - 1)].ai ? appData['wk' + (wk.n - 1)].ai.slice(0, 300) + '...' : 'none';
-  var prompt = 'Expert exercise physiologist reviewing training for Matt (167.5 lbs, 14.8% BF, conjugate-trained). 22-week hypertrophy-to-sprint-triathlon program. Week ' + wk.n + '/22 (' + wk.phase + ': ' + wk.focus + ', load: ' + wk.load + '). HR zones (Karvonen RHR 55 max 180): Z2 130-143, Z3 143-155, Z4 155-168. Recent run 5.45km/30min avg 165bpm (Z4) after 1yr off. Z2 run pace ~10:30-11:30/mi.\nWeek ' + wk.n + ' data:\n' + summary + '\nPrev week: ' + prevAI + '\nDirect review max 200 words: 1) completion + skipped 2) HR zone compliance -- flag Z3/Z4 runs that should be Z2 3) strength progression 4) swim CSS changes 5) one specific next-week adjustment. Numbers only.';
+  var prompt = 'Expert exercise physiologist reviewing training for Matt (165.5 lbs, 11.1% BF, 84 lbs SMM, BMR 1812; conjugate-trained). 28-week muscle-growth-to-Olympic-triathlon program (strength-primary block). Week ' + wk.n + '/22 (' + wk.phase + ': ' + wk.focus + ', load: ' + wk.load + '). HR zones (Karvonen RHR 55 max 180): Z2 130-143, Z3 143-155, Z4 155-168. Recent run 5.45km/30min avg 165bpm (Z4) after 1yr off. Z2 run pace ~10:30-11:30/mi.\nWeek ' + wk.n + ' data:\n' + summary + '\nPrev week: ' + prevAI + '\nDirect review max 200 words: 1) completion + skipped 2) HR zone compliance -- flag Z3/Z4 runs that should be Z2 3) strength progression 4) swim CSS changes 5) one specific next-week adjustment. Numbers only.';
   try {
     var r = await fetch('https://tracker-ai.msmyers4.workers.dev/', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-5-20250929', max_tokens:1000, messages:[{role:'user', content:prompt}]})});
     var d = await r.json();
@@ -2800,36 +2800,34 @@ async function runAnalysis() {
 }
 
 // ─── NUTRITION ────────────────────────────────────────────────────────────────
+// Explicit trainer-aligned targets (July 2026, from InBody 2026-07-11 + trainer guidance).
+// Kept in sync with the meals app so both surfaces show the SAME numbers.
+var EXPLICIT_TARGETS = {
+  gain:   { kcal:3080, pro:175, carb:370, fat:100 },   // muscle-growth surplus (trainer band 3000-3200)
+  recomp: { kcal:2880, pro:175, carb:320, fat:100 },   // maintenance-ish hold
+  cut:    { kcal:2405, pro:180, carb:230, fat:85  }    // protein-sparing deficit
+};
 function getMT(idx) {
   var base = MACRO_BY_LOAD[WEEKS[idx].load] || MACRO_BY_LOAD.moderate;
   var goal = (appData.profile && appData.profile.goal) || 'baseline';
   if (goal === 'baseline') return base;
-  // Recalculate from current weight + goal
   var wt = getCurrentWeight();
-  var baselineWt = 167.5;
-  // Scale the baseline calorie figure by weight ratio (maintenance roughly tracks bodyweight)
-  var scaled = Math.round(base.kcal * (wt / baselineWt));
-  // Apply goal multiplier to calories
-  var mult = goal === 'cut' ? 0.83 : goal === 'gain' ? 1.10 : 1.0; // recomp = maintenance
-  var kcal = Math.round(scaled * mult);
-  // Protein: 1.0 g/lb bodyweight, floor 150g; on a cut bump to 1.1 g/lb to protect muscle
-  var proPerLb = goal === 'cut' ? 1.1 : 1.0;
-  var pro = Math.max(150, Math.round(wt * proPerLb));
-  // Fat: ~0.4 g/lb, floor 60g
-  var fat = Math.max(60, Math.round(wt * 0.4));
-  // Carbs: remainder of calories after protein (4 kcal/g) and fat (9 kcal/g)
-  var carb = Math.max(120, Math.round((kcal - pro * 4 - fat * 9) / 4));
-  var goalLabel = goal === 'cut' ? 'Fat loss' : goal === 'gain' ? 'Lean gain' : 'Recomposition';
-  var goalReason = goal === 'cut'
-    ? 'Gradual deficit (~17% below maintenance) from your logged weight of ' + wt + ' lbs. Protein raised to ' + proPerLb + ' g/lb to protect muscle in the deficit. Expect ~0.5-0.75 lb/wk loss; if faster, eat more.'
-    : goal === 'gain'
-    ? 'Gradual surplus (~10% above maintenance) from your logged weight of ' + wt + ' lbs. Aim for ~0.25-0.5 lb/wk gain; faster than that is mostly fat.'
-    : 'Maintenance calories from your logged weight of ' + wt + ' lbs -- the recomposition sweet spot. Scale-weight should stay roughly flat while body composition shifts.';
-  return {
-    kcal: kcal, carb: carb, pro: pro, fat: fat,
-    label: goalLabel + ' -- ' + base.label.split('--')[0].trim() + ' (live, ' + wt + ' lbs)',
-    reason: goalReason + ' ' + base.reason
-  };
+  // Use explicit trainer targets (source of truth, matches meals app) rather than weight-ratio estimate.
+  var et = EXPLICIT_TARGETS[goal];
+  if (et) {
+    var goalLabel = goal === 'cut' ? 'Fat loss' : goal === 'gain' ? 'Muscle growth' : 'Recomposition';
+    var goalReason = goal === 'gain'
+      ? 'Trainer-set muscle-growth target (~3,080 kcal, 175P/370C/100F) from InBody 2026-07-11 (165.5 lb, 11.1% BF, BMR 1812). Surplus is carb-driven for the concurrent endurance load. Aim ~0.3-0.5 lb/wk gain; flat -> nudge toward 3,200, faster than 0.7 -> ease toward 3,000.'
+      : goal === 'cut'
+      ? 'Protein-sparing deficit. Protein high to protect muscle. Expect ~0.5-0.75 lb/wk loss; if faster, eat more.'
+      : 'Maintenance-ish hold -- body recomposition sweet spot. Scale-weight roughly flat while composition shifts.';
+    return {
+      kcal: et.kcal, carb: et.carb, pro: et.pro, fat: et.fat,
+      label: goalLabel + ' -- ' + base.label.split('--')[0].trim() + ' (' + wt + ' lb)',
+      reason: goalReason + ' ' + base.reason
+    };
+  }
+  return base;
 }
 
 function getSessionComposition(wk) {
@@ -3123,9 +3121,9 @@ async function runNutAnalysis() {
       metricsCtx += ' Weight trend: ' + (dW > 0 ? '+' : '') + dW + ' lbs over ' + dDays + ' days.';
     }
   } else {
-    metricsCtx = 'No body weight logged yet (using baseline 167.5 lbs, 14.8% BF).';
+    metricsCtx = 'No body weight logged yet (using latest InBody 2026-07-11: 165.5 lbs, 11.1% BF, 84 lbs SMM, BMR 1812).';
   }
-  var prompt = 'Sports dietitian reviewing weekly nutrition for Matt (baseline 167.5 lbs, 14.8% BF, 81.4 lbs SMM; goal: body recomposition -- build/maintain muscle especially legs while supporting sprint triathlon training). ' + metricsCtx + ' Week ' + wk.n + '/22, load: ' + wk.load + '. Targets: ' + mt.kcal + ' kcal / ' + mt.carb + 'g C / ' + mt.pro + 'g P / ' + mt.fat + 'g F. ' + mt.reason + '\nLogged days:\n' + (days.join('\n') || 'No days logged yet.') + '\nPost-workout smoothie = 380 kcal / 42g C / 40g P / 7g F.\nDirect feedback max 200 words: 1) protein compliance 2) carb-to-training match 3) obvious under/over-eating days 4) IF weight trend data exists, comment on whether current calorie target aligns with the recomposition goal and recommend a specific kcal adjustment if the trend suggests it 5) one practical adjustment. Numbers only.';
+  var prompt = 'Sports dietitian reviewing weekly nutrition for Matt (latest InBody 2026-07-11: 165.5 lbs, 11.1% BF, 84 lbs SMM, BMR 1812; goal: muscle growth at ~3080 kcal/day, 175P/370C/100F per trainer; build muscle especially legs while supporting sprint triathlon training). ' + metricsCtx + ' Week ' + wk.n + '/22, load: ' + wk.load + '. Targets: ' + mt.kcal + ' kcal / ' + mt.carb + 'g C / ' + mt.pro + 'g P / ' + mt.fat + 'g F. ' + mt.reason + '\nLogged days:\n' + (days.join('\n') || 'No days logged yet.') + '\nPost-workout smoothie = 380 kcal / 42g C / 40g P / 7g F.\nDirect feedback max 200 words: 1) protein compliance 2) carb-to-training match 3) obvious under/over-eating days 4) IF weight trend data exists, comment on whether current calorie target aligns with the recomposition goal and recommend a specific kcal adjustment if the trend suggests it 5) one practical adjustment. Numbers only.';
   try {
     var r = await fetch('https://tracker-ai.msmyers4.workers.dev/', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-5-20250929', max_tokens:1000, messages:[{role:'user', content:prompt}]})});
     var d = await r.json();
@@ -3338,7 +3336,7 @@ function loadProfile() {
 function getCurrentWeight() {
   var metrics = appData.metrics || [];
   if (metrics.length > 0) return metrics[metrics.length - 1].weight;
-  return 167.5; // baseline fallback
+  return 165.5; // baseline fallback (InBody 2026-07-11)
 }
 
 function logBodyMetric() {
