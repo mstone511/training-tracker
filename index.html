@@ -235,6 +235,10 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
 .swim-int.on{background:var(--a);color:#fff;border-color:var(--a)}
 .swim-est-out{font-size:15px;font-weight:600;color:var(--tx);margin-bottom:6px}
 .swim-est-note{font-size:10px;color:var(--td);line-height:1.4}
+
+.ow-note{margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--bg2);border:1px solid var(--a)}
+.ow-note-lbl{font-size:11px;color:var(--a);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;font-weight:600}
+.ow-note-body{font-size:12px;color:var(--tx);line-height:1.6}
 </style>
 </head>
 <body>
@@ -2639,6 +2643,13 @@ function renderTraining() {
     html += '<textarea class="note-area" placeholder="Notes -- how it felt, load changes, energy, anything to flag at review" oninput="saveNote(\'' + s.id + '\',\'' + wk.n + '\',this.value)">' + noteV + '</textarea>';
     html += '</div>';
     if (s.type === 'swim') {
+      html += '<div class="ow-note">';
+      html += '<div class="ow-note-lbl">\uD83C\uDF0A Building toward open water \u2014 practice these in the pool now</div>';
+      html += '<div class="ow-note-body">';
+      html += '&bull; <b>Bilateral breathing</b> (every 3 strokes, both sides) \u2014 essential for sighting away from chop/sun in open water.<br>';
+      html += '&bull; <b>Sighting drill</b>: every 6\u20138 strokes, lift eyes forward to a fixed point without stopping (crocodile eyes, minimal head lift).<br>';
+      html += '&bull; <b>Continuous swimming</b>: minimise wall push-offs on longer sets \u2014 open water has no walls to rest at.';
+      html += '</div></div>';
       var swW = getCurrentWeight() || 165.5;
       var swWkg = swW / 2.20462;
       var curMin = parseFloat((sd.fields && sd.fields['swim_min']) || 0) || 0;
