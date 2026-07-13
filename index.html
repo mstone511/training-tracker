@@ -227,6 +227,14 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
 
 .jay-btn{width:100%;box-sizing:border-box;margin:8px 0;padding:8px 10px;background:var(--bg2);color:var(--tm);border:1px dashed var(--b);border-radius:6px;font-size:12px;cursor:pointer;text-align:center}
 .jay-btn.on{background:var(--green-bg);color:var(--green-txt);border-style:solid;border-color:var(--green-txt)}
+
+.swim-est{margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--bg2);border:1px solid var(--b)}
+.swim-est-lbl{font-size:11px;color:var(--tm);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px}
+.swim-int-row{display:flex;gap:6px;margin-bottom:8px}
+.swim-int{flex:1;background:var(--bg);color:var(--tm);border:1px solid var(--b);border-radius:6px;padding:6px 4px;font-size:11px;cursor:pointer}
+.swim-int.on{background:var(--a);color:#fff;border-color:var(--a)}
+.swim-est-out{font-size:15px;font-weight:600;color:var(--tx);margin-bottom:6px}
+.swim-est-note{font-size:10px;color:var(--td);line-height:1.4}
 </style>
 </head>
 <body>
@@ -473,7 +481,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<div id="buildStamp" data-build="2026-07-11" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-11</div>
+<div id="buildStamp" data-build="2026-07-11b" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-11b</div>
 </body>
 </html><script>
 
@@ -2630,6 +2638,26 @@ function renderTraining() {
     html += '<input id="painloc-' + s.id + '" class="painloc" style="display:' + (painOn?'block':'none') + '" type="text" placeholder="Where? (e.g. left knee, low back)" value="' + painLocV + '" oninput="savePainLoc(\'' + s.id + '\',\'' + wk.n + '\',this.value)">';
     html += '<textarea class="note-area" placeholder="Notes -- how it felt, load changes, energy, anything to flag at review" oninput="saveNote(\'' + s.id + '\',\'' + wk.n + '\',this.value)">' + noteV + '</textarea>';
     html += '</div>';
+    if (s.type === 'swim') {
+      var swW = getCurrentWeight() || 165.5;
+      var swWkg = swW / 2.20462;
+      var curMin = parseFloat((sd.fields && sd.fields['swim_min']) || 0) || 0;
+      var curInt = (sd && sd.swimIntensity) || 'moderate';
+      var mets = { easy:6.0, moderate:8.3, vigorous:10.0 };
+      var estKcal = Math.round(mets[curInt] * swWkg * (curMin/60));
+      html += '<div class="swim-est">';
+      html += '<div class="swim-est-lbl">\uD83C\uDFCA Swim calorie estimate (MET-based -- approximate)</div>';
+      html += '<div class="swim-int-row">';
+      ['easy','moderate','vigorous'].forEach(function(lv){
+        var on = curInt === lv;
+        var lbl = lv === 'easy' ? 'Easy/technique' : lv === 'moderate' ? 'Steady Z2' : 'Hard';
+        html += '<button class="swim-int' + (on?' on':'') + '" onclick="event.stopPropagation(); setSwimIntensity(\'' + s.id + '\',' + wk.n + ',\'' + lv + '\')">' + lbl + '</button>';
+      });
+      html += '</div>';
+      html += '<div class="swim-est-out" id="swimest-' + s.id + '">' + (curMin>0 ? ('~' + estKcal + ' kcal  (' + curMin + ' min @ ' + curInt + ')') : 'Enter duration above to estimate') + '</div>';
+      html += '<div class="swim-est-note">Swim calorie figures are rough for everyone \u2014 use as a load approximation, not a precise number. Log it, don\'t agonize over it.</div>';
+      html += '</div>';
+    }
     if (s.type === 'run') {
       var hr = parseInt((sd.fields && sd.fields['run_avghr']) || 0);
       html += '<div class="hr-warn" id="hrw-' + s.id + '" style="display:' + (hr > 143 ? 'block' : 'none') + '">';
@@ -2678,6 +2706,7 @@ function buildReviewExport() {
         for (var k = 0; k < fk.length; k++) { if (rec.fields[fk[k]]) loads.push(fk[k].replace(/^load_/,'').replace(/_/g,' ') + '=' + rec.fields[fk[k]]); }
         if (loads.length) parts.push('    loads: ' + loads.join(', '));
       }
+      if (rec.swimKcal) parts.push('    swim est: ~' + rec.swimKcal + ' kcal (' + (rec.swimIntensity||'moderate') + ')');
       if (rec.rpe) parts.push('    RPE: ' + rec.rpe + '/10');
       if (rec.pain) parts.push('    !! PAIN/JOINT FLAG' + (rec.painLoc ? ': ' + rec.painLoc : ''));
       if (rec.note) parts.push('    note: ' + rec.note);
@@ -2706,6 +2735,20 @@ function fallbackCopy(txt) {
   try { document.execCommand('copy'); showToast('Review data copied -- paste to Claude'); }
   catch(e){ showToast('Copy failed -- long-press to select'); }
   document.body.removeChild(ta);
+}
+function setSwimIntensity(sid, wn, level) {
+  var wd = getWD(wn);
+  if (!wd.sessions[sid]) wd.sessions[sid] = {};
+  wd.sessions[sid].swimIntensity = level;
+  // compute + store the estimate so it's captured in the log/export
+  var swW = getCurrentWeight() || 165.5;
+  var swWkg = swW / 2.20462;
+  var curMin = parseFloat((wd.sessions[sid].fields && wd.sessions[sid].fields['swim_min']) || 0) || 0;
+  var mets = { easy:6.0, moderate:8.3, vigorous:10.0 };
+  var est = Math.round(mets[level] * swWkg * (curMin/60));
+  wd.sessions[sid].swimKcal = est;
+  saveData();
+  renderTraining();
 }
 function saveNote(sid, wn, v) {
   var wd = getWD(wn);
