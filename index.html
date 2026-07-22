@@ -239,6 +239,8 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
 .ow-note{margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--bg2);border:1px solid var(--a)}
 .ow-note-lbl{font-size:11px;color:var(--a);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;font-weight:600}
 .ow-note-body{font-size:12px;color:var(--tx);line-height:1.6}
+
+.ex-foot{font-size:10px;color:var(--a);margin-top:3px;line-height:1.45;opacity:0.95}
 </style>
 </head>
 <body>
@@ -292,6 +294,15 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
     <button class="btn" style="width:100%;font-size:12px;margin-top:8px" onclick="resetScheduleShift()">Reset schedule to start date (clear all slips)</button>
     <button class="btn" style="width:100%;font-size:12px;margin-top:8px" onclick="copyReviewExport()">&#128203; Copy review data for Claude</button>
     <button class="btn" style="width:100%;font-size:12px;margin-top:6px" onclick="downloadReviewExport()">&#128190; Download export for dashboard</button>
+    <div class="sync-field" style="margin-top:10px">
+      <label>Travel / away window (train what you can; close out when back)</label>
+      <div style="display:flex;gap:6px">
+        <input type="date" id="cfgTravelStart" onchange="setTravel(this.value, document.getElementById('cfgTravelEnd').value)">
+        <input type="date" id="cfgTravelEnd" onchange="setTravel(document.getElementById('cfgTravelStart').value, this.value)">
+      </div>
+    </div>
+    <div id="travelStatus" style="font-size:12px;line-height:1.5;margin-top:6px"></div>
+    <button class="btn" id="travelCloseBtn" style="width:100%;font-size:12px;margin-top:6px;display:none" onclick="closeOutTravel()">&#9992; Close out travel -- push missed sessions forward</button>
     <div class="sync-help" style="margin-top:8px">Floating schedule: sessions show target dates, but if you miss days the plan slides forward from where you actually are -- nothing is marked failed. Check sessions off as you do them and the dates re-project automatically. Use Reset to snap everything back to the start date.</div>
   </div>
 </div>
@@ -486,7 +497,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<div id="buildStamp" data-build="2026-07-11b" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-11b</div>
+<div id="buildStamp" data-build="2026-07-22" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-22</div>
 </body>
 </html><script>
 
@@ -706,6 +717,73 @@ function buildWCHtml(sid, type, name) {
   html += '<div class="wc-sec"><div class="wc-sec-title">Cool-down / stretch (5 min)</div>' + cdHtml + '</div>';
   html += '</div>';
   return gluteNote + html;
+}
+
+var DAY_OVERRIDE = {
+  'w1s2':'Sat',
+  'w1s4':'Tue',
+  'w1s6':'Thu',
+  'w2s2':'Sat',
+  'w2s4':'Tue',
+  'w2s6':'Thu',
+  'w3s2':'Sat',
+  'w3s4':'Tue',
+  'w3s6':'Thu',
+  'w4s2':'Sat',
+  'w4s4':'Tue',
+  'w4s6':'Thu',
+  'w5s2':'Sat',
+  'w5s4':'Tue',
+  'w5s6':'Thu',
+  'w6s2':'Sat',
+  'w6s4':'Tue',
+  'w6s6':'Thu',
+  'w7s2':'Sat',
+  'w7s6':'Tue',
+  'w8s2':'Sat',
+  'w8s7':'Tue',
+  'w9s2':'Sat',
+  'w9s6':'Tue',
+  'w10s2':'Sat',
+  'w10s6':'Tue',
+  'w11s2':'Sat',
+  'w11s6':'Tue',
+  'w12s2':'Sat',
+  'w12s6':'Tue',
+  'w13s2':'Sat',
+  'w13s6':'Tue',
+  'w14s2':'Sat',
+  'w14s6':'Tue',
+  'w15s2':'Sat',
+  'w15s6':'Tue',
+  'w16s2':'Sat',
+  'w16s6':'Tue',
+  'w17s2':'Sat',
+  'w17s6':'Tue',
+  'w18s2':'Sat',
+  'w18s6':'Tue',
+  'w19s2':'Sat',
+  'w19s6':'Tue',
+  'w20s2':'Sat',
+  'w20s6':'Tue',
+  'w21s2':'Sat',
+  'w21s6':'Tue',
+  'w22s2':'Sat',
+  'w22s6':'Tue',
+};
+
+// Day remap (swim moved to Saturday per Matt's weekend swim availability; wk1-6 also
+// rotate bike->Tue, run->Thu so the run keeps 3 days' separation from Monday's heavy legs).
+// Applied as an override map rather than rewriting WEEKS, so session IDs -- and therefore
+// every localStorage key in matt_v5 -- are untouched.
+function sessionDay(sid, fallbackDay) {
+  return (typeof DAY_OVERRIDE !== 'undefined' && DAY_OVERRIDE[sid]) || fallbackDay;
+}
+var DAY_ORDER = {'Mon':0,'Tue':1,'Wed':2,'Thu':3,'Fri':4,'Sat':5,'Sun':6};
+function sessionsInDayOrder(wk) {
+  return wk.sessions.slice().sort(function(a,b){
+    return (DAY_ORDER[sessionDay(a.id,a.day)]||0) - (DAY_ORDER[sessionDay(b.id,b.day)]||0);
+  });
 }
 
 // ─── DATA: EXERCISE DETAIL ───────────────────────────────────────────────────
@@ -1666,7 +1744,7 @@ function toggleSkip(sid, wn) {
   var dayLabel = '';
   var wkObj = null;
   for (var i = 0; i < WEEKS.length; i++) { if (WEEKS[i].n === wn) { wkObj = WEEKS[i]; break; } }
-  if (wkObj) { for (var s = 0; s < wkObj.sessions.length; s++) { if (wkObj.sessions[s].id === sid) { dayLabel = wkObj.sessions[s].day; break; } } }
+  if (wkObj) { for (var s = 0; s < wkObj.sessions.length; s++) { if (wkObj.sessions[s].id === sid) { dayLabel = sessionDay(wkObj.sessions[s].id, wkObj.sessions[s].day); break; } } }
   if (nowSkipped) {
     wd.sessions[sid].done = false; delete wd.sessions[sid].doneDate;
     pushPlanForward();   // lose one training slot -> everyone shifts one Mon-Sat slot
@@ -1726,6 +1804,74 @@ function shiftedDate(wkNum, dayLabel) {
 
 // Auto-catch-up: if the earliest remaining session's projected date is in the past,
 // add lost slots so it lands on/after today -- preserving structure (whole-slot steps).
+// ─── TRAVEL / AWAY WINDOWS ────────────────────────────────────────────────────
+// Generalised for any trip. You set a date range; train whatever you can during it
+// (completions stamp normally). When the trip ends you close it out with one tap and the
+// plan advances by exactly the number of sessions you did NOT complete in that window --
+// so nothing is lost, sequencing is preserved, and you never cross off days one by one.
+function updateTravelUI() {
+  var t = getTravel();
+  var st = document.getElementById('travelStatus');
+  var btn = document.getElementById('travelCloseBtn');
+  var i1 = document.getElementById('cfgTravelStart'), i2 = document.getElementById('cfgTravelEnd');
+  if (i1 && t.start) i1.value = t.start;
+  if (i2 && t.end) i2.value = t.end;
+  if (!st || !btn) return;
+  if (!t.start || !t.end) { st.textContent = ''; btn.style.display = 'none'; return; }
+  var missed = travelMissedCount();
+  var today = todayLocal();
+  var active = inTravelWindow(today);
+  st.innerHTML = (active ? '<span style="color:var(--amber-txt)">&#9992; Travel active</span> ' : '<span style="color:var(--txt2)">Travel window set</span> ')
+    + t.start + ' \u2192 ' + t.end + ' &middot; ' + missed + ' session' + (missed===1?'':'s')
+    + ' currently unfinished in the window. Train what you can \u2014 completions stamp normally. Close out when you\'re back.';
+  btn.style.display = 'block';
+}
+function getTravel() {
+  var cfg = appData.config || {};
+  return { start: cfg.travelStart || '', end: cfg.travelEnd || '' };
+}
+function setTravel(start, end) {
+  if (!appData.config) appData.config = {};
+  appData.config.travelStart = start || '';
+  appData.config.travelEnd = end || '';
+  saveData(); renderTraining(); renderSchedule && renderSchedule();
+}
+function inTravelWindow(d) {
+  var t = getTravel();
+  if (!t.start || !t.end || !d) return false;
+  var s = parseDate(t.start), e = parseDate(t.end);
+  if (!s || !e) return false;
+  return d.getTime() >= s.getTime() && d.getTime() <= e.getTime();
+}
+// Count uncompleted, unskipped sessions whose projected date lands inside the window.
+function travelMissedCount() {
+  var t = getTravel();
+  if (!t.start || !t.end) return 0;
+  var n = 0;
+  for (var w = 0; w < WEEKS.length; w++) {
+    var wd = appData[wkey(WEEKS[w].n)];
+    for (var s = 0; s < WEEKS[w].sessions.length; s++) {
+      var sess = WEEKS[w].sessions[s];
+      if (sess.type === 'rest') continue;
+      var rec = wd && wd.sessions && wd.sessions[sess.id];
+      if (rec && (rec.done || rec.skipped)) continue;
+      var pd = shiftedDate(WEEKS[w].n, sessionDay(sess.id, sess.day));
+      if (pd && inTravelWindow(pd)) n++;
+    }
+  }
+  return n;
+}
+function closeOutTravel() {
+  var missed = travelMissedCount();
+  if (missed > 0) setLostSlots(getLostSlots() + missed);
+  setTravel('', '');
+  _projectionCache = null;
+  saveData();
+  renderTraining();
+  showToast(missed > 0
+    ? 'Travel closed out -- plan advanced ' + missed + ' session' + (missed===1?'':'s') + ', sequence intact'
+    : 'Travel closed out -- nothing missed, plan unchanged');
+}
 function reconcilePlanShift() {
   // Auto-advance DISABLED by design: the plan no longer slides forward just because a
   // scheduled date has passed. An uncompleted session simply shows as overdue ("Xd ago")
@@ -1752,7 +1898,7 @@ function floatingDate(wkNum, dayLabel, sid) {
 function projectedFinishDate() {
   var lastWk = WEEKS[WEEKS.length - 1];
   var lastSess = lastWk.sessions[lastWk.sessions.length - 1];
-  return shiftedDate(lastWk.n, lastSess.day);
+  return shiftedDate(lastWk.n, sessionDay(lastSess.id, lastSess.day));
 }
 
 // Are we on track for the race? Returns {status, deltaDays} or null if no race set.
@@ -1763,7 +1909,7 @@ function raceProjection() {
   var projFinish = projectedFinishDate();
   if (!projFinish) {
     var lastWk = WEEKS[WEEKS.length - 1];
-    projFinish = scheduledDate(lastWk.n, lastWk.sessions[lastWk.sessions.length - 1].day);
+    projFinish = scheduledDate(lastWk.n, sessionDay(lastWk.sessions[lastWk.sessions.length-1].id, lastWk.sessions[lastWk.sessions.length-1].day));
   }
   var delta = daysBetween(projFinish, race); // +ve = race after plan finish (buffer)
   return {race: race, projFinish: projFinish, deltaDays: delta};
@@ -1956,6 +2102,62 @@ function deriveFields(sid, sessionType, authored){
   return out.length ? out : (authored || []);
 }
 
+// ─── EXERCISE HISTORY FOOTNOTES ───────────────────────────────────────────────
+// Under each movement, surface (a) the most recent logged load/reps for that exact
+// movement, and (b) any number you wrote in a session NOTE that mentions it. This is how
+// manually-noted loads for movements without a dedicated field become visible next time.
+function exStem(cleanName) {
+  return String(cleanName).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,28);
+}
+function findExerciseHistory(cleanName, beforeWeekNum) {
+  var stem = exStem(cleanName);
+  var out = { load:null, reps:null, addl:null, wk:null, noteHit:null, noteWk:null };
+  if (!stem) return out;
+  // significant words for note matching (drop generic tokens)
+  var stop = {bb:1,db:1,kb:1,the:1,and:1,or:1,with:1,to:1,a:1,of:1};
+  var words = String(cleanName).toLowerCase().split(/[^a-z0-9]+/).filter(function(w){ return w.length>2 && !stop[w]; });
+  for (var w = WEEKS.length - 1; w >= 0; w--) {
+    var wn = WEEKS[w].n;
+    if (beforeWeekNum && wn > beforeWeekNum) continue;
+    var wd = appData[wkey(wn)];
+    if (!wd || !wd.sessions) continue;
+    for (var sid in wd.sessions) {
+      var rec = wd.sessions[sid];
+      if (!rec) continue;
+      if (rec.fields && out.load === null && out.reps === null) {
+        if (rec.fields['load_' + stem]) { out.load = rec.fields['load_' + stem]; out.wk = wn; }
+        if (rec.fields['reps_' + stem]) { out.reps = rec.fields['reps_' + stem]; out.wk = wn; }
+        if (rec.fields['addl_' + stem]) { out.addl = rec.fields['addl_' + stem]; out.wk = wn; }
+      }
+      if (rec.note && out.noteHit === null && words.length) {
+        var low = String(rec.note).toLowerCase();
+        var matched = words.some(function(x){ return low.indexOf(x) >= 0; });
+        if (matched) {
+          // pull the sentence/fragment containing the match
+          var parts = String(rec.note).split(/[.;\n]/);
+          for (var p = 0; p < parts.length; p++) {
+            var pl = parts[p].toLowerCase();
+            if (words.some(function(x){ return pl.indexOf(x) >= 0; }) && /\d/.test(parts[p])) {
+              out.noteHit = parts[p].trim().slice(0, 90); out.noteWk = wn; break;
+            }
+          }
+        }
+      }
+    }
+    if (out.load !== null && out.noteHit !== null) break;
+  }
+  return out;
+}
+function exFootnote(cleanName, curWeekNum) {
+  var h = findExerciseHistory(cleanName, curWeekNum);
+  var bits = [];
+  if (h.load) bits.push('last logged <b>' + h.load + ' lb</b>' + (h.wk ? ' (wk' + h.wk + ')' : ''));
+  else if (h.reps) bits.push('last logged <b>' + h.reps + ' reps</b>' + (h.addl ? ' +' + h.addl + ' lb' : '') + (h.wk ? ' (wk' + h.wk + ')' : ''));
+  if (h.noteHit) bits.push('note wk' + h.noteWk + ': &ldquo;' + h.noteHit.replace(/</g,'&lt;') + '&rdquo;');
+  if (!bits.length) return '';
+  return '<div class="ex-foot">&#8627; ' + bits.join(' &middot; ') + '</div>';
+}
+
 function buildExHtml(sid, type, name) {
   var detail = EX_DATA[sid] || (EX_ALIAS[sid] && EX_DATA[EX_ALIAS[sid]]) || getGenericExDetail(type, name);
   if (!detail) return '';
@@ -2003,9 +2205,12 @@ function buildExHtml(sid, type, name) {
     for (var e = 0; e < group.ex.length; e++) {
       var ex = group.ex[e];
       var noteHtml = ex[2] ? '<div class="ex-note">' + ex[2] + '</div>' : '';
+      var cleanEx = String(ex[0]).replace(/^[A-D][12]\.\s*/, '').trim();
+      var footHtml = '';
+      try { footHtml = exFootnote(cleanEx, (typeof curWk !== 'undefined' && WEEKS[curWk]) ? WEEKS[curWk].n : null); } catch (err) { footHtml = ''; }
       rowsHtml += '<div class="ex-row">';
       rowsHtml += '<span class="ex-num">' + (e + 1) + '</span>';
-      rowsHtml += '<div class="ex-info"><div class="ex-name">' + ex[0] + '</div>' + noteHtml + '</div>';
+      rowsHtml += '<div class="ex-info"><div class="ex-name">' + ex[0] + '</div>' + noteHtml + footHtml + '</div>';
       rowsHtml += '<span class="ex-sets">' + ex[1] + '</span>';
       rowsHtml += '</div>';
     }
@@ -2092,7 +2297,7 @@ var WEEKS = [
 {id:'w7s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI + LB-DY',fields:[{k:'squat_top',l:'Squat top (lbs)'},{k:'rdl_top',l:'RDL top (lbs)'}]},
 {id:'w7s2',name:'Swim -- technique + continuous easy',type:'swim',day:'Tue',detail:'30 min drill focus',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 {id:'w7s3',name:'Upper body -- high intensity',type:'lift',day:'Wed',detail:'UB-HI + UB-DY',fields:[{k:'pullup_reps',l:'Pull-up max reps'},{k:'bench_top',l:'Bench top (lbs)'}]},
-{id:'w7s4',name:'Swim -- easy aerobic sets',type:'swim',day:'Thu',detail:'35 min, 3rd swim this week',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
+{id:'w7s4',name:'Bike -- Z2 50 min',type:'bike',day:'Thu',detail:'35 min, 3rd swim this week',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w7s5',name:'Conditioning + running prep',type:'lift',day:'Fri',syncKey:'Full Body - Running Prep Work - Single Leg Focus',detail:'COND + RP-SL',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
 {id:'w7s6',name:'Run -- Z2 2.5 mi',type:'run',day:'Sat',detail:'HR 130-143',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR (bpm)'},{k:'run_pace',l:'Pace (min/mi)'}]},
 {id:'w7s7',name:'Swim -- continuous Z2',type:'swim',day:'Sun',detail:'30 min easy',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
@@ -2111,7 +2316,7 @@ var WEEKS = [
 {id:'w9s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI + LB-DY',fields:[{k:'squat_top',l:'Squat top (lbs)'},{k:'rdl_top',l:'RDL top (lbs)'}]},
 {id:'w9s2',name:'Swim -- CSS 40 min',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w9s3',name:'Upper body -- high intensity',type:'lift',day:'Wed',detail:'UB-HI + UB-DY',fields:[{k:'pullup_reps',l:'Pull-up reps'},{k:'bench_top',l:'Bench top (lbs)'}]},
-{id:'w9s4',name:'Swim -- technique 30 min',type:'swim',day:'Thu',detail:'Technique only',fields:[{k:'swim_min',l:'Duration (min)'}]},
+{id:'w9s4',name:'Bike -- Z2 55 min',type:'bike',day:'Thu',detail:'Technique only',fields:[{k:'swim_min',l:'Duration (min)'}]},
 {id:'w9s5',name:'Deadlift work capacity (5th session)',type:'lift',day:'Fri',detail:'FB-B',fields:[{k:'circuit_time',l:'Circuit time (min)'}]},
 {id:'w9s6',name:'Run Z2 3 mi + Bike Z2 60 min',type:'run',day:'Sat',detail:'Run then bike Z2',fields:[{k:'run_dist',l:'Run distance (mi)'},{k:'run_avghr',l:'Run avg HR'},{k:'bike_min',l:'Bike duration (min)'}]},
 {id:'w9s7',name:'Swim -- continuous 40 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
@@ -2120,7 +2325,7 @@ var WEEKS = [
 {id:'w10s1',name:'Lower body -- squat',type:'lift',day:'Mon',syncKey:'Second Session - Leg(Squat) and Core Focus',detail:'LB-SQ',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
 {id:'w10s2',name:'Swim -- CSS retest #1',type:'swim',day:'Tue',detail:'400m TT + 200m TT',fields:[{k:'css_400',l:'400m time (mm:ss)'},{k:'css_200',l:'200m time (mm:ss)'},{k:'css_pace',l:'New CSS pace (/100m)'}]},
 {id:'w10s3',name:'Upper body -- press (6th session)',type:'lift',day:'Wed',syncKey:'6th Session - Upperbody Focus',detail:'UB-PR',fields:[{k:'press_top',l:'Press top (lbs)'}]},
-{id:'w10s4',name:'Run Z2 + Swim technique',type:'run',day:'Thu',detail:'Short run AM, swim PM 30 min',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'swim_min',l:'Swim duration (min)'}]},
+{id:'w10s4',name:'Bike -- Z2 55 min',type:'bike',day:'Thu',detail:'Short run AM, swim PM 30 min',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'swim_min',l:'Swim duration (min)'}]},
 {id:'w10s5',name:'Deadlift work capacity (5th session)',type:'lift',day:'Fri',detail:'FB-A + RP-SL',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
 {id:'w10s6',name:'Run Z2 3.5 mi + Z3 bike 45 min',type:'run',day:'Sat',detail:'Within safe spike threshold',fields:[{k:'run_dist',l:'Run distance (mi)'},{k:'run_avghr',l:'Run avg HR'},{k:'run_pace',l:'Pace (min/mi)'}]},
 {id:'w10s7',name:'Swim -- continuous 40 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
@@ -2129,7 +2334,7 @@ var WEEKS = [
 {id:'w11s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI + LB-DY',fields:[{k:'squat_top',l:'Squat top (lbs)'},{k:'rdl_top',l:'RDL top (lbs)'}]},
 {id:'w11s2',name:'Swim -- CSS 40 min',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w11s3',name:'Upper body -- high intensity',type:'lift',day:'Wed',detail:'UB-HI + UB-DY',fields:[{k:'pullup_reps',l:'Pull-up reps'},{k:'bench_top',l:'Bench top (lbs)'}]},
-{id:'w11s4',name:'Swim -- technique 35 min',type:'swim',day:'Thu',detail:'Technique focus',fields:[{k:'swim_min',l:'Duration (min)'}]},
+{id:'w11s4',name:'Bike -- Z2 60 min',type:'bike',day:'Thu',detail:'Technique focus',fields:[{k:'swim_min',l:'Duration (min)'}]},
 {id:'w11s5',name:'Conditioning circuit',type:'lift',day:'Fri',syncKey:'Full Body - Conditoning Focus with Circuits',detail:'COND',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
 {id:'w11s6',name:'Run Z2 3.5 mi + Z3 bike 45 min',type:'run',day:'Sat',detail:'Monitor Oura readiness',fields:[{k:'run_dist',l:'Run distance (mi)'},{k:'run_avghr',l:'Run avg HR'},{k:'oura_readiness',l:'Oura readiness score'}]},
 {id:'w11s7',name:'Swim -- continuous 45 min',type:'swim',day:'Sun',detail:'Z2 longest swim to date',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
@@ -2147,7 +2352,7 @@ var WEEKS = [
 {id:'w13s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI accessory -30%',fields:[{k:'squat_top',l:'Squat top (lbs)'},{k:'rdl_top',l:'RDL top (lbs)'}]},
 {id:'w13s2',name:'Swim -- CSS 40 min',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w13s3',name:'Upper body -- high intensity',type:'lift',day:'Wed',detail:'UB-HI accessory -30%',fields:[{k:'pullup_reps',l:'Pull-up reps'},{k:'bench_top',l:'Bench top (lbs)'}]},
-{id:'w13s4',name:'Run Z2 3 mi + Swim technique',type:'run',day:'Thu',detail:'Short run AM, swim PM 35 min',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'swim_min',l:'Swim duration'}]},
+{id:'w13s4',name:'Bike -- Z2 60 min',type:'bike',day:'Thu',detail:'Short run AM, swim PM 35 min',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'swim_min',l:'Swim duration'}]},
 {id:'w13s5',name:'Running prep + chest/arms',type:'lift',day:'Fri',syncKey:'Full Body - Running Prep Work - Single Leg Focus',detail:'RP-SL + chest/arms finisher',fields:[]},
 {id:'w13s6',name:'Run Z2 4 mi + Z3 bike 50 min',type:'run',day:'Sat',detail:'Longest run to date',fields:[{k:'run_dist',l:'Run distance (mi)'},{k:'run_avghr',l:'Run avg HR'},{k:'run_pace',l:'Pace (min/mi)'}]},
 {id:'w13s7',name:'Swim -- continuous 45 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
@@ -2156,7 +2361,7 @@ var WEEKS = [
 {id:'w14s1',name:'Lower body -- squat + core (2nd session)',type:'lift',day:'Mon',syncKey:'Second Session - Leg(Squat) and Core Focus',detail:'LB-SQ',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
 {id:'w14s2',name:'Swim -- CSS 40 min',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w14s3',name:'Upper body -- press (6th session)',type:'lift',day:'Wed',syncKey:'6th Session - Upperbody Focus',detail:'UB-PR',fields:[{k:'press_top',l:'Press top (lbs)'}]},
-{id:'w14s4',name:'Swim -- technique 35 min',type:'swim',day:'Thu',detail:'Technique only',fields:[{k:'swim_min',l:'Duration (min)'}]},
+{id:'w14s4',name:'Bike -- Z2 60 min',type:'bike',day:'Thu',detail:'Technique only',fields:[{k:'swim_min',l:'Duration (min)'}]},
 {id:'w14s5',name:'Running prep -- single leg focus',type:'lift',day:'Fri',syncKey:'Full Body - Running Prep Work - Single Leg Focus',detail:'COND',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
 {id:'w14s6',name:'BRICK -- bike 30 min to run 10 min',type:'brick',day:'Sat',detail:'First brick, all Z2, expect heavy legs',fields:[{k:'bike_min',l:'Bike (min)'},{k:'bike_avghr',l:'Bike avg HR'},{k:'run_min',l:'Run (min)'},{k:'run_avghr',l:'Run avg HR'},{k:'brick_feel',l:'Feel score (1-10)'}]},
 {id:'w14s7',name:'Swim -- continuous 45 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
@@ -2257,6 +2462,27 @@ var pendingFood = null;
 
 function loadData() {
   try { var s = localStorage.getItem('matt_v5'); if (s) appData = JSON.parse(s); } catch(e) {}
+  migrateSchema();
+}
+// Additive-only migration. NEVER replaces appData or any wkN/sessions object -- it only
+// fills in containers that newer features expect, so six-plus weeks of logs survive every
+// update. Storage key stays 'matt_v5'. New per-session fields (rpe, pain, painLoc, note,
+// swimKcal, swimIntensity, jaySession) are optional reads with fallbacks, so older records
+// that lack them keep working untouched.
+function migrateSchema() {
+  if (!appData || typeof appData !== 'object') appData = {};
+  if (!appData.config || typeof appData.config !== 'object') appData.config = {};
+  if (!appData.profile || typeof appData.profile !== 'object') appData.profile = {};
+  if (!Array.isArray(appData.metrics)) appData.metrics = appData.metrics || [];
+  if (appData.config.lostSlots === undefined) appData.config.lostSlots = 0;
+  if (appData.config.travelStart === undefined) appData.config.travelStart = '';
+  if (appData.config.travelEnd === undefined) appData.config.travelEnd = '';
+  // ensure each week container exists but do NOT touch existing session records
+  for (var i = 0; i < WEEKS.length; i++) {
+    var k = wkey(WEEKS[i].n);
+    if (!appData[k] || typeof appData[k] !== 'object') appData[k] = { sessions: {} };
+    if (!appData[k].sessions || typeof appData[k].sessions !== 'object') appData[k].sessions = {};
+  }
 }
 function saveData() {
   try { localStorage.setItem('matt_v5', JSON.stringify(appData)); } catch(e) {}
@@ -2473,10 +2699,10 @@ function nearestSessionToDate(targetDate) {
     for (var s = 0; s < WEEKS[w].sessions.length; s++) {
       var sess = WEEKS[w].sessions[s];
       if (sess.type !== 'lift') continue;
-      var pd = shiftedDate(WEEKS[w].n, sess.day);
+      var pd = shiftedDate(WEEKS[w].n, sessionDay(sess.id, sess.day));
       if (!pd) continue;
       var gap = Math.abs(daysBetween(targetDate, pd));
-      if (gap < bestGap) { bestGap = gap; best = {wkNum: WEEKS[w].n, sid: sess.id, dayLabel: sess.day, gapDays: gap}; }
+      if (gap < bestGap) { bestGap = gap; best = {wkNum: WEEKS[w].n, sid: sess.id, dayLabel: sessionDay(sess.id, sess.day), gapDays: gap}; }
     }
   }
   return best;
@@ -2579,12 +2805,13 @@ function nextWeek() { if (curWk < WEEKS.length - 1) { curWk++; document.getEleme
 
 function renderTraining() {
   reconcilePlanShift();
+  updateTravelUI();
   _projectionCache = null;
   var wk = WEEKS[curWk];
   var wd = getWD(wk.n);
   document.getElementById('phaseBadge').textContent = wk.phase;
   document.getElementById('weekSel').value = curWk;
-  var sess = wk.sessions;
+  var sess = sessionsInDayOrder(wk);
   var done = 0;
   for (var i = 0; i < sess.length; i++) { if (wd.sessions[sess[i].id] && wd.sessions[sess[i].id].done) done++; }
   document.getElementById('doneCount').textContent = done;
@@ -2607,7 +2834,7 @@ function renderTraining() {
     html += '<div class="session" id="sc-' + s.id + '">';
     html += '<div class="session-top" onclick="toggleSession(\'' + s.id + '\')">';
     html += '<div class="check ' + (isDone ? 'done' : '') + '" id="chk-' + s.id + '" onclick="event.stopPropagation(); toggleDone(\'' + s.id + '\',' + wk.n + ')">' + (isDone ? '&#10003;' : '') + '</div>';
-    var dInfo = sessionDateLabel(wk.n, s.day, s.id, isDone);
+    var dInfo = sessionDateLabel(wk.n, sessionDay(s.id, s.day), s.id, isDone);
     var skipped = isSkipped(wk.n, s.id);
     var isJay = !!(sd && sd.jaySession);
     var jayBadge = isJay ? '<span style="font-size:9px;background:var(--green-bg);color:var(--green-txt);padding:1px 6px;border-radius:3px;margin-left:4px;vertical-align:middle">\uD83C\uDFCB Jay session</span>' : '';
@@ -2711,7 +2938,7 @@ function buildReviewExport() {
       if (!done && !skipped && !rec.note && !rec.rpe && !rec.pain && !(rec.fields && Object.keys(rec.fields).length)) continue;
       var parts = [];
       var jayMark = rec.jaySession ? ' [JAY SESSION -- replaced programmed work]' : '';
-      parts.push('  [' + s.day + '] ' + s.name + (done ? ' (done ' + (rec.doneDate||'?') + ')' : skipped ? ' (SKIPPED)' : ' (in progress)') + jayMark);
+      parts.push('  [' + sessionDay(s.id, s.day) + '] ' + s.name + (done ? ' (done ' + (rec.doneDate||'?') + ')' : skipped ? ' (SKIPPED)' : ' (in progress)') + jayMark);
       if (rec.fields) {
         var fk = Object.keys(rec.fields);
         var loads = [];
@@ -2733,6 +2960,19 @@ function buildReviewExport() {
   }
   return lines.join('\n');
 }
+function downloadReviewExport() {
+  try {
+    var stamp = toISO(todayLocal());
+    var payload = { generated: stamp, reviewText: buildReviewExport(), appData: appData };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'triathlon_export_' + stamp + '.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+    showToast('Export downloaded -- drops in your Downloads folder');
+  } catch(e) { showToast('Export failed: ' + e.message); }
+}
 function copyReviewExport() {
   var txt = buildReviewExport();
   if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -2747,19 +2987,6 @@ function fallbackCopy(txt) {
   try { document.execCommand('copy'); showToast('Review data copied -- paste to Claude'); }
   catch(e){ showToast('Copy failed -- long-press to select'); }
   document.body.removeChild(ta);
-}
-function downloadReviewExport() {
-  try {
-    var stamp = toISO(todayLocal());
-    var payload = { generated: stamp, reviewText: buildReviewExport(), appData: appData };
-    var blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url; a.download = 'triathlon_export_' + stamp + '.json';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
-    showToast('Export downloaded -- drops in your Downloads folder');
-  } catch(e) { showToast('Export failed: ' + e.message); }
 }
 function setSwimIntensity(sid, wn, level) {
   var wd = getWD(wn);
