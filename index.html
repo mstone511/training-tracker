@@ -291,6 +291,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
     <div id="raceProjection" style="font-size:12px;line-height:1.5;margin-top:4px"></div>
     <button class="btn" style="width:100%;font-size:12px;margin-top:8px" onclick="resetScheduleShift()">Reset schedule to start date (clear all slips)</button>
     <button class="btn" style="width:100%;font-size:12px;margin-top:8px" onclick="copyReviewExport()">&#128203; Copy review data for Claude</button>
+    <button class="btn" style="width:100%;font-size:12px;margin-top:6px" onclick="downloadReviewExport()">&#128190; Download export for dashboard</button>
     <div class="sync-help" style="margin-top:8px">Floating schedule: sessions show target dates, but if you miss days the plan slides forward from where you actually are -- nothing is marked failed. Check sessions off as you do them and the dates re-project automatically. Use Reset to snap everything back to the start date.</div>
   </div>
 </div>
@@ -2746,6 +2747,19 @@ function fallbackCopy(txt) {
   try { document.execCommand('copy'); showToast('Review data copied -- paste to Claude'); }
   catch(e){ showToast('Copy failed -- long-press to select'); }
   document.body.removeChild(ta);
+}
+function downloadReviewExport() {
+  try {
+    var stamp = toISO(todayLocal());
+    var payload = { generated: stamp, reviewText: buildReviewExport(), appData: appData };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'triathlon_export_' + stamp + '.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+    showToast('Export downloaded -- drops in your Downloads folder');
+  } catch(e) { showToast('Export failed: ' + e.message); }
 }
 function setSwimIntensity(sid, wn, level) {
   var wd = getWD(wn);
