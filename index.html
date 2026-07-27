@@ -505,7 +505,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<div id="buildStamp" data-build="2026-07-22d" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-22d</div>
+<div id="buildStamp" data-build="2026-07-22e" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-22e</div>
 </body>
 </html><script>
 
@@ -1858,7 +1858,8 @@ function dateForSlot(slotIndex) {
 
 // Each session's IDEAL slot index = (weekNum-1)*6 + dayOffset(Mon=0..Sat=5).
 function idealSlotIndex(wkNum, dayLabel) {
-  var off = {'Mon':0,'Tue':1,'Wed':2,'Thu':3,'Fri':4,'Sat':5}[dayLabel];
+  var base = String(dayLabel).replace(/\s*(AM|PM)\s*$/i, '').trim();
+  var off = {'Mon':0,'Tue':1,'Wed':2,'Thu':3,'Fri':4,'Sat':5}[base];
   if (off === undefined) off = 0;
   return (wkNum - 1) * 6 + off;
 }
@@ -2383,17 +2384,17 @@ var WEEKS = [
 {id:'w7s4',name:'Bike -- FTP TEST (20-min) -- sets power zones',type:'bike',day:'Thu',detail:'20-min max sustainable; FTP = avg x 0.95',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w7s5',name:'Conditioning + running prep',type:'lift',day:'Fri',syncKey:'Full Body - Running Prep Work - Single Leg Focus',detail:'COND + RP-SL',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
 {id:'w7s6',name:'Run -- Z2 2.5 mi',type:'run',day:'Sat',detail:'HR 130-143',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR (bpm)'},{k:'run_pace',l:'Pace (min/mi)'}]},
-{id:'w7s7',name:'Swim -- continuous Z2',type:'swim',day:'Sun',detail:'30 min easy',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
+{id:'w7s7',name:'Rest (was 2nd swim -- now Saturday only)',type:'rest',day:'Sun',detail:'30 min easy',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:8,phase:'Phase 2',focus:'Second run session added',load:'high',sessions:[
 {id:'w8s1',name:'Lower body -- squat + core (2nd session)',type:'lift',day:'Mon',syncKey:'Second Session - Leg(Squat) and Core Focus',detail:'LB-SQ',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
 {id:'w8s2',name:'Swim -- CSS baseline test (your FIRST test -- establishes swim zones)',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w8s3',name:'Upper body -- L-sit pull + bench (7th session)',type:'lift',day:'Wed',syncKey:'7th Session - Upperbody Focus',detail:'UB-PR + UB-PL',fields:[{k:'press_top',l:'Press top (lbs)'}]},
-{id:'w8s4',name:'Run -- Z2 easy 2 mi',type:'run',day:'Thu AM',detail:'2nd run/wk, strictly Z2',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR (bpm)'}]},
-{id:'w8s5',name:'Swim -- technique',type:'swim',day:'Thu PM',detail:'30 min, 6h+ after run',fields:[{k:'swim_min',l:'Duration (min)'}]},
+{id:'w8s4',name:'Run -- Z2 easy 2 mi',type:'run',day:'Thu',detail:'2nd run/wk, strictly Z2',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR (bpm)'}]},
+{id:'w8s5',name:'Rest (was 2nd swim -- Saturday CSS test covers swim)',type:'rest',day:'Thu',detail:'30 min, 6h+ after run',fields:[{k:'swim_min',l:'Duration (min)'}]},
 {id:'w8s6',name:'Landmine work capacity (4th session)',type:'lift',day:'Fri',detail:'FB-A',fields:[{k:'circuit_time',l:'Circuit time (min)'}]},
 {id:'w8s7',name:'Run 3 mi + Z3 bike 40 min',type:'run',day:'Sat',detail:'Run first, first Z3 bike',fields:[{k:'run_dist',l:'Run distance (mi)'},{k:'run_avghr',l:'Run avg HR'},{k:'bike_avghr',l:'Bike avg HR'}]},
-{id:'w8s8',name:'Swim -- continuous 35 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
+{id:'w8s8',name:'Rest (was 2nd swim -- now Saturday only)',type:'rest',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:9,phase:'Phase 2',focus:'Strength peak + hold run volume',load:'peak',sessions:[
 {id:'w9s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI + LB-DY',fields:[{k:'squat_top',l:'Squat top (lbs)'},{k:'rdl_top',l:'RDL top (lbs)'}]},
@@ -2402,7 +2403,7 @@ var WEEKS = [
 {id:'w9s4',name:'Bike -- VO2 intro 3x3',type:'bike',day:'Thu',detail:'10 wu / 3x3min hard, 3min easy / Z2 / cd',fields:[{k:'swim_min',l:'Duration (min)'}]},
 {id:'w9s5',name:'Deadlift work capacity (5th session)',type:'lift',day:'Fri',detail:'FB-B',fields:[{k:'circuit_time',l:'Circuit time (min)'}]},
 {id:'w9s6',name:'Run Z2 3 mi + Bike Z2 60 min',type:'run',day:'Sat',detail:'Run then bike Z2',fields:[{k:'run_dist',l:'Run distance (mi)'},{k:'run_avghr',l:'Run avg HR'},{k:'bike_min',l:'Bike duration (min)'}]},
-{id:'w9s7',name:'Swim -- continuous 40 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
+{id:'w9s7',name:'Rest (was 2nd swim -- now Saturday only)',type:'rest',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:10,phase:'Phase 2',focus:'CSS retest + run to 3.5 mi',load:'high',sessions:[
 {id:'w10s1',name:'Lower body -- squat',type:'lift',day:'Mon',syncKey:'Second Session - Leg(Squat) and Core Focus',detail:'LB-SQ',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
@@ -2411,7 +2412,7 @@ var WEEKS = [
 {id:'w10s4',name:'Bike -- VO2 3x4',type:'bike',day:'Thu',detail:'10 wu / 3x4min hard, 3min easy / Z2 / cd',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'swim_min',l:'Swim duration (min)'}]},
 {id:'w10s5',name:'Deadlift work capacity (5th session)',type:'lift',day:'Fri',detail:'FB-A + RP-SL',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
 {id:'w10s6',name:'Run Z2 3.5 mi + Z3 bike 45 min',type:'run',day:'Sat',detail:'Within safe spike threshold',fields:[{k:'run_dist',l:'Run distance (mi)'},{k:'run_avghr',l:'Run avg HR'},{k:'run_pace',l:'Pace (min/mi)'}]},
-{id:'w10s7',name:'Swim -- continuous 40 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
+{id:'w10s7',name:'Rest (was 2nd swim -- now Saturday only)',type:'rest',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:11,phase:'Phase 2',focus:'Peak Phase 2 load',load:'peak',sessions:[
 {id:'w11s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI + LB-DY',fields:[{k:'squat_top',l:'Squat top (lbs)'},{k:'rdl_top',l:'RDL top (lbs)'}]},
@@ -2420,7 +2421,7 @@ var WEEKS = [
 {id:'w11s4',name:'Bike -- VO2 4x3',type:'bike',day:'Thu',detail:'10 wu / 4x3min hard, 3min easy / Z2 / cd',fields:[{k:'swim_min',l:'Duration (min)'}]},
 {id:'w11s5',name:'Conditioning circuit',type:'lift',day:'Fri',syncKey:'Full Body - Conditoning Focus with Circuits',detail:'COND',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
 {id:'w11s6',name:'Run Z2 3.5 mi + Z3 bike 45 min',type:'run',day:'Sat',detail:'Monitor Oura readiness',fields:[{k:'run_dist',l:'Run distance (mi)'},{k:'run_avghr',l:'Run avg HR'},{k:'oura_readiness',l:'Oura readiness score'}]},
-{id:'w11s7',name:'Swim -- continuous 45 min',type:'swim',day:'Sun',detail:'Z2 longest swim to date',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
+{id:'w11s7',name:'Rest (was 2nd swim -- now Saturday only)',type:'rest',day:'Sun',detail:'Z2 longest swim to date',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:12,phase:'Phase 2',focus:'Phase 2 deload',load:'deload',sessions:[
 {id:'w12s1',name:'Lower body -- dynamic light',type:'lift',day:'Mon',syncKey:'Lower Body Dynamic',detail:'LB-DY + chest/arms (light)',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
@@ -2429,7 +2430,7 @@ var WEEKS = [
 {id:'w12s4',name:'Run -- Z2 2.5 mi easy',type:'run',day:'Thu',detail:'Easy short',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR'}]},
 {id:'w12s5',name:'REST',type:'rest',day:'Fri',detail:'Full rest -- mandatory',fields:[]},
 {id:'w12s6',name:'Bike -- easy Z2 45 min',type:'bike',day:'Sat',detail:'Easy spin',fields:[{k:'bike_min',l:'Duration (min)'}]},
-{id:'w12s7',name:'Swim -- easy 30 min',type:'swim',day:'Sun',detail:'Easy continuous',fields:[{k:'swim_min',l:'Duration (min)'}]},
+{id:'w12s7',name:'Rest (was 2nd swim -- now Saturday only)',type:'rest',day:'Sun',detail:'Easy continuous',fields:[{k:'swim_min',l:'Duration (min)'}]},
 ]},
 {n:13,phase:'Phase 3',focus:'Emphasis shift -- strength to 3x/wk',load:'high',sessions:[
 {id:'w13s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI accessory -30%',fields:[{k:'squat_top',l:'Squat top (lbs)'},{k:'rdl_top',l:'RDL top (lbs)'}]},
@@ -2438,7 +2439,7 @@ var WEEKS = [
 {id:'w13s4',name:'Bike -- VO2 4x4',type:'bike',day:'Thu',detail:'10 wu / 4x4min @110-115% FTP / Z2 / cd',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'swim_min',l:'Swim duration'}]},
 {id:'w13s5',name:'Running prep + chest/arms',type:'lift',day:'Fri',syncKey:'Full Body - Running Prep Work - Single Leg Focus',detail:'RP-SL + chest/arms finisher',fields:[]},
 {id:'w13s6',name:'Run Z2 4 mi + Z3 bike 50 min',type:'run',day:'Sat',detail:'Longest run to date',fields:[{k:'run_dist',l:'Run distance (mi)'},{k:'run_avghr',l:'Run avg HR'},{k:'run_pace',l:'Pace (min/mi)'}]},
-{id:'w13s7',name:'Swim -- continuous 45 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
+{id:'w13s7',name:'Rest (was 2nd swim -- now Saturday only)',type:'rest',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:14,phase:'Phase 3',focus:'First brick session',load:'high',sessions:[
 {id:'w14s1',name:'Lower body -- squat + core (2nd session)',type:'lift',day:'Mon',syncKey:'Second Session - Leg(Squat) and Core Focus',detail:'LB-SQ',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
@@ -2447,7 +2448,7 @@ var WEEKS = [
 {id:'w14s4',name:'Bike -- FTP RETEST #1',type:'bike',day:'Thu',detail:'20-min max sustainable; updates zones',fields:[{k:'swim_min',l:'Duration (min)'}]},
 {id:'w14s5',name:'Running prep -- single leg focus',type:'lift',day:'Fri',syncKey:'Full Body - Running Prep Work - Single Leg Focus',detail:'COND',fields:[{k:'circuit_rounds',l:'AMRAP rounds'}]},
 {id:'w14s6',name:'BRICK -- bike 30 min to run 10 min',type:'brick',day:'Sat',detail:'First brick, all Z2, expect heavy legs',fields:[{k:'bike_min',l:'Bike (min)'},{k:'bike_avghr',l:'Bike avg HR'},{k:'run_min',l:'Run (min)'},{k:'run_avghr',l:'Run avg HR'},{k:'brick_feel',l:'Feel score (1-10)'}]},
-{id:'w14s7',name:'Swim -- continuous 45 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
+{id:'w14s7',name:'Rest (was 2nd swim -- now Saturday only)',type:'rest',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:15,phase:'Phase 3',focus:'CSS retest #2 + brick 35/12',load:'moderate',sessions:[
 {id:'w15s1',name:'Lower body -- dynamic',type:'lift',day:'Mon',syncKey:'Lower Body Dynamic',detail:'LB-DY + chest/arms finisher',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
@@ -2456,7 +2457,7 @@ var WEEKS = [
 {id:'w15s4',name:'Run Z2 3 mi + Swim technique',type:'run',day:'Thu',detail:'Short run + swim PM',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'swim_min',l:'Swim min'}]},
 {id:'w15s5',name:'REST',type:'rest',day:'Fri',detail:'Full rest before brick',fields:[]},
 {id:'w15s6',name:'BRICK -- bike 35 min to run 12 min',type:'brick',day:'Sat',detail:'Z2 throughout',fields:[{k:'bike_min',l:'Bike (min)'},{k:'bike_avghr',l:'Bike avg HR'},{k:'run_min',l:'Run (min)'},{k:'run_avghr',l:'Run avg HR'},{k:'brick_feel',l:'Feel (1-10)'}]},
-{id:'w15s7',name:'Swim -- continuous 50 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
+{id:'w15s7',name:'Rest (was 2nd swim -- now Saturday only)',type:'rest',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:16,phase:'Phase 3',focus:'5 km continuous run milestone',load:'high',sessions:[
 {id:'w16s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI + chest/arms finisher',fields:[{k:'squat_top',l:'Squat top (lbs)'},{k:'rdl_top',l:'RDL top (lbs)'}]},
@@ -2465,7 +2466,7 @@ var WEEKS = [
 {id:'w16s4',name:'Run Z2 3 mi + Swim technique',type:'run',day:'Thu',detail:'Mid-week run + swim PM',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'swim_min',l:'Swim min'}]},
 {id:'w16s5',name:'REST',type:'rest',day:'Fri',detail:'Rest before milestone run',fields:[]},
 {id:'w16s6',name:'Run -- Z2 5 km continuous',type:'run',day:'Sat',detail:'Sprint-tri distance, HR 130-145, time irrelevant',fields:[{k:'run_dist',l:'Distance (km or mi)'},{k:'run_avghr',l:'Avg HR (bpm)'},{k:'run_pace',l:'Pace (min/km)'},{k:'run_time',l:'Total time (mm:ss)'}]},
-{id:'w16s7',name:'Swim -- continuous 50 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
+{id:'w16s7',name:'Rest (was 2nd swim -- now Saturday only)',type:'rest',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:17,phase:'Phase 3',focus:'Phase 3 deload',load:'deload',sessions:[
 {id:'w17s1',name:'Lower body -- dynamic light',type:'lift',day:'Mon',syncKey:'Lower Body Dynamic',detail:'LB-DY + chest/arms (light)',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
@@ -2474,7 +2475,7 @@ var WEEKS = [
 {id:'w17s4',name:'Run -- Z2 2.5 mi easy',type:'run',day:'Thu',detail:'Easy short',fields:[{k:'run_dist',l:'Distance (mi)'},{k:'run_avghr',l:'Avg HR'}]},
 {id:'w17s5',name:'REST',type:'rest',day:'Fri',detail:'Full rest',fields:[]},
 {id:'w17s6',name:'Bike -- easy Z2 40 min',type:'bike',day:'Sat',detail:'Easy spin',fields:[{k:'bike_min',l:'Duration (min)'}]},
-{id:'w17s7',name:'Swim -- easy 30 min',type:'swim',day:'Sun',detail:'Easy continuous',fields:[{k:'swim_min',l:'Duration (min)'}]},
+{id:'w17s7',name:'Rest (was 2nd swim -- now Saturday only)',type:'rest',day:'Sun',detail:'Easy continuous',fields:[{k:'swim_min',l:'Duration (min)'}]},
 ]},
 {n:18,phase:'Phase 4',focus:'Race-specific, strength to 2x/wk',load:'high',sessions:[
 {id:'w18s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI + chest/arms (maintenance)',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
@@ -2483,7 +2484,7 @@ var WEEKS = [
 {id:'w18s4',name:'Bike -- VO2 4x4',type:'bike',day:'Thu',detail:'10 wu / 4x4min @110-115% FTP / Z2 / cd',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR'}]},
 {id:'w18s5',name:'Upper body -- high intensity',type:'lift',day:'Fri',detail:'UB-HI',fields:[{k:'pullup_reps',l:'Pull-up reps'},{k:'bench_top',l:'Bench top (lbs)'}]},
 {id:'w18s6',name:'BRICK -- bike 40 min to run 15 min',type:'brick',day:'Sat',detail:'Z2-Z3',fields:[{k:'bike_min',l:'Bike (min)'},{k:'bike_avghr',l:'Bike avg HR'},{k:'run_min',l:'Run (min)'},{k:'run_avghr',l:'Run avg HR'},{k:'brick_feel',l:'Feel (1-10)'}]},
-{id:'w18s7',name:'Swim -- continuous 50 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
+{id:'w18s7',name:'Rest (was 2nd swim -- now Saturday only)',type:'rest',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:19,phase:'Phase 4',focus:'Race simulation intensity',load:'peak',sessions:[
 {id:'w19s1',name:'Lower body -- dynamic',type:'lift',day:'Mon',detail:'LB-DY + chest/arms (maintenance)',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
@@ -2492,7 +2493,7 @@ var WEEKS = [
 {id:'w19s4',name:'Bike -- Threshold 2x17',type:'bike',day:'Thu',detail:'race-specific: 2x17min @95-100% FTP',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR'},{k:'bike_peak_hr',l:'Peak HR'}]},
 {id:'w19s5',name:'Upper body -- dynamic',type:'lift',day:'Fri',detail:'UB-DY',fields:[{k:'bench_top',l:'Working weight (lbs)'}]},
 {id:'w19s6',name:'BRICK -- bike 45 min to run 18 min',type:'brick',day:'Sat',detail:'Include 1 mi at Z3',fields:[{k:'bike_min',l:'Bike (min)'},{k:'bike_avghr',l:'Bike avg HR'},{k:'run_min',l:'Run (min)'},{k:'run_avghr',l:'Run avg HR'},{k:'brick_feel',l:'Feel (1-10)'}]},
-{id:'w19s7',name:'Swim -- open water or 40 min pool',type:'swim',day:'Sun',detail:'Open water if possible',fields:[{k:'swim_min',l:'Duration (min)'},{k:'open_water',l:'Open water? (yes/no)'}]},
+{id:'w19s7',name:'Rest (was 2nd swim -- now Saturday only)',type:'rest',day:'Sun',detail:'Open water if possible',fields:[{k:'swim_min',l:'Duration (min)'},{k:'open_water',l:'Open water? (yes/no)'}]},
 ]},
 {n:20,phase:'Phase 4',focus:'CSS retest #3 + longest brick',load:'peak',sessions:[
 {id:'w20s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI + chest/arms (maintenance)',fields:[{k:'squat_top',l:'Squat top (lbs)'}]},
@@ -2501,7 +2502,7 @@ var WEEKS = [
 {id:'w20s4',name:'Bike -- FTP RETEST #2',type:'bike',day:'Thu',detail:'20-min max sustainable; updates zones',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR'}]},
 {id:'w20s5',name:'Upper body -- high intensity',type:'lift',day:'Fri',detail:'UB-HI',fields:[{k:'pullup_reps',l:'Pull-up reps'},{k:'bench_top',l:'Bench top (lbs)'}]},
 {id:'w20s6',name:'BRICK -- bike 45 min to run 20 min',type:'brick',day:'Sat',detail:'Longest brick of program',fields:[{k:'bike_min',l:'Bike (min)'},{k:'bike_avghr',l:'Bike avg HR'},{k:'run_min',l:'Run (min)'},{k:'run_avghr',l:'Run avg HR'},{k:'brick_feel',l:'Feel (1-10)'}]},
-{id:'w20s7',name:'Swim -- easy 35 min',type:'swim',day:'Sun',detail:'Easy Z2',fields:[{k:'swim_min',l:'Duration (min)'}]},
+{id:'w20s7',name:'Rest (was 2nd swim -- now Saturday only)',type:'rest',day:'Sun',detail:'Easy Z2',fields:[{k:'swim_min',l:'Duration (min)'}]},
 ]},
 {n:21,phase:'Phase 4',focus:'Final load week before taper',load:'high',sessions:[
 {id:'w21s1',name:'Lower body -- dynamic',type:'lift',day:'Mon',detail:'LB-DY + chest/arms (maintenance)',fields:[{k:'squat_top',l:'Working weight (lbs)'}]},
@@ -2510,7 +2511,7 @@ var WEEKS = [
 {id:'w21s4',name:'Bike -- VO2 3x3 (taper)',type:'bike',day:'Thu',detail:'short sharpener, stay fresh',fields:[{k:'bike_min',l:'Duration (min)'},{k:'bike_avghr',l:'Avg HR'}]},
 {id:'w21s5',name:'REST',type:'rest',day:'Fri',detail:'Full rest',fields:[]},
 {id:'w21s6',name:'Run Z2 5 km + easy bike 30 min',type:'run',day:'Sat',detail:'Should feel easy vs wk 16',fields:[{k:'run_dist',l:'Run distance (km)'},{k:'run_avghr',l:'Run avg HR'},{k:'run_time',l:'Total run time'}]},
-{id:'w21s7',name:'Swim -- continuous 45 min',type:'swim',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
+{id:'w21s7',name:'Rest (was 2nd swim -- now Saturday only)',type:'rest',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
 ]},
 {n:22,phase:'Race week',focus:'Taper -- 40-50% volume drop',load:'taper',sessions:[
 {id:'w22s1',name:'Upper body -- dynamic light',type:'lift',day:'Mon',detail:'UB-DY reduced',fields:[{k:'bench_top',l:'Working weight (lbs)'}]},
@@ -2894,7 +2895,7 @@ function renderTraining() {
   var wd = getWD(wk.n);
   document.getElementById('phaseBadge').textContent = wk.phase;
   document.getElementById('weekSel').value = curWk;
-  var sess = sessionsInDayOrder(wk);
+  var sess = sessionsInDayOrder(wk).filter(function(s){ return s.type !== 'rest'; });
   var done = 0;
   for (var i = 0; i < sess.length; i++) { if (wd.sessions[sess[i].id] && wd.sessions[sess[i].id].done) done++; }
   document.getElementById('doneCount').textContent = done;
