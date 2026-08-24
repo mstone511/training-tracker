@@ -505,7 +505,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<div id="buildStamp" data-build="2026-07-22g" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-22g</div>
+<div id="buildStamp" data-build="2026-07-22i" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-22i</div>
 </body>
 </html><script>
 
@@ -781,9 +781,53 @@ function sessionsInDayOrder(wk) {
   });
 }
 
+// ─── STRENGTH + VO2 BLOCK (8 wks from 2026-07-22 reset; weeks 9-16) ───────────
+// Focus shifted OFF triathlon prep (move pending; no race until Q2 2027 at earliest)
+// TO muscle gain + VO2 max. Triathlon-specific content resumes at week 17+.
+// Structure per week: ONE 4x4 anchor (Thu) + ONE flexible Z4 option (Tue), both >=24h
+// from Monday heavy legs. Modality-agnostic -- do it on whatever you have (bike/run/row).
+var BLOCK_FOCUS = {
+  9:  'Strength + VO2 -- week 1 of 8', 10: 'Strength + VO2 -- week 2 of 8',
+  11: 'Strength + VO2 -- week 3 of 8', 12: 'Strength + VO2 -- week 4 (deload)',
+  13: 'Strength + VO2 -- week 5 of 8', 14: 'Strength + VO2 -- week 6 of 8',
+  15: 'Strength + VO2 -- week 7 of 8', 16: 'Strength + VO2 -- week 8 of 8'
+};
+// The 4x4 anchor per week (Thursday quality slot). pct = % FTP if biking; HR/RPE targets given
+// for any modality. Progressive, with the deload week reduced.
+var VO2_BLOCK_4X4 = {
+  'w9s4':  { sets:4, mins:4, pct:[106,110], label:'4x4 VO2 -- intro loading' },
+  'w10s4': { sets:4, mins:4, pct:[108,112], label:'4x4 VO2' },
+  'w11s4': { sets:4, mins:4, pct:[110,115], label:'4x4 VO2 -- full' },
+  'w12s4': { sets:3, mins:3, pct:[106,110], label:'3x3 VO2 -- deload, stay sharp' },
+  'w14s4': { sets:4, mins:4, pct:[112,117], label:'4x4 VO2 -- peak' },
+  'w15s4': { sets:4, mins:4, pct:[110,115], label:'4x4 VO2 -- full' },
+  'w16s4': { sets:5, mins:4, pct:[110,115], label:'5x4 VO2 -- block peak' }
+};
+// The flexible second Z4 session (Tuesday). Optional -- deploy by recovery. Lighter than the 4x4.
+var VO2_BLOCK_Z4 = {
+  'w9s2':'flex','w10s2':'flex','w11s2':'flex','w13s2':'flex','w14s2':'flex','w15s2':'flex','w16s2':'flex'
+};
+function blockVO2Html(sid) {
+  var v = VO2_BLOCK_4X4[sid];
+  if (v) {
+    var ftp = (typeof getFTP === 'function') ? getFTP() : null;
+    var w = (ftp && typeof wattsFor === 'function') ? wattsFor(v.pct[0], v.pct[1]) : null;
+    var h = '<div class="vo2-box"><div class="vo2-lbl">&#128293; ' + v.label + ' &mdash; THE hard session this week</div>';
+    h += '<div class="vo2-body"><b>' + v.sets + ' x ' + v.mins + ' min hard</b>, 3-min easy recoveries. 10-min warm-up first, 5-min cooldown after.<br>';
+    h += '<b>Targets (any modality):</b> ~90&ndash;95% max HR by the end of each interval, RPE 8&ndash;9 &mdash; hard but repeatable for all reps.<br>';
+    h += 'Bike: ' + (w ? '<b>' + w.lo + '&ndash;' + w.hi + ' W</b> (' + v.pct[0] + '&ndash;' + v.pct[1] + '% FTP).' : v.pct[0] + '&ndash;' + v.pct[1] + '% FTP once you run an FTP test.') + ' &nbsp; Run: near 5K race pace on the work intervals. &nbsp; Row: ~2K-pace effort.<br>';
+    h += '<span style="opacity:.85">This is the VO2max driver (Helgerud 2007). Keep it ONE hard bout &mdash; the rest of the week stays genuinely easy.</span></div></div>';
+    return h;
+  }
+  if (VO2_BLOCK_Z4[sid]) {
+    return '<div class="pwr-note"><b>Optional Z4 session &mdash; deploy by recovery.</b> If you\'re fresh: 5&ndash;6 x 3 min at threshold (RPE 7&ndash;8, ~Z4), 2-min recoveries, any modality. If you\'re beat up from the 4x4 or heavy legs, make this an easy Z2 aerobic session or skip. Never let this become a second maximal day.</div>';
+  }
+  return '';
+}
+
 // ─── FTP / BIKE POWER + VO2 4x4 ──────────────────────────────────────────────
 // FTP test sessions (mirrors the CSS swim test cadence). Retest ~6-8 wks.
-var FTP_TEST = { 'w7s4':'baseline', 'w14s4':'retest #1', 'w20s4':'retest #2' };
+var FTP_TEST = { 'w7s4':'baseline', 'w13s4':'block retest', 'w20s4':'retest #2' };
 // Weekly VO2 4x4 progression on the Thursday quality-bike slot. Ramps in during base,
 // full 4x4 through build, alternates with race-specific threshold at peak, minimal in taper.
 // NOTE: final interval counts + phase boundaries get re-set at the dated rebuild.
@@ -2477,7 +2521,7 @@ var WEEKS = [
 {id:'w13s1',name:'Lower body -- high intensity',type:'lift',day:'Mon',detail:'LB-HI accessory -30%',fields:[{k:'squat_top',l:'Squat top (lbs)'},{k:'rdl_top',l:'RDL top (lbs)'}]},
 {id:'w13s2',name:'Swim -- CSS 40 min',type:'swim',day:'Tue',detail:'CSS intervals',fields:[{k:'swim_min',l:'Duration (min)'},{k:'css_pace',l:'CSS pace (/100m)'}]},
 {id:'w13s3',name:'Upper body -- high intensity',type:'lift',day:'Wed',detail:'UB-HI accessory -30%',fields:[{k:'pullup_reps',l:'Pull-up reps'},{k:'bench_top',l:'Bench top (lbs)'}]},
-{id:'w13s4',name:'Bike -- VO2 4x4',type:'bike',day:'Thu',detail:'10 wu / 4x4min @110-115% FTP / Z2 / cd',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'swim_min',l:'Swim duration'}]},
+{id:'w13s4',name:'Bike -- FTP RETEST (recalibrates block)',type:'bike',day:'Thu',detail:'20-min max sustainable; fresh off deload; updates all watt targets',fields:[{k:'run_avghr',l:'Run avg HR'},{k:'swim_min',l:'Swim duration'}]},
 {id:'w13s5',name:'Running prep + chest/arms',type:'lift',day:'Fri',syncKey:'Full Body - Running Prep Work - Single Leg Focus',detail:'RP-SL + chest/arms finisher',fields:[]},
 {id:'w13s6',name:'Run Z2 4 mi + Z3 bike 50 min',type:'run',day:'Sat',detail:'Longest run to date',fields:[{k:'run_dist',l:'Run distance (mi)'},{k:'run_avghr',l:'Run avg HR'},{k:'run_pace',l:'Pace (min/mi)'}]},
 {id:'w13s7',name:'Rest (was 2nd swim -- now Saturday only)',type:'rest',day:'Sun',detail:'Z2',fields:[{k:'swim_min',l:'Duration (min)'},{k:'swim_dist',l:'Distance (m)'}]},
@@ -2602,6 +2646,16 @@ function migrateSchema() {
   if (appData.config.lostSlots === undefined) appData.config.lostSlots = 0;
   if (appData.config.travelStart === undefined) appData.config.travelStart = '';
   if (appData.config.travelEnd === undefined) appData.config.travelEnd = '';
+  // ONE-TIME block re-anchor (2026-07-22 reset): align to week 9 = today, and also clear
+  // any accumulated schedule drift + open travel window from the trip.
+  if (!appData.config.blockReset_2026_07_22) {
+    appData.config.blockReset_2026_07_22 = true;
+    appData.config.blockAnchorWeek = 9;
+    appData.config.blockAnchorDate = toISO(todayLocal());
+    appData.config.lostSlots = 0;
+    appData.config.travelStart = '';
+    appData.config.travelEnd = '';
+  }
   // ensure each week container exists but do NOT touch existing session records
   for (var i = 0; i < WEEKS.length; i++) {
     var k = wkey(WEEKS[i].n);
@@ -2934,7 +2988,9 @@ function renderTraining() {
   _projectionCache = null;
   var wk = WEEKS[curWk];
   var wd = getWD(wk.n);
-  document.getElementById('phaseBadge').textContent = wk.phase;
+  document.getElementById('phaseBadge').textContent = (typeof BLOCK_FOCUS !== 'undefined' && BLOCK_FOCUS[wk.n]) ? 'Strength + VO2' : wk.phase;
+  var _focusEl = document.getElementById('weekFocusLabel');
+  if (_focusEl) { _focusEl.textContent = (typeof BLOCK_FOCUS !== 'undefined' && BLOCK_FOCUS[wk.n]) ? BLOCK_FOCUS[wk.n] : (wk.focus || ''); }
   document.getElementById('weekSel').value = curWk;
   var sess = sessionsInDayOrder(wk).filter(function(s){ return s.type !== 'rest'; });
   var done = 0;
@@ -2996,7 +3052,10 @@ function renderTraining() {
     html += '<textarea class="note-area" placeholder="Notes -- how it felt, load changes, energy, anything to flag at review" oninput="saveNote(\'' + s.id + '\',\'' + wk.n + '\',this.value)">' + noteV + '</textarea>';
     html += '</div>';
     if (s.type === 'bike') {
-      try { html += zoneTargetHtml(s.id, s.name); } catch (err) {}
+      var blockV = '';
+      try { blockV = (typeof blockVO2Html === 'function') ? blockVO2Html(s.id) : ''; } catch (e) { blockV = ''; }
+      if (blockV) { html += blockV; }
+      else { try { html += zoneTargetHtml(s.id, s.name); } catch (err) {} }
     }
     if (s.type === 'swim') {
       html += '<div class="ow-note">';
@@ -3025,6 +3084,7 @@ function renderTraining() {
       html += '<div class="swim-est-note">Swim calorie figures are rough for everyone \u2014 use as a load approximation, not a precise number. Log it, don\'t agonize over it.</div>';
       html += '</div>';
     }
+    try { if (typeof VO2_BLOCK_Z4 !== 'undefined' && VO2_BLOCK_Z4[s.id]) { html += blockVO2Html(s.id); } } catch (e) {}
     if (s.type === 'run') {
       var hr = parseInt((sd.fields && sd.fields['run_avghr']) || 0);
       html += '<div class="hr-warn" id="hrw-' + s.id + '" style="display:' + (hr > 143 ? 'block' : 'none') + '">';
@@ -3964,9 +4024,19 @@ function addDescribedMeal() {
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function computeCurrentWeek() {
   // Which program week does today fall in? Based on program start + elapsed days,
-  // adjusted for schedule slips (lostSlots shifts the calendar forward). Clamped to
-  // the range of real weeks, and never past the last week.
+  // adjusted for schedule slips. Clamped to the range of real weeks.
+  // BLOCK RE-ANCHOR: if a reset anchor is set (e.g. after a trip/move re-aligned the plan),
+  // count forward from that anchor week+date instead of the original program start.
   try {
+    if (appData.config && appData.config.blockAnchorWeek && appData.config.blockAnchorDate) {
+      var aDate = parseDate(appData.config.blockAnchorDate);
+      var aElapsed = daysBetween(aDate, todayLocal());
+      if (aElapsed < 0) aElapsed = 0;
+      var aIdx = (appData.config.blockAnchorWeek - 1) + Math.floor(aElapsed / 7);
+      if (aIdx < 0) aIdx = 0;
+      if (aIdx > WEEKS.length - 1) aIdx = WEEKS.length - 1;
+      return aIdx;
+    }
     var startISO = getProgramStart();
     if (!startISO) return 0;
     var start = parseDate(startISO);
