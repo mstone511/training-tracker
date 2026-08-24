@@ -512,7 +512,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<div id="buildStamp" data-build="2026-08-24b" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-08-24b</div>
+<div id="buildStamp" data-build="2026-08-24d" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-08-24d</div>
 </body>
 </html><script>
 
@@ -2015,6 +2015,17 @@ function travelMissedCount() {
   }
   return n;
 }
+function getDayNote(iso) {
+  return (appData.config && appData.config.dayNotes && appData.config.dayNotes[iso]) || '';
+}
+function setDayNote(iso, text) {
+  if (!appData.config) appData.config = {};
+  if (!appData.config.dayNotes) appData.config.dayNotes = {};
+  if (text && text.trim()) appData.config.dayNotes[iso] = text.trim();
+  else delete appData.config.dayNotes[iso];
+  saveData();
+  renderTraining();
+}
 function reanchorToday(weekNum) {
   var wn = parseInt(weekNum);
   if (!wn || wn < 1 || wn > WEEKS.length) { showToast('Enter a week 1-' + WEEKS.length); return; }
@@ -2696,6 +2707,12 @@ function migrateSchema() {
     appData.config.blockAnchorDate = '2026-08-24';
     appData.config.lostSlots = 0;
   }
+  if (!appData.config.dayNotes || typeof appData.config.dayNotes !== 'object') appData.config.dayNotes = {};
+  // Foot injury (saucepan impact) -- mark 8/24 as rest WITHOUT removing any programmed session.
+  if (!appData.config.dayNote_footInjury_0824) {
+    appData.config.dayNote_footInjury_0824 = true;
+    appData.config.dayNotes['2026-08-24'] = 'REST -- foot injury (saucepan impact to dorsal midfoot; pain on toe extension + weight-bearing). Programmed sessions left intact; do upper-body only if anything, foot fully unloaded. Get X-ray if not clearly improving.';
+  }
   // ensure each week container exists but do NOT touch existing session records
   for (var i = 0; i < WEEKS.length; i++) {
     var k = wkey(WEEKS[i].n);
@@ -3046,6 +3063,20 @@ function renderTraining() {
   }
   document.getElementById('streakTxt').textContent = 'streak: ' + streak + ' wk' + (streak !== 1 ? 's' : '');
   var html = '';
+  // Day-note banners: show any dated note that falls on a session date in THIS week.
+  try {
+    var _seen = {};
+    for (var dn = 0; dn < sess.length; dn++) {
+      if (sess[dn].type === 'rest') continue;
+      var _iso = toISO(shiftedDate(wk.n, sessionDay(sess[dn].id, sess[dn].day)));
+      if (_seen[_iso]) continue; _seen[_iso] = 1;
+      var _note = getDayNote(_iso);
+      if (_note) {
+        html += '<div style="margin-bottom:10px;padding:10px 12px;border-radius:8px;background:var(--amber-bg);border:1px solid var(--amber-txt);font-size:12px;line-height:1.5;color:var(--amber-txt)">'
+          + '&#9888; <b>' + _iso + '</b> &mdash; ' + _note.replace(/</g,'&lt;') + '</div>';
+      }
+    }
+  } catch (e) {}
   for (var si2 = 0; si2 < sess.length; si2++) {
     var s = sess[si2];
     var sd = wd.sessions[s.id] || {};
@@ -3151,6 +3182,11 @@ function buildReviewExport() {
     for (var mi = 0; mi < sorted.length; mi++) { if (sorted[mi].weight) { bw = sorted[mi].weight; break; } }
   }
   if (bw) lines.push('Bodyweight (latest logged): ' + bw + ' lb');
+  try {
+    var _dn = (appData.config && appData.config.dayNotes) || {};
+    var _keys = Object.keys(_dn).sort();
+    for (var _k = 0; _k < _keys.length; _k++) lines.push('DAY NOTE ' + _keys[_k] + ': ' + _dn[_keys[_k]]);
+  } catch (e) {}
   var _ftp = getFTP();
   if (_ftp) lines.push('FTP: ' + _ftp + ' W' + ((appData.profile && appData.profile.ftpDate) ? ' (set ' + appData.profile.ftpDate + ')' : '')
     + '  |  Z2 ' + wattsFor(56,75).lo + '-' + wattsFor(56,75).hi + 'W, Z4 ' + wattsFor(91,105).lo + '-' + wattsFor(91,105).hi + 'W, Z5 ' + wattsFor(106,120).lo + '-' + wattsFor(106,120).hi + 'W');
