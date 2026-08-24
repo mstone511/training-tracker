@@ -311,6 +311,13 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
     </div>
     <div id="travelStatus" style="font-size:12px;line-height:1.5;margin-top:6px"></div>
     <button class="btn" id="travelCloseBtn" style="width:100%;font-size:12px;margin-top:6px;display:none" onclick="closeOutTravel()">&#9992; Close out travel -- push missed sessions forward</button>
+    <div class="sync-field" style="margin-top:10px">
+      <label>Re-anchor: "I'm on week ___ today" (realigns all dates to today)</label>
+      <div style="display:flex;gap:6px">
+        <input type="number" id="reanchorWk" min="1" placeholder="week #" style="flex:1">
+        <button class="btn" style="font-size:12px" onclick="reanchorToday(document.getElementById('reanchorWk').value)">Set</button>
+      </div>
+    </div>
     <div class="sync-help" style="margin-top:8px">Floating schedule: sessions show target dates, but if you miss days the plan slides forward from where you actually are -- nothing is marked failed. Check sessions off as you do them and the dates re-project automatically. Use Reset to snap everything back to the start date.</div>
   </div>
 </div>
@@ -505,7 +512,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<div id="buildStamp" data-build="2026-07-22i" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-22i</div>
+<div id="buildStamp" data-build="2026-07-22j" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-22j</div>
 </body>
 </html><script>
 
@@ -1789,6 +1796,20 @@ function renderSchedule() {
 var DEFAULT_START = '2026-06-08'; // Monday June 8, 2026
 
 function getProgramStart() {
+  // If a block re-anchor is set (post-trip/move realignment), the EFFECTIVE calendar origin is
+  // shifted so that anchorWeek lands on anchorDate. This keeps the session dates + 'today' flag
+  // consistent with computeCurrentWeek, which also honours the anchor. Both now share one origin.
+  if (appData.config && appData.config.blockAnchorWeek && appData.config.blockAnchorDate) {
+    var a = parseDate(appData.config.blockAnchorDate);
+    if (a) {
+      var eff = new Date(a.getTime());
+      eff.setDate(eff.getDate() - (appData.config.blockAnchorWeek - 1) * 7);
+      return toISO(eff);
+    }
+  }
+  return (appData.config && appData.config.startDate) || DEFAULT_START;
+}
+function getOriginalStart() {
   return (appData.config && appData.config.startDate) || DEFAULT_START;
 }
 function getRaceDate() {
@@ -1995,6 +2016,19 @@ function travelMissedCount() {
     }
   }
   return n;
+}
+function reanchorToday(weekNum) {
+  var wn = parseInt(weekNum);
+  if (!wn || wn < 1 || wn > WEEKS.length) { showToast('Enter a week 1-' + WEEKS.length); return; }
+  if (!appData.config) appData.config = {};
+  appData.config.blockAnchorWeek = wn;
+  appData.config.blockAnchorDate = toISO(todayLocal());
+  appData.config.lostSlots = 0;
+  _projectionCache = null;
+  saveData();
+  curWk = computeCurrentWeek();
+  renderTraining();
+  showToast('Re-anchored: week ' + wn + ' = today. Dates realigned.');
 }
 function closeOutTravel() {
   var missed = travelMissedCount();
