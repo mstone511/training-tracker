@@ -512,7 +512,7 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<div id="buildStamp" data-build="2026-07-22j" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-07-22j</div>
+<div id="buildStamp" data-build="2026-08-24b" style="text-align:center;font-size:9px;color:var(--tm,#888);opacity:0.6;padding:10px 0 18px">build 2026-08-24b</div>
 </body>
 </html><script>
 
@@ -794,26 +794,24 @@ function sessionsInDayOrder(wk) {
 // Structure per week: ONE 4x4 anchor (Thu) + ONE flexible Z4 option (Tue), both >=24h
 // from Monday heavy legs. Modality-agnostic -- do it on whatever you have (bike/run/row).
 var BLOCK_FOCUS = {
-  9:  'Strength + VO2 -- week 1 of 8', 10: 'Strength + VO2 -- week 2 of 8',
-  11: 'Strength + VO2 -- week 3 of 8', 12: 'Strength + VO2 -- week 4 (deload)',
-  13: 'Strength + VO2 -- week 5 of 8', 14: 'Strength + VO2 -- week 6 of 8',
-  15: 'Strength + VO2 -- week 7 of 8', 16: 'Strength + VO2 -- week 8 of 8'
+  10: 'Strength + VO2 -- week 1 of 8', 11: 'Strength + VO2 -- week 2 of 8',
+  12: 'Strength + VO2 -- week 3 (deload)', 13: 'Strength + VO2 -- week 4 (FTP retest)',
+  14: 'Strength + VO2 -- week 5 of 8', 15: 'Strength + VO2 -- week 6 of 8',
+  16: 'Strength + VO2 -- week 7 of 8', 17: 'Strength + VO2 -- week 8 (deload/close-out)'
 };
 // The 4x4 anchor per week (Thursday quality slot). pct = % FTP if biking; HR/RPE targets given
 // for any modality. Progressive, with the deload week reduced.
 var VO2_BLOCK_4X4 = {
-  'w9s4':  { sets:4, mins:4, pct:[106,110], label:'4x4 VO2 -- intro loading' },
-  'w10s4': { sets:4, mins:4, pct:[108,112], label:'4x4 VO2' },
+  'w10s4': { sets:4, mins:4, pct:[106,110], label:'4x4 VO2 -- intro loading' },
   'w11s4': { sets:4, mins:4, pct:[110,115], label:'4x4 VO2 -- full' },
   'w12s4': { sets:3, mins:3, pct:[106,110], label:'3x3 VO2 -- deload, stay sharp' },
-  'w14s4': { sets:4, mins:4, pct:[112,117], label:'4x4 VO2 -- peak' },
+  'w14s4': { sets:4, mins:4, pct:[110,115], label:'4x4 VO2 -- full (post-retest, recalibrated)' },
   'w15s4': { sets:4, mins:4, pct:[110,115], label:'4x4 VO2 -- full' },
-  'w16s4': { sets:5, mins:4, pct:[110,115], label:'5x4 VO2 -- block peak' }
+  'w16s4': { sets:5, mins:4, pct:[112,117], label:'5x4 VO2 -- block peak' },
+  'w17s6': { sets:3, mins:3, pct:[106,110], label:'3x3 VO2 -- deload, block close-out' }
 };
 // The flexible second Z4 session (Tuesday). Optional -- deploy by recovery. Lighter than the 4x4.
-var VO2_BLOCK_Z4 = {
-  'w9s2':'flex','w10s2':'flex','w11s2':'flex','w13s2':'flex','w14s2':'flex','w15s2':'flex','w16s2':'flex'
-};
+var VO2_BLOCK_Z4 = { 'w10s2':'flex','w11s2':'flex','w13s2':'flex','w14s2':'flex','w15s2':'flex','w16s2':'flex','w17s4':'flex' };
 function blockVO2Html(sid) {
   var v = VO2_BLOCK_4X4[sid];
   if (v) {
@@ -2689,6 +2687,14 @@ function migrateSchema() {
     appData.config.lostSlots = 0;
     appData.config.travelStart = '';
     appData.config.travelEnd = '';
+  }
+  // 2026-08-24 re-anchor: skip week 9's unfinished sessions; week 10 (Phase 2, Strength+VO2
+  // block week 2) starts TODAY. Fixed anchor date so it's stable regardless of when first loaded.
+  if (!appData.config.blockReset_2026_08_24) {
+    appData.config.blockReset_2026_08_24 = true;
+    appData.config.blockAnchorWeek = 10;
+    appData.config.blockAnchorDate = '2026-08-24';
+    appData.config.lostSlots = 0;
   }
   // ensure each week container exists but do NOT touch existing session records
   for (var i = 0; i < WEEKS.length; i++) {
