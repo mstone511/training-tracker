@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Console">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0d0d0d">
+<title>Mass Accrual Console — Matt</title>
+<style>
+  :root{
+    color-scheme: dark;
+    --page:#0d0d0d; --surface:#1a1a19; --surface-2:#222220; --surface-3:#2a2a28;
+    --text:#ffffff; --text-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,0.10);
+    --s1:#3987e5; --s2:#199e70; --s3:#d55181; --s4:#c98500; --s5:#9085e9; --s6:#d95926;
+    --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b;
+    --radius:14px;
+  }
+  html[data-theme="light"]{
+    color-scheme: light;
+    --page:#f2f2ef; --surface:#fcfcfb; --surface-2:#f4f4f1; --surface-3:#ecebe6;
+    --text:#0b0b0b; --text-2:#52514e; --muted:#8a8880;
+    --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,0.10);
+    --s1:#2a78d6; --s2:#008300; --s3:#e87ba4; --s4:#eda100; --s5:#4a3aa7; --s6:#eb6834;
+    --good:#0ca30c; --warn:#c98a00; --serious:#c05a34; --crit:#d03b3b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--page); color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.5; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px; margin:0 auto; padding:28px 20px 64px}
+  header.top{display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:8px}
+  h1{font-size:26px; margin:0; letter-spacing:-0.02em; font-weight:700}
+  .sub{color:var(--text-2); font-size:14px; margin-top:4px; max-width:660px}
+  .vitals{display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-size:13px; color:var(--muted)}
+  .vitals b{color:var(--text-2); font-weight:600}
+  .toolbar{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+  .btn{background:var(--surface-2); color:var(--text-2); border:1px solid var(--border);
+       border-radius:999px; padding:7px 14px; font-size:13px; cursor:pointer; font-family:inherit}
+  .btn:hover{color:var(--text)}
+  .btn:focus-visible{outline:2px solid var(--s1); outline-offset:2px}
+  .score{display:flex; align-items:baseline; gap:8px; background:var(--surface); border:1px solid var(--border);
+         border-radius:var(--radius); padding:12px 16px}
+  .score .num{font-size:34px; font-weight:700; letter-spacing:-0.03em}
+  .score .lbl{font-size:12px; color:var(--muted)}
+
+  section{margin-top:22px}
+  .sect-head{display:flex; align-items:baseline; gap:10px; margin:0 0 12px; flex-wrap:wrap}
+  .sect-head h2{font-size:15px; margin:0; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-2); font-weight:700}
+  .sect-head .note{font-size:12px; color:var(--muted)}
+
+  .grid{display:grid; gap:14px}
+  .kpis{grid-template-columns:repeat(6,1fr)}
+  @media(max-width:900px){.kpis{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .tile{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 15px; position:relative; overflow:hidden}
+  .tile .k{font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px}
+  .tile .v{font-size:26px; font-weight:700; letter-spacing:-0.02em; margin-top:4px; font-variant-numeric:tabular-nums}
+  .tile .v small{font-size:14px; color:var(--text-2); font-weight:500}
+  .tile .d{font-size:11.5px; margin-top:3px; color:var(--text-2)}
+  .dot{width:8px; height:8px; border-radius:50%; display:inline-block; flex:0 0 auto}
+  .dot.good{background:var(--good)} .dot.warn{background:var(--warn)} .dot.ser{background:var(--serious)} .dot.crit{background:var(--crit)} .dot.info{background:var(--s1)}
+
+  .cards{grid-template-columns:1fr 1fr}
+  @media(max-width:840px){.cards{grid-template-columns:1fr}}
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px}
+  .card h3{margin:0 0 4px; font-size:15px; font-weight:700}
+  .card .cap{font-size:12px; color:var(--muted); margin:0 0 14px}
+
+  .row{display:flex; justify-content:space-between; align-items:baseline; padding:7px 0; border-bottom:1px solid var(--grid); font-size:13.5px; gap:10px}
+  .row:last-child{border-bottom:0}
+  .row .lab{color:var(--text-2)} .row .val{font-weight:600; font-variant-numeric:tabular-nums; text-align:right}
+  .row .val small{color:var(--muted); font-weight:500; font-size:12px}
+
+  .budget{position:relative; height:38px; border-radius:10px; background:var(--surface-3); overflow:hidden; margin-top:10px}
+  .budget .used{position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg,var(--s2),var(--s4)); transition:width .35s ease}
+  .budget .over{background:linear-gradient(90deg,var(--s4),var(--crit))}
+  .budget .txt{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; letter-spacing:.01em; text-shadow:0 1px 3px rgba(0,0,0,.5)}
+  html[data-theme="light"] .budget .txt{text-shadow:none}
+  .budget .ticks{position:absolute; inset:0}
+  .budget .tick{position:absolute; top:0; bottom:0; width:1px; background:var(--border)}
+
+  .seg{display:grid; grid-template-columns:96px 1fr 78px; align-items:center; gap:10px; margin:9px 0; font-size:12.5px}
+  .seg .name{color:var(--text-2)}
+  .seg .track{position:relative; height:14px; background:var(--surface-3); border-radius:7px; overflow:hidden}
+  .seg .fill{position:absolute; left:0; top:0; bottom:0; border-radius:7px; background:var(--s1)}
+  .seg .fill.low{background:var(--serious)} .seg .fill.ok{background:var(--good)} .seg .fill.high{background:var(--warn)}
+  .seg .band{position:absolute; top:0; bottom:0; background:rgba(255,255,255,.07); border-left:1px solid var(--muted); border-right:1px solid var(--muted)}
+  .seg .pct{text-align:right; font-variant-numeric:tabular-nums; color:var(--text); font-weight:600}
+
+  .tier{border:1px solid var(--border); border-radius:12px; margin:12px 0; overflow:hidden}
+  .tier > .th{display:flex; align-items:center; gap:9px; padding:10px 14px; font-weight:700; font-size:13.5px}
+  .tier.A > .th{background:color-mix(in srgb,var(--good) 16%,var(--surface))}
+  .tier.B > .th{background:color-mix(in srgb,var(--s1) 16%,var(--surface))}
+  .tier.C > .th{background:color-mix(in srgb,var(--warn) 16%,var(--surface))}
+  .tier.D > .th{background:color-mix(in srgb,var(--crit) 15%,var(--surface))}
+  .tier .th .grade{font-size:11px; padding:2px 8px; border-radius:999px; background:var(--surface); border:1px solid var(--border); color:var(--text-2); letter-spacing:.04em}
+  .item{padding:11px 14px; border-top:1px solid var(--grid)}
+  .item .h{display:flex; justify-content:space-between; gap:10px; align-items:baseline; flex-wrap:wrap}
+  .item .nm{font-weight:600; font-size:13.5px}
+  .item .ev{font-size:11px; color:var(--muted); white-space:nowrap}
+  .item .bd{font-size:12.5px; color:var(--text-2); margin-top:3px}
+  .item .src{font-size:11.5px; color:var(--muted); margin-top:5px; font-style:italic}
+  .item .you{font-size:12.5px; margin-top:4px; color:var(--text)}
+  .item .you b{color:var(--s1)}
+
+  .disc{margin-top:26px; font-size:12px; color:var(--muted); background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px}
+  .disc b{color:var(--text-2)}
+  a{color:var(--s1)}
+  .chartcard{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px}
+  .chartcard h4{margin:0 0 2px; font-size:13px; font-weight:700}
+  .chartcard .sc{font-size:11.5px; color:var(--muted); margin:0 0 6px}
+  svg.line{width:100%; height:auto; display:block; overflow:visible}
+  .trendcall{background:var(--surface-2); border:1px solid var(--border); border-left:3px solid var(--s1); border-radius:12px; padding:12px 14px; font-size:12.5px; color:var(--text-2); margin-top:14px}
+  .trendcall b{color:var(--text)}
+  .foot{margin-top:18px; font-size:11.5px; color:var(--muted); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px}
+  .legendrow{display:flex; gap:16px; flex-wrap:wrap; font-size:11.5px; color:var(--muted); margin-top:8px}
+  .legendrow span{display:flex; align-items:center; gap:6px}
+
+  /* forms */
+  .form{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:12px; padding-top:12px; border-top:1px solid var(--grid)}
+  input,select,textarea{background:var(--surface-2); color:var(--text); border:1px solid var(--border); border-radius:9px;
+    padding:7px 10px; font-size:13px; font-family:inherit}
+  input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--s1); outline-offset:1px}
+  input[type=date]{min-width:140px}
+  .form .go{background:var(--s1); color:#fff; border-color:transparent; font-weight:600; cursor:pointer}
+  .hint{font-size:11.5px; color:var(--muted); width:100%; margin-top:-2px}
+  table.dt{width:100%; border-collapse:collapse; font-size:12.5px; margin-top:6px}
+  table.dt th{color:var(--muted); text-align:right; font-weight:600; padding:4px 0; border-bottom:1px solid var(--grid)}
+  table.dt th:first-child{text-align:left}
+  table.dt td{text-align:right; padding:5px 0; border-bottom:1px solid var(--grid); font-variant-numeric:tabular-nums}
+  table.dt td:first-child{text-align:left}
+  .del{background:none; border:0; color:var(--muted); cursor:pointer; font-size:13px; padding:0 4px}
+  .del:hover{color:var(--crit)}
+  .empty{color:var(--muted); font-size:12.5px; padding:10px 0; font-style:italic}
+  .pillrow{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px}
+  .pill{font-size:11.5px; padding:3px 9px; border-radius:999px; border:1px solid var(--border); background:var(--surface-2); color:var(--text-2); cursor:pointer}
+  .pill[aria-pressed="true"]{background:var(--s1); color:#fff; border-color:transparent; font-weight:600}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>Mass Accrual Console</h1>
+      <div class="sub">Hypertrophy block. One question governs this page: <b>how much lean tissue can be added before the fat ceiling is reached</b>. Everything here is either the numerator, the denominator, or the stop rule. Triathlon volume is out; the VO&#8322; stimulus stays.</div>
+      <div class="vitals">
+        <span><b>Matt</b> · 38M</span><span>5&#39;9.6&quot; · <b id="vWeight">—</b></span><span>Denver, CO</span>
+        <span>Block start <b id="vStart">—</b></span><span id="vDay">—</span>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="score"><span class="num" id="vWeek">—</span><span class="lbl">block<br>week</span></div>
+      <a class="btn" href="./index.html" style="text-decoration:none">&larr; Program</a>
+      <button class="btn" id="themeBtn">☀ Light</button>
+    </div>
+  </header>
+
+  <!-- KPI ROW -->
+  <section>
+    <div class="sect-head"><h2>Where the block stands</h2><span class="note">estimates between scans are model-based — see partitioning card</span></div>
+    <div class="grid kpis" id="kpiRow"></div>
+    <div class="legendrow">
+      <span><span class="dot good"></span>on plan</span>
+      <span><span class="dot warn"></span>drifting</span>
+      <span><span class="dot ser"></span>off plan</span>
+      <span><span class="dot crit"></span>stop rule triggered</span>
+      <span><span class="dot info"></span>needs data</span>
+    </div>
+  </section>
+
+  <!-- THE CONSTRAINT -->
+  <section>
+    <div class="sect-head"><h2>The constraint</h2><span class="note">fat budget and runway — the two numbers that end this block</span></div>
+    <div class="grid cards">
+      <div class="card">
+        <h3>Fat budget</h3>
+        <p class="cap">Body-fat percentage is a ratio, so the ceiling moves as lean mass grows. Budget is recomputed against current estimated fat-free mass, not against a fixed pound count.</p>
+        <div class="pillrow" id="ceilPills"></div>
+        <div class="budget"><div class="used" id="budgetBar" style="width:0%"></div><div class="ticks" id="budgetTicks"></div><div class="txt" id="budgetTxt">—</div></div>
+        <div style="margin-top:12px" id="budgetRows"></div>
+        <div class="trendcall" id="budgetCall">—</div>
+      </div>
+
+      <div class="card">
+        <h3>Rate and runway</h3>
+        <p class="cap">Least-squares slope through the weigh-in window with a 95% confidence interval, so a real trend is separable from water noise. Runway is how long the fat budget lasts at the current rate and partitioning.</p>
+        <div id="rateRows"></div>
+        <div class="trendcall" id="rateCall">—</div>
+        <div class="chartcard" style="border:0;padding:0;margin-top:14px">
+          <h4>Body mass — logged weigh-ins with fitted trend</h4>
+          <p class="sc" id="trendCap">no weigh-ins logged yet</p>
+          <svg id="chWeight" class="line" viewBox="0 0 340 150" preserveAspectRatio="none" role="img" aria-label="Body mass trend"></svg>
+        </div>
+        <div class="form">
+          <input type="date" id="wDate" aria-label="Weigh-in date">
+          <input type="number" step="0.1" id="wLb" placeholder="lb" style="width:90px" aria-label="Weight in pounds">
+          <button class="btn go" id="wAdd">Add weigh-in</button>
+          <span class="hint">Same conditions every time: fasted, post-void, pre-fluid. Standardization beats accuracy for serial tracking.</span>
+        </div>
+        <div id="wTable"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PARTITIONING -->
+  <section>
+    <div class="sect-head"><h2>Partitioning</h2><span class="note">the only outcome that matters — what fraction of gained mass is lean</span></div>
+    <div class="grid cards">
+      <div class="card">
+        <h3>Scan-to-scan p-ratio</h3>
+        <p class="cap">p-ratio = change in fat-free mass ÷ change in total mass. Above 0.5 means most of what you added was lean. This is measured only at scans; everything between them is interpolation.</p>
+        <div id="pRows"></div>
+        <div class="chartcard" style="border:0;padding:0;margin-top:14px">
+          <h4>Fat mass and fat-free mass by scan</h4>
+          <p class="sc">fat-free mass (blue) and fat mass (orange), pounds</p>
+          <svg id="chComp" class="line" viewBox="0 0 340 150" preserveAspectRatio="none" role="img" aria-label="Composition by scan"></svg>
+        </div>
+        <div class="form">
+          <input type="date" id="sDate" aria-label="Scan date">
+          <input type="number" step="0.1" id="sLb" placeholder="lb" style="width:80px" aria-label="Scan weight">
+          <input type="number" step="0.1" id="sBf" placeholder="BF %" style="width:80px" aria-label="Body fat percent">
+          <input type="number" step="0.1" id="sSmm" placeholder="SMM lb" style="width:95px" aria-label="Skeletal muscle mass">
+          <button class="btn go" id="sAdd">Add scan</button>
+        </div>
+        <div id="sTable"></div>
+      </div>
+
+      <div class="card">
+        <h3>What the rate buys you</h3>
+        <p class="cap">Projection at the assumed p-ratio below. This is arithmetic on your own numbers, not a prediction of your response.</p>
+        <div class="form" style="border-top:0; padding-top:0; margin-top:0">
+          <label class="hint" style="width:auto;margin:0">Assumed p-ratio</label>
+          <input type="number" step="0.05" min="0.1" max="0.9" id="pAssume" style="width:80px" aria-label="Assumed p-ratio">
+          <button class="btn" id="pCalib">Calibrate from last two scans</button>
+        </div>
+        <div id="projRows" style="margin-top:12px"></div>
+        <div class="trendcall" id="projCall">—</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VOLUME -->
+  <section>
+    <div class="sect-head"><h2>Mechanical work</h2><span class="note">direct-equivalent sets per muscle per week · rolling 7 days</span></div>
+    <div class="grid cards">
+      <div class="card">
+        <h3>Weekly set volume</h3>
+        <p class="cap">Sets counted fractionally: 1.0 for a direct set, 0.5 for an indirect one, per the classification used in the current dose-response meta-regression. Shaded band is the working target of 12–20 direct-equivalent sets.</p>
+        <div id="volBars"></div>
+        <div class="trendcall" id="volCall">—</div>
+      </div>
+      <div class="card">
+        <h3>Log a session</h3>
+        <p class="cap">One line per exercise. Format: sets × reps @ load, e.g. <b>3x8@135</b>. Multiple entries separated by commas.</p>
+        <div class="form" style="border-top:0;padding-top:0;margin-top:0">
+          <input type="date" id="lDate" aria-label="Session date">
+          <select id="lEx" aria-label="Exercise"></select>
+          <input type="text" id="lSets" placeholder="3x8@135" style="width:120px" aria-label="Sets reps load">
+          <button class="btn go" id="lAdd">Add</button>
+          <span class="hint">Load in pounds. Bodyweight movements: enter your body mass, or 0 to log volume without a load.</span>
+        </div>
+        <div id="lTable"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGRESSION -->
+  <section>
+    <div class="sect-head"><h2>Progression</h2><span class="note">estimated one-rep max, Epley · load × (1 + reps ÷ 30)</span></div>
+    <div class="grid cards">
+      <div class="card">
+        <h3>Strength trend by lift</h3>
+        <p class="cap">Hypertrophy without load progression over a block is usually a measurement error, a logging gap, or an energy problem. This table is the audit.</p>
+        <div id="e1Table"></div>
+      </div>
+      <div class="chartcard">
+        <h4>Estimated 1RM — <span id="chLiftName">select a lift</span></h4>
+        <p class="sc">best set per session, pounds</p>
+        <select id="liftPick" aria-label="Lift to chart" style="margin-bottom:8px"></select>
+        <svg id="chLift" class="line" viewBox="0 0 340 150" preserveAspectRatio="none" role="img" aria-label="Estimated one rep max trend"></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- VO2 RETENTION -->
+  <section>
+    <div class="sect-head"><h2>VO&#8322; retention <span style="color:var(--good);font-weight:600">· Apple Health</span></h2><span class="note">the one endurance input kept through the block</span></div>
+    <div class="grid cards">
+      <div class="card">
+        <h3>Minimum effective dose, not maintenance</h3>
+        <p class="cap">Auto-fed from the weekly export block below; manual override available if the feed is stale.</p>
+        <div id="vo2Rows"></div>
+        <div class="form">
+          <input type="number" step="1" id="zMin" placeholder="Z4+ min this week" style="width:170px" aria-label="Zone 4 plus minutes this week">
+          <input type="number" step="0.1" id="zVo2" placeholder="VO2 max" style="width:110px" aria-label="VO2 max reading">
+          <button class="btn go" id="zAdd">Update</button>
+        </div>
+        <div class="trendcall" id="vo2Call">—</div>
+      </div>
+      <div class="card">
+        <h3>Why the bike, not the run</h3>
+        <p class="cap">Modality is not neutral during a hypertrophy block.</p>
+        <div class="item" style="padding-left:0;padding-right:0;border-top:0">
+          <div class="bd">Whole-muscle hypertrophy is not measurably impaired by concurrent aerobic work at typical doses — the pooled estimate is essentially zero. At the muscle-fiber level a small attenuation does appear, and in subgroup analysis it reaches significance for type I fibers when the aerobic mode is running, but not cycling. Eccentric loading and the resulting muscle damage are the likely mechanism.</div>
+          <div class="src">Schumann M, et al. Sports Med 2022;52(3):601–612 — systematic review and meta-analysis, 43 studies; hypertrophy SMD −0.01 (95% CI −0.16 to 0.18), p = 0.919. Lundberg TR, Feuerbacher JF, Sünkeler M, Schumann M. Sports Med 2022;52(10):2391–2403 — fiber-level meta-analysis; combined type I + II SMD −0.20, p = 0.05; interference significant for type I with running, not cycling. Authors declare no conflicts.</div>
+          <div class="you"><b>Applied:</b> keep the 4×4 on the bike or the erg. The cost to this block is close to zero. It is the triathlon's swim and long-run volume — the energy cost and the fatigue, not the aerobic signal itself — that was paying for itself in lost lean mass.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NUTRITION -->
+  <section>
+    <div class="sect-head"><h2>Energy and protein</h2><span class="note">expenditure recomputes as endurance volume comes out — do not hold a static target</span></div>
+    <div class="grid cards">
+      <div class="card">
+        <h3>Dynamic targets</h3>
+        <p class="cap">Total daily expenditure is taken from the 28-day Apple average in the feed block, not from a formula. Cutting triathlon volume lowers it; a target set against the old number silently becomes a much larger surplus.</p>
+        <div id="nutRows"></div>
+        <div class="form">
+          <input type="number" step="10" id="nTdee" placeholder="TDEE kcal" style="width:130px" aria-label="Total daily energy expenditure">
+          <select id="nSurplus" aria-label="Surplus size">
+            <option value="0.05">5% surplus</option>
+            <option value="0.075">7.5% surplus</option>
+            <option value="0.10">10% surplus</option>
+            <option value="0.15">15% surplus</option>
+          </select>
+          <button class="btn go" id="nSave">Update</button>
+        </div>
+        <div class="trendcall" id="nutCall">—</div>
+      </div>
+      <div class="card">
+        <h3>The surplus-size evidence, in full</h3>
+        <p class="cap">Two randomized trials address this question directly. Both point the same way.</p>
+        <div class="item" style="padding-left:0;padding-right:0;border-top:0">
+          <div class="h"><span class="nm">Larger surplus bought fat, not lean</span><span class="ev">RCT · n=39</span></div>
+          <div class="bd">Elite athletes randomized to nutritional counselling with a planned positive energy balance versus ad libitum intake, over 8–12 weeks, with four added strength sessions per week in both arms. Intake was 3,585 ± 601 vs 2,964 ± 884 kcal. Body mass rose 3.9 ± 0.6% vs 1.5 ± 0.4%, and fat mass rose 15 ± 4% vs 3 ± 3%. <b>Gain in lean body mass did not differ between groups.</b> One-rep-max improved 6–12% in both arms.</div>
+          <div class="src">Garthe I, Raastad T, Refsnes PE, Sundgot-Borgen J. Eur J Sport Sci 2013;13(3):295–303.</div>
+        </div>
+        <div class="item" style="padding-left:0;padding-right:0">
+          <div class="h"><span class="nm">Replicated in trained lifters, at small n</span><span class="ev">RCT · n=21 (17 completed)</span></div>
+          <div class="bd">Trained lifters randomized to maintenance, 5% surplus, or 15% surplus for eight weeks of supervised training three days per week, with skinfolds, squat and bench 1RM, and ultrasound muscle thickness at biceps, triceps and quadriceps. Faster body-mass gain predicted greater skinfold thickness; it did not predict greater muscle thickness or 1RM. The training stimulus alone produced the strength gains.</div>
+          <div class="src">Helms ER, Spence A-J, Sousa C, et al. Sports Med Open 2023;9(1):102. <b>Caveat:</b> roughly 5–6 completers per arm after COVID-related attrition — badly underpowered for between-group physiological endpoints. Directionally consistent with Garthe, not independently confirmatory.</div>
+        </div>
+        <div class="item" style="padding-left:0;padding-right:0">
+          <div class="h"><span class="nm">But a floor exists</span><span class="ev">meta-analysis</span></div>
+          <div class="bd">Energy deficiency during resistance training impairs lean-mass accrual (ES −0.57, p = 0.02) while leaving strength gains statistically intact (ES −0.31, p = 0.28). Undereating is not a safe hedge against fat gain during a hypertrophy block.</div>
+          <div class="src">Murphy C, Koehler K. Scand J Med Sci Sports 2022;32(1):125–137.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EVIDENCE -->
+  <section>
+    <div class="sect-head"><h2>Graded interventions</h2><span class="note">two axes held separate — strength of the human literature, and the recommendation for this block</span></div>
+
+    <div class="tier A">
+      <div class="th"><span class="dot good"></span>Does the work<span class="grade" style="margin-left:auto">LIT A · FOR YOU A</span></div>
+      <div class="item">
+        <div class="h"><span class="nm">Progressive set volume, 12–20 direct-equivalent sets per muscle per week</span><span class="ev">67 studies · n=2,058</span></div>
+        <div class="bd">Multi-level meta-regression of 220 hypertrophy effects and 490 strength effects, with sets classified as direct or indirect before pooling. Hypertrophy rises with weekly set volume across the studied range with diminishing returns; strength shows steeper diminishing returns. Frequency has little independent effect on hypertrophy once weekly volume is equated — so session count is a scheduling convenience, not a stimulus variable.</div>
+        <div class="src">Pelland JC, Remmert JF, Robinson ZP, Hinson SR, Zourdos MC. Sports Med 2026;56(2):481–505 (epub 2025 Dec 4).</div>
+        <div class="you"><b>For you:</b> this is the entire lever. The volume ledger above is the instrument. Anything else on this page is a rounding error next to holding 12–20 direct-equivalent sets per muscle with documented load progression.</div>
+      </div>
+      <div class="item">
+        <div class="h"><span class="nm">Creatine monohydrate 5 g/day</span><span class="ev">already running since Jan 2026</span></div>
+        <div class="bd">No change, and no washout. Note the measurement consequence rather than the physiological one: creatine loading raises serum creatinine and depresses creatinine-based eGFR, which is why cystatin C belongs on any renal assessment during this block.</div>
+        <div class="you"><b>For you:</b> continue. Nothing to decide.</div>
+      </div>
+    </div>
+
+    <div class="tier B">
+      <div class="th"><span class="dot info"></span>Worth getting right, small margin<span class="grade" style="margin-left:auto">LIT A · FOR YOU B</span></div>
+      <div class="item">
+        <div class="h"><span class="nm">Protein 1.6–2.2 g/kg/day</span><span class="ev">49 RCTs · n=1,863</span></div>
+        <div class="bd">Protein supplementation increased fat-free mass by 0.30 kg (95% CI 0.09–0.52) and 1RM by 2.49 kg (0.64–4.33) across trials of at least six weeks. Two-phase break-point analysis put the plateau at 1.62 g/kg/day, with the confidence interval running to 2.20. The effect was larger in resistance-trained participants and smaller with advancing age — both of which describe you. <b>Conflict disclosed:</b> a 2020 correction to this paper records that one author served on the advisory board of a sports-supplement manufacturer while it was written. The finding has broad independent support; the disclosure is noted because it was omitted originally.</div>
+        <div class="src">Morton RW, Murphy KT, McKellar SR, et al. Br J Sports Med 2018;52(6):376–384; correction Br J Sports Med 2020;54(19):e7.</div>
+        <div class="you"><b>For you:</b> at 75 kg the plateau is roughly 122 g and the upper bound of the interval is roughly 165 g. Your standing target of 175 g/day sits above the top of that interval. It is not harmful and it is not wrong — but it is doing no measurable additional work, and it displaces carbohydrate that has a real job during a high-volume block. Treat 150–165 g as the target and put the difference into carbohydrate.</div>
+      </div>
+    </div>
+
+    <div class="tier C">
+      <div class="th"><span class="dot warn"></span>Conditional on measurement<span class="grade" style="margin-left:auto">LIT B · FOR YOU C</span></div>
+      <div class="item">
+        <div class="h"><span class="nm">Anything added to the stack before the next draw</span><span class="ev">standing rule</span></div>
+        <div class="bd">The rule that governs the frozen stack applies unchanged here. A compound introduced mid-block that shifts an inflammatory or lipid marker does not merely confound the panel; it makes a training-driven change attributable to the compound, permanently.</div>
+        <div class="you"><b>For you:</b> defer every addition past the draw. If lean gain stalls in this block, the cause will be sets, load progression, or energy — in that order — and no supplement substitutes for a missing training input.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DATA SOURCES -->
+  <section>
+    <div class="sect-head"><h2>Data sources</h2><span class="note">manual log is authoritative for training · Apple and Oura feed the block below</span></div>
+    <div class="grid cards">
+      <div class="card">
+        <h3>Auto-feed block</h3>
+        <p class="cap">A writer script replaces only the JSON between the markers. The page reads it on load. This is deliberately not HTML — a script rewriting one JSON object cannot break the layout the way a script rewriting markup can.</p>
+        <div id="feedRows"></div>
+        <div class="trendcall"><b>Status:</b> the feed block currently holds seed values only. Your existing Apple Health and Oura writers target the other dashboard file and have not been pointed at this one — that is a separate change, and nothing here has been tested against those scripts.</div>
+      </div>
+      <div class="card">
+        <h3>Local log</h3>
+        <p class="cap">Weigh-ins, sessions and scans are stored in this browser under <code>matt_hyper_v1</code>. Nothing leaves the device.</p>
+        <div id="storeRows"></div>
+        <div class="form">
+          <button class="btn" id="expBtn">Export JSON</button>
+          <button class="btn" id="impBtn">Import JSON</button>
+          <button class="btn" id="clrBtn" style="color:var(--crit)">Erase local log</button>
+        </div>
+        <textarea id="ioBox" rows="4" style="width:100%;margin-top:10px;display:none" aria-label="Import export box"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <div class="disc">
+    <b>Scope.</b> This page is an instrument, not a clinical record and not medical advice. Between-scan fat and fat-free mass are modelled from body mass and an assumed partitioning ratio, and are labelled as estimates wherever they appear — only scan rows are measurements. Bioimpedance carries its own error; the case for it here rests on standardized serial conditions, not on absolute accuracy. Trial results are quoted with design, n and the pre-specified endpoint so they can be graded rather than taken on trust.
+  </div>
+
+  <div class="foot">
+    <span>Mass Accrual Console v1 · built 2026-08-30</span>
+    <span id="foot2">—</span>
+  </div>
+</div>
+
+<!-- AUTOFEED:START (writer script replaces only the JSON below — do not hand-edit inside markers) -->
+<script id="autofeed" type="application/json">
+{
+  "generated": "2026-08-30",
+  "stale": true,
+  "apple": { "tdee28": 2778, "active28": 891, "basal28": 1887, "z4plus_min_week": 39, "sessions_week": 5, "through": "2026-08-22" },
+  "oura": { "sleep_h": 6.4, "hrv": 59, "rhr": 55, "readiness": 75, "week_of": "2026-08-22" },
+  "vo2": { "latest": 40.5, "date": "2026-07-23" }
+}
+</script>
+<!-- AUTOFEED:END -->
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- theme ---------- */
+var root=document.documentElement, tb=document.getElementById('themeBtn');
+function setTheme(t){root.setAttribute('data-theme',t); tb.textContent = t==='dark' ? '☀ Light' : '☾ Dark';}
+tb.addEventListener('click',function(){setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark');});
+setTheme('dark');
+
+/* ---------- constants ---------- */
+var KEY='matt_hyper_v1';
+var BLOCK_START='2026-08-31';
+var SET_TARGET=[12,20];            // direct-equivalent sets/muscle/week
+var RATE_BAND=[0.20,0.40];         // % body mass per week
+var Z4_TARGET=16;                  // min/week at Z4+ (one 4x4 session)
+
+var MUSCLES=['Chest','Back','Quads','Hamstrings','Glutes','Shoulders','Biceps','Triceps','Calves'];
+
+// exercise library: primary muscles (1.0) and secondary muscles (0.5)
+var LIB=[
+ {n:'Barbell back squat',   p:['Quads'],               s:['Glutes','Hamstrings']},
+ {n:'Front squat',          p:['Quads'],               s:['Glutes']},
+ {n:'Leg press',            p:['Quads'],               s:['Glutes']},
+ {n:'Romanian deadlift',    p:['Hamstrings','Glutes'], s:['Back']},
+ {n:'Conventional deadlift',p:['Back','Glutes'],       s:['Hamstrings','Quads']},
+ {n:'Hip thrust',           p:['Glutes'],              s:['Hamstrings']},
+ {n:'Leg curl',             p:['Hamstrings'],          s:[]},
+ {n:'Leg extension',        p:['Quads'],               s:[]},
+ {n:'Walking lunge',        p:['Quads'],               s:['Glutes','Hamstrings']},
+ {n:'Calf raise',           p:['Calves'],              s:[]},
+ {n:'Barbell bench press',  p:['Chest'],               s:['Triceps','Shoulders']},
+ {n:'Incline DB press',     p:['Chest'],               s:['Triceps','Shoulders']},
+ {n:'Cable fly',            p:['Chest'],               s:[]},
+ {n:'Dip',                  p:['Chest','Triceps'],     s:['Shoulders']},
+ {n:'Overhead press',       p:['Shoulders'],           s:['Triceps']},
+ {n:'Lateral raise',        p:['Shoulders'],           s:[]},
+ {n:'Rear delt fly',        p:['Shoulders'],           s:['Back']},
+ {n:'Pull-up',              p:['Back'],                s:['Biceps']},
+ {n:'Lat pulldown',         p:['Back'],                s:['Biceps']},
+ {n:'Barbell row',          p:['Back'],                s:['Biceps']},
+ {n:'Chest-supported row',  p:['Back'],                s:['Biceps']},
+ {n:'Face pull',            p:['Shoulders'],           s:['Back']},
+ {n:'Barbell curl',         p:['Biceps'],              s:[]},
+ {n:'Incline DB curl',      p:['Biceps'],              s:[]},
+ {n:'Hammer curl',          p:['Biceps'],              s:[]},
+ {n:'Cable triceps pushdown',p:['Triceps'],            s:[]},
+ {n:'Overhead triceps ext', p:['Triceps'],             s:[]},
+ {n:'Close-grip bench',     p:['Triceps'],             s:['Chest']}
+];
+
+/* ---------- state ---------- */
+var seed={
+  settings:{ bfCeiling:13.0, pAssume:0.5, tdee:2778, surplus:0.075, z4:null, vo2:null },
+  weighins:[],
+  scans:[
+    {d:'2026-01-15', w:167.5, bf:14.8, smm:81.4},
+    {d:'2026-07-10', w:165.5, bf:11.1, smm:84.0}
+  ],
+  sessions:[]
+};
+var S=load();
+
+function load(){
+  try{
+    var raw=localStorage.getItem(KEY);
+    if(!raw) return JSON.parse(JSON.stringify(seed));
+    var o=JSON.parse(raw);
+    o.settings=Object.assign({},seed.settings,o.settings||{});
+    o.weighins=o.weighins||[]; o.scans=o.scans||[]; o.sessions=o.sessions||[];
+    return o;
+  }catch(e){ return JSON.parse(JSON.stringify(seed)); }
+}
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+
+var FEED={};
+try{ FEED=JSON.parse(document.getElementById('autofeed').textContent); }catch(e){ FEED={}; }
+
+/* ---------- helpers ---------- */
+function $(id){return document.getElementById(id);}
+function fmt(n,d){ if(n===null||n===undefined||isNaN(n)) return '—'; return Number(n).toFixed(d===undefined?1:d); }
+function days(a,b){ return (new Date(b+'T12:00:00') - new Date(a+'T12:00:00'))/86400000; }
+function today(){ var t=new Date(); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); }
+function byDate(a,b){ return a.d<b.d?-1:a.d>b.d?1:0; }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function tile(dot,k,v,unit,d){
+  return '<div class="tile"><div class="k"><span class="dot '+dot+'"></span>'+k+'</div>'+
+         '<div class="v">'+v+(unit?'<small>'+unit+'</small>':'')+'</div><div class="d">'+d+'</div></div>';
+}
+function rowsHTML(list){
+  return list.map(function(r){
+    return '<div class="row"><span class="lab">'+r[0]+'</span><span class="val">'+r[1]+(r[2]?' <small>'+r[2]+'</small>':'')+'</span></div>';
+  }).join('');
+}
+
+/* ---------- derived body composition ---------- */
+function latestScan(){ var a=S.scans.slice().sort(byDate); return a.length?a[a.length-1]:null; }
+function scanFat(sc){ return sc.w*sc.bf/100; }
+function scanFFM(sc){ return sc.w*(1-sc.bf/100); }
+
+function latestWeight(){
+  var w=S.weighins.slice().sort(byDate);
+  if(w.length) return w[w.length-1].w;
+  var sc=latestScan(); return sc?sc.w:null;
+}
+
+// estimate current fat / FFM from last scan + weight delta at assumed p-ratio
+function estimateNow(){
+  var sc=latestScan(); if(!sc) return null;
+  var w=latestWeight(); if(w===null) return null;
+  var p=Number(S.settings.pAssume)||0.5;
+  var dw=w-sc.w;
+  var ffm=scanFFM(sc)+dw*p;
+  var fat=scanFat(sc)+dw*(1-p);
+  return {w:w, ffm:ffm, fat:fat, bf:100*fat/w, measured:(dw===0), from:sc.d, p:p};
+}
+
+function ceilingFat(ffm){ var c=Number(S.settings.bfCeiling)/100; return c/(1-c)*ffm; }
+
+/* ---------- trend regression ---------- */
+function trend(windowDays){
+  var w=S.weighins.slice().sort(byDate);
+  if(w.length<3) return null;
+  var end=w[w.length-1].d;
+  var pts=w.filter(function(x){ return days(x.d,end)<=windowDays; });
+  if(pts.length<3) pts=w.slice(-Math.min(w.length,8));
+  var n=pts.length, t0=pts[0].d;
+  var xs=pts.map(function(p){return days(t0,p.d);}), ys=pts.map(function(p){return p.w;});
+  var mx=xs.reduce(function(a,b){return a+b;},0)/n, my=ys.reduce(function(a,b){return a+b;},0)/n;
+  var sxx=0,sxy=0; for(var i=0;i<n;i++){ sxx+=(xs[i]-mx)*(xs[i]-mx); sxy+=(xs[i]-mx)*(ys[i]-my); }
+  if(sxx===0) return null;
+  var b=sxy/sxx, a=my-b*mx;
+  var ss=0; for(var j=0;j<n;j++){ var e=ys[j]-(a+b*xs[j]); ss+=e*e; }
+  var se = n>2 ? Math.sqrt(ss/(n-2)/sxx) : NaN;
+  var tcrit = n>2 ? 2.0 : NaN; // ~95% for small n; deliberately conservative and approximate
+  return {slopeDay:b, slopeWk:b*7, ciWk: isNaN(se)?null:tcrit*se*7, n:n, spanD:xs[xs.length-1], a:a, t0:t0, pts:pts};
+}
+
+/* ---------- volume ---------- */
+function weekVolume(){
+  var end=today(), map={};
+  MUSCLES.forEach(function(m){ map[m]=0; });
+  S.sessions.forEach(function(s){
+    if(days(s.d,end)>7 || days(s.d,end)<0) return;
+    var ex=LIB.filter(function(l){return l.n===s.ex;})[0];
+    if(!ex) return;
+    ex.p.forEach(function(m){ if(map[m]!==undefined) map[m]+=s.sets*1.0; });
+    ex.s.forEach(function(m){ if(map[m]!==undefined) map[m]+=s.sets*0.5; });
+  });
+  return map;
+}
+
+/* ---------- e1RM ---------- */
+function e1rm(load,reps){ if(!load) return 0; return load*(1+reps/30); }
+function liftHistory(name){
+  var m={};
+  S.sessions.filter(function(s){return s.ex===name && s.load>0;}).forEach(function(s){
+    var v=e1rm(s.load,s.reps);
+    if(!m[s.d]||v>m[s.d]) m[s.d]=v;
+  });
+  return Object.keys(m).sort().map(function(d){return {d:d,v:m[d]};});
+}
+
+/* ---------- chart ---------- */
+var NS='http://www.w3.org/2000/svg';
+function el(n,a){ var e=document.createElementNS(NS,n); for(var k in a) e.setAttribute(k,a[k]); return e; }
+function drawSeries(svgId, series, opts){
+  var svg=$(svgId); if(!svg) return;
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  opts=opts||{};
+  var W=340,H=150,padL=34,padR=8,padT=10,padB=20;
+  var all=[]; series.forEach(function(s){ s.pts.forEach(function(p){ all.push(p.v); }); });
+  if(!all.length){ svg.appendChild(el('text',{x:W/2,y:H/2,'text-anchor':'middle','font-size':11,fill:'var(--muted)'})).textContent='no data yet'; return; }
+  var min=opts.min!==undefined?opts.min:Math.min.apply(null,all), max=opts.max!==undefined?opts.max:Math.max.apply(null,all);
+  if(max-min<0.4){ max+=0.4; min-=0.4; }
+  var pad=(max-min)*0.12; min-=pad; max+=pad;
+  var dates=[]; series.forEach(function(s){ s.pts.forEach(function(p){ if(dates.indexOf(p.d)<0) dates.push(p.d); }); });
+  dates.sort();
+  var t0=dates[0], t1=dates[dates.length-1];
+  var span=Math.max(1,days(t0,t1));
+  function X(d){ return padL+(days(t0,d)/span)*(W-padL-padR); }
+  function Y(v){ return padT+(1-(v-min)/(max-min))*(H-padT-padB); }
+  for(var g=0;g<=3;g++){
+    var yv=min+(max-min)*g/3, y=Y(yv);
+    svg.appendChild(el('line',{x1:padL,y1:y,x2:W-padR,y2:y,stroke:'var(--grid)','stroke-width':1}));
+    var tx=el('text',{x:padL-5,y:y+3,'text-anchor':'end','font-size':9,fill:'var(--muted)'}); tx.textContent=fmt(yv,opts.dec===undefined?1:opts.dec); svg.appendChild(tx);
+  }
+  if(opts.band){
+    var yA=Y(opts.band[1]), yB=Y(opts.band[0]);
+    svg.appendChild(el('rect',{x:padL,y:Math.min(yA,yB),width:W-padL-padR,height:Math.abs(yB-yA),fill:'var(--good)','fill-opacity':0.10}));
+  }
+  series.forEach(function(s){
+    var pts=s.pts.slice().sort(function(a,b){return a.d<b.d?-1:1;});
+    if(pts.length>1){
+      var dstr=pts.map(function(p,i){ return (i?'L':'M')+X(p.d).toFixed(1)+' '+Y(p.v).toFixed(1); }).join(' ');
+      svg.appendChild(el('path',{d:dstr,fill:'none',stroke:s.color,'stroke-width':2,'stroke-linejoin':'round','stroke-linecap':'round'}));
+    }
+    pts.forEach(function(p){
+      var c=el('circle',{cx:X(p.d),cy:Y(p.v),r:2.6,fill:s.color});
+      var t=el('title'); t.textContent=p.d+' · '+fmt(p.v,opts.dec===undefined?1:opts.dec); c.appendChild(t);
+      svg.appendChild(c);
+    });
+  });
+  if(opts.fit){
+    var f=opts.fit;
+    svg.appendChild(el('line',{x1:X(f.d0),y1:Y(f.v0),x2:X(f.d1),y2:Y(f.v1),stroke:'var(--s4)','stroke-width':1.5,'stroke-dasharray':'4 3'}));
+  }
+  [t0,t1].forEach(function(d,i){
+    var tx=el('text',{x:i?W-padR:padL,y:H-4,'text-anchor':i?'end':'start','font-size':9,fill:'var(--muted)'});
+    tx.textContent=d.slice(5); svg.appendChild(tx);
+  });
+}
+
+/* ---------- render ---------- */
+function render(){
+  var est=estimateNow(), sc=latestScan(), tr=trend(28);
+  var wk=Math.floor(days(BLOCK_START,today())/7)+1;
+
+  $('vWeight').textContent = est? fmt(est.w,1)+' lb' : '—';
+  $('vStart').textContent = BLOCK_START;
+  $('vDay').textContent = 'day '+Math.max(0,Math.round(days(BLOCK_START,today())));
+  $('vWeek').textContent = wk>0?wk:0;
+  $('foot2').textContent = 'feed '+(FEED.generated||'—')+(FEED.stale?' · seed values':'')+' · log '+S.weighins.length+' weigh-ins, '+S.sessions.length+' entries';
+
+  /* KPI */
+  var kp='';
+  if(est){
+    kp+=tile('info','Body mass',fmt(est.w,1),' lb', tr? (tr.slopeWk>=0?'+':'')+fmt(tr.slopeWk,2)+' lb/wk over '+tr.n+' points':'log 3+ weigh-ins for a trend');
+    var bfDot = est.bf<=S.settings.bfCeiling-1?'good':est.bf<=S.settings.bfCeiling?'warn':'crit';
+    kp+=tile(bfDot,'Body fat (est.)',fmt(est.bf,1),'%','ceiling '+fmt(S.settings.bfCeiling,1)+'% · last scan '+est.from);
+    var ffmi = est.ffm*0.4536/Math.pow(1.7678,2); // 5'9.6" = 1.7678 m
+    kp+=tile('good','FFMI (est.)',fmt(ffmi,1),'', 'fat-free mass '+fmt(est.ffm,1)+' lb');
+    var leanGain = sc? est.ffm-scanFFM(S.scans.slice().sort(byDate)[0]) : null;
+    kp+=tile('good','Lean added',(leanGain>=0?'+':'')+fmt(leanGain,1),' lb','since first scan on file');
+    var cf=ceilingFat(est.ffm), rem=cf-est.fat;
+    kp+=tile(rem>2?'good':rem>0?'warn':'crit','Fat budget left',fmt(rem,1),' lb','ceiling '+fmt(cf,1)+' lb at '+fmt(S.settings.bfCeiling,1)+'%');
+  } else {
+    kp+=tile('info','Body mass','—','','add a scan or weigh-in');
+    kp+=tile('info','Body fat','—','','—'); kp+=tile('info','FFMI','—','','—');
+    kp+=tile('info','Lean added','—','','—'); kp+=tile('info','Fat budget left','—','','—');
+  }
+  var z4 = (S.settings.z4!==null && S.settings.z4!==undefined) ? S.settings.z4 : (FEED.apple? FEED.apple.z4plus_min_week : null);
+  kp+=tile(z4===null?'info':z4>=Z4_TARGET?'good':'ser','Z4+ this week',z4===null?'—':fmt(z4,0),' min','target ≥'+Z4_TARGET+' · one 4×4 session');
+  $('kpiRow').innerHTML=kp;
+
+  /* ceiling pills */
+  var pills=[11,12,13,14].map(function(c){
+    return '<button class="pill" data-c="'+c+'" aria-pressed="'+(Number(S.settings.bfCeiling)===c?'true':'false')+'">'+c+'% ceiling</button>';
+  }).join('');
+  $('ceilPills').innerHTML=pills;
+  Array.prototype.forEach.call($('ceilPills').querySelectorAll('.pill'),function(b){
+    b.addEventListener('click',function(){ S.settings.bfCeiling=Number(b.getAttribute('data-c')); save(); render(); });
+  });
+
+  /* fat budget */
+  if(est){
+    var cf2=ceilingFat(est.ffm), rem2=cf2-est.fat;
+    var startFat = sc? scanFat(sc) : est.fat;
+    var spanFat = Math.max(0.1, cf2-startFat);
+    var pctUsed = Math.max(0,Math.min(100, 100*(est.fat-startFat)/spanFat));
+    var bar=$('budgetBar'); bar.style.width=pctUsed.toFixed(1)+'%';
+    bar.className = rem2<0 ? 'used over' : 'used';
+    $('budgetTxt').textContent = rem2>=0 ? fmt(rem2,1)+' lb of fat budget remaining' : fmt(-rem2,1)+' lb over ceiling';
+    $('budgetTicks').innerHTML=[25,50,75].map(function(t){return '<div class="tick" style="left:'+t+'%"></div>';}).join('');
+    $('budgetRows').innerHTML=rowsHTML([
+      ['Fat mass now (est.)', fmt(est.fat,1),'lb'],
+      ['Fat-free mass now (est.)', fmt(est.ffm,1),'lb'],
+      ['Ceiling at '+fmt(S.settings.bfCeiling,1)+'% of current FFM', fmt(cf2,1),'lb'],
+      ['Budget remaining', fmt(rem2,1),'lb'],
+      ['Total mass at ceiling', fmt(est.ffm+cf2,1),'lb']
+    ]);
+    $('budgetCall').innerHTML='<b>The ceiling is not fixed.</b> Every pound of fat-free mass you add raises the allowed fat mass by '+fmt(Number(S.settings.bfCeiling)/(100-Number(S.settings.bfCeiling)),2)+' lb, because body-fat percentage is a ratio. Build lean tissue and the budget grows with you; gain quickly and you spend it before the denominator moves.';
+  }
+
+  /* rate + runway */
+  if(tr && est){
+    var pctWk = 100*tr.slopeWk/est.w;
+    var lo=tr.ciWk!==null?tr.slopeWk-tr.ciWk:null, hi=tr.ciWk!==null?tr.slopeWk+tr.ciWk:null;
+    var band=[RATE_BAND[0]*est.w/100, RATE_BAND[1]*est.w/100];
+    var p=Number(S.settings.pAssume)||0.5;
+    var rem3=ceilingFat(est.ffm)-est.fat;
+    var fatRate=tr.slopeWk*(1-p);
+    var runway = fatRate>0.005 ? rem3/fatRate : null;
+    $('rateRows').innerHTML=rowsHTML([
+      ['Fitted rate', (tr.slopeWk>=0?'+':'')+fmt(tr.slopeWk,2),'lb/wk'],
+      ['95% confidence interval', lo===null?'—':fmt(lo,2)+' to '+fmt(hi,2),'lb/wk'],
+      ['As % of body mass', (pctWk>=0?'+':'')+fmt(pctWk,2),'%/wk'],
+      ['Target band', fmt(band[0],2)+' – '+fmt(band[1],2),'lb/wk'],
+      ['Implied fat accrual at p='+fmt(p,2), (fatRate>=0?'+':'')+fmt(fatRate,2),'lb/wk'],
+      ['Runway to ceiling', runway===null?'—':fmt(runway,0),'weeks']
+    ]);
+    var verdict;
+    if(lo!==null && lo<=0 && hi>=0) verdict='<b>No detectable trend.</b> The confidence interval spans zero, so these '+tr.n+' weigh-ins over '+Math.round(tr.spanD)+' days cannot distinguish gaining from maintaining. Do not adjust intake on this. Keep logging; two more weeks of daily weigh-ins will usually resolve it.';
+    else if(tr.slopeWk>band[1]) verdict='<b>Too fast.</b> The fitted rate exceeds the top of the target band. On the randomized evidence the excess buys fat, not lean — Garthe found no lean-mass advantage at a surplus that produced a fivefold larger fat gain. Cut roughly 150–200 kcal/day and re-fit in two weeks.';
+    else if(tr.slopeWk<band[0]) verdict='<b>Too slow or flat.</b> Below the band you are at or near maintenance, where lean accrual is impaired (Murphy &amp; Koehler: ES −0.57 for lean mass in deficit). Add roughly 150 kcal/day before touching training volume.';
+    else verdict='<b>On plan.</b> The fitted rate sits inside the target band. Change nothing on the nutrition side; the next lever is set volume and load progression.';
+    $('trendCap').textContent = tr.n+' weigh-ins over '+Math.round(tr.spanD)+' days · dashed line is the least-squares fit';
+    drawSeries('chWeight',[{color:'var(--s1)',pts:tr.pts.map(function(p){return {d:p.d,v:p.w};})}],
+      {dec:1, fit:{d0:tr.pts[0].d, v0:tr.a, d1:tr.pts[tr.pts.length-1].d, v1:tr.a+tr.slopeDay*tr.spanD}});
+    $('rateCall').innerHTML=verdict;
+  } else {
+    $('rateCall').innerHTML='<b>Not enough weigh-ins to fit anything.</b> Until there are three, the page will not guess at a trend, and neither should you.';
+    $('rateRows').innerHTML='<div class="empty">Three or more weigh-ins are needed before a slope and its confidence interval mean anything. Daily is best; the noise is what the regression is for.</div>';
+    drawSeries('chWeight',[{color:'var(--s1)',pts:S.weighins.map(function(p){return {d:p.d,v:p.w};})}],{dec:1});
+  }
+
+  /* weigh-in table */
+  var wl=S.weighins.slice().sort(byDate).reverse().slice(0,8);
+  $('wTable').innerHTML = wl.length ? '<table class="dt"><tr><th>Date</th><th>lb</th><th></th></tr>'+
+    wl.map(function(x,i){ return '<tr><td>'+x.d+'</td><td>'+fmt(x.w,1)+'</td><td><button class="del" data-w="'+x.d+'" aria-label="Delete">×</button></td></tr>'; }).join('')+
+    '</table>' : '<div class="empty">No weigh-ins logged.</div>';
+  Array.prototype.forEach.call($('wTable').querySelectorAll('.del'),function(b){
+    b.addEventListener('click',function(){ var d=b.getAttribute('data-w'); S.weighins=S.weighins.filter(function(x){return x.d!==d;}); save(); render(); });
+  });
+
+  /* partitioning */
+  var scs=S.scans.slice().sort(byDate);
+  if(scs.length>=2){
+    var A=scs[scs.length-2], B=scs[scs.length-1];
+    var dW=B.w-A.w, dF=scanFFM(B)-scanFFM(A), dFat=scanFat(B)-scanFat(A);
+    var prTxt;
+    if(dW<=0.3 && dF>0.3) prTxt='undefined — recomposition';
+    else if(Math.abs(dW)<=0.3) prTxt='undefined — weight flat';
+    else prTxt=fmt(dF/dW,2);
+    $('pRows').innerHTML=rowsHTML([
+      ['Interval', A.d+' → '+B.d, Math.round(days(A.d,B.d))+' d'],
+      ['Δ body mass', (dW>=0?'+':'')+fmt(dW,1),'lb'],
+      ['Δ fat-free mass', (dF>=0?'+':'')+fmt(dF,1),'lb'],
+      ['Δ fat mass', (dFat>=0?'+':'')+fmt(dFat,1),'lb'],
+      ['Δ skeletal muscle mass', (B.smm&&A.smm)?((B.smm-A.smm>=0?'+':'')+fmt(B.smm-A.smm,1)):'—','lb'],
+      ['p-ratio', prTxt,'']
+    ]);
+    if(dW<=0 && dF>0){
+      $('pRows').insertAdjacentHTML('beforeend','<div class="trendcall" style="border-left-color:var(--warn)"><b>The ratio does not apply to this interval.</b> Between these two scans body mass fell '+fmt(-dW,1)+' lb while fat-free mass rose '+fmt(dF,1)+' lb — recomposition, not accrual. A p-ratio is the lean fraction of <em>gained</em> mass, so it is undefined when the denominator is negative, and the −'+fmt(Math.abs(dF/dW),1)+' the arithmetic returns is a artefact, not a finding. The first useful p-ratio for this block comes from the first two scans that bracket real weight gain.</div>');
+    }
+  } else {
+    $('pRows').innerHTML='<div class="empty">Two scans are required. One scan is a point, not a trajectory.</div>';
+  }
+  drawSeries('chComp',[
+    {color:'var(--s1)',pts:scs.map(function(x){return {d:x.d,v:scanFFM(x)};})},
+    {color:'var(--s6)',pts:scs.map(function(x){return {d:x.d,v:scanFat(x)};})}
+  ],{dec:1});
+  $('sTable').innerHTML = scs.length ? '<table class="dt"><tr><th>Date</th><th>lb</th><th>BF%</th><th>SMM</th><th></th></tr>'+
+    scs.slice().reverse().map(function(x){ return '<tr><td>'+x.d+'</td><td>'+fmt(x.w,1)+'</td><td>'+fmt(x.bf,1)+'</td><td>'+(x.smm?fmt(x.smm,1):'—')+'</td><td><button class="del" data-s="'+x.d+'" aria-label="Delete">×</button></td></tr>'; }).join('')+'</table>' : '';
+  Array.prototype.forEach.call($('sTable').querySelectorAll('.del'),function(b){
+    b.addEventListener('click',function(){ var d=b.getAttribute('data-s'); S.scans=S.scans.filter(function(x){return x.d!==d;}); save(); render(); });
+  });
+
+  /* projection */
+  $('pAssume').value=S.settings.pAssume;
+  if(est){
+    var pA=Number(S.settings.pAssume)||0.5;
+    var rem4=ceilingFat(est.ffm)-est.fat;
+    // solve: fat_gain = total*(1-p); ffm_gain = total*p; ceiling grows with ffm
+    var c=Number(S.settings.bfCeiling)/100, k=c/(1-c);
+    // ceilingFat(ffm+total*p) - (fat+total*(1-p)) = 0
+    var denom=(1-pA)-k*pA;
+    var totalGain = (denom>0 && rem4>0) ? rem4/denom : null;
+    var leanGain2 = totalGain===null?null:totalGain*pA;
+    var fatGain2 = totalGain===null?null:totalGain*(1-pA);
+    $('projRows').innerHTML=rowsHTML([
+      ['Room to ceiling, total mass', totalGain===null?'unbounded':'+'+fmt(totalGain,1),'lb'],
+      ['of which lean', leanGain2===null?'—':'+'+fmt(leanGain2,1),'lb'],
+      ['of which fat', fatGain2===null?'—':'+'+fmt(fatGain2,1),'lb'],
+      ['End body mass', totalGain===null?'—':fmt(est.w+totalGain,1),'lb'],
+      ['Weeks at 0.30 lb/wk', totalGain===null?'—':fmt(totalGain/0.30,0),'wk'],
+      ['Weeks at 0.50 lb/wk', totalGain===null?'—':fmt(totalGain/0.50,0),'wk']
+    ]);
+    if(rem4<=0){
+      var cNext=(Number(S.settings.bfCeiling)+1)/100;
+      var released=(cNext/(1-cNext))*est.ffm - ceilingFat(est.ffm);
+      $('projCall').innerHTML='<b>You are already at or above the selected ceiling.</b> At '+fmt(est.bf,1)+'% estimated body fat there is no budget to spend against a '+fmt(S.settings.bfCeiling,1)+'% ceiling, so nothing can be gained under that constraint — the only moves are a higher ceiling or a fat-loss phase first. Raising the ceiling by one point releases about '+fmt(released,1)+' lb of fat budget, which at a p-ratio of '+fmt(pA,2)+' is roughly '+fmt(released*pA/(1-pA),1)+' lb of lean tissue. This is not a rounding artefact; it is the constraint doing exactly what you asked it to do.';
+    } else if(denom<=0){
+      $('projCall').innerHTML='<b>At a p-ratio of '+fmt(pA,2)+' the ceiling recedes faster than you approach it.</b> Lean mass is being added quickly enough that the allowed fat mass grows faster than actual fat mass. That is the ideal case and it is rare — verify it against two consecutive scans before believing it.';
+    } else {
+      $('projCall').innerHTML='<b>Read:</b> at a p-ratio of '+fmt(pA,2)+' you have room for roughly '+fmt(leanGain2,1)+' lb of lean tissue before the '+fmt(S.settings.bfCeiling,1)+'% ceiling. For an advanced trainee at 38 that is a block of months, not weeks — which is why the stop rule is a scan, not a calendar date. Recalibrate the p-ratio from real scans rather than trusting the default.';
+    }
+  }
+
+  /* volume */
+  var vol=weekVolume(), vh='';
+  MUSCLES.forEach(function(m){
+    var v=vol[m], pct=Math.min(100, 100*v/24);
+    var cls = v<SET_TARGET[0]?'low':(v<=SET_TARGET[1]?'ok':'high');
+    var bandL=100*SET_TARGET[0]/24, bandW=100*(SET_TARGET[1]-SET_TARGET[0])/24;
+    vh+='<div class="seg"><span class="name">'+m+'</span><div class="track">'+
+        '<div class="band" style="left:'+bandL+'%;width:'+bandW+'%"></div>'+
+        '<div class="fill '+cls+'" style="width:'+pct+'%"></div></div>'+
+        '<span class="pct">'+fmt(v,1)+' sets</span></div>';
+  });
+  $('volBars').innerHTML=vh;
+  var under=MUSCLES.filter(function(m){return vol[m]<SET_TARGET[0];});
+  var over=MUSCLES.filter(function(m){return vol[m]>SET_TARGET[1];});
+  var totalSets=MUSCLES.reduce(function(a,m){return a+vol[m];},0);
+  if(totalSets===0){
+    $('volCall').innerHTML='<b>Nothing logged in the last seven days.</b> The ledger is the instrument for the only A-grade lever on this page; an empty ledger means the block is unmeasured, not that it is going badly.';
+  } else {
+    $('volCall').innerHTML='<b>'+fmt(totalSets,0)+' direct-equivalent sets across nine muscle groups this week.</b> '+
+      (under.length?'Below target: '+under.join(', ')+'. ':'')+
+      (over.length?'Above target: '+over.join(', ')+' — diminishing returns, and recoverable volume is finite. ':'')+
+      (!under.length&&!over.length?'Every group sits inside the target band. Progress load, not sets.':'');
+  }
+
+  /* session log */
+  var sel=$('lEx');
+  if(sel.options.length===0){ LIB.forEach(function(l){ var o=document.createElement('option'); o.value=l.n; o.textContent=l.n; sel.appendChild(o); }); }
+  var recent=S.sessions.slice().sort(byDate).reverse().slice(0,10);
+  $('lTable').innerHTML = recent.length ? '<table class="dt"><tr><th>Date</th><th>Exercise</th><th>Sets</th><th>Reps</th><th>lb</th><th>e1RM</th><th></th></tr>'+
+    recent.map(function(x,i){ return '<tr><td>'+x.d+'</td><td>'+esc(x.ex)+'</td><td>'+x.sets+'</td><td>'+x.reps+'</td><td>'+(x.load||'—')+'</td><td>'+(x.load?fmt(e1rm(x.load,x.reps),0):'—')+'</td><td><button class="del" data-i="'+x.id+'" aria-label="Delete">×</button></td></tr>'; }).join('')+'</table>' : '<div class="empty">No entries yet.</div>';
+  Array.prototype.forEach.call($('lTable').querySelectorAll('.del'),function(b){
+    b.addEventListener('click',function(){ var id=b.getAttribute('data-i'); S.sessions=S.sessions.filter(function(x){return String(x.id)!==id;}); save(); render(); });
+  });
+
+  /* progression */
+  var names={}; S.sessions.forEach(function(s){ if(s.load>0) names[s.ex]=1; });
+  var lifts=Object.keys(names).sort();
+  var lp=$('liftPick'), prev=lp.value;
+  lp.innerHTML=lifts.map(function(n){return '<option>'+esc(n)+'</option>';}).join('');
+  if(lifts.indexOf(prev)>=0) lp.value=prev;
+  var pick=lp.value||lifts[0];
+  $('chLiftName').textContent=pick||'select a lift';
+  drawSeries('chLift', pick?[{color:'var(--s2)',pts:liftHistory(pick).map(function(p){return {d:p.d,v:p.v};})}]:[], {dec:0});
+  $('e1Table').innerHTML = lifts.length ? '<table class="dt"><tr><th>Lift</th><th>First</th><th>Latest</th><th>Δ</th><th>%</th></tr>'+
+    lifts.map(function(n){
+      var h=liftHistory(n); if(h.length<1) return '';
+      var a=h[0].v, b=h[h.length-1].v, d=b-a;
+      return '<tr><td>'+esc(n)+'</td><td>'+fmt(a,0)+'</td><td>'+fmt(b,0)+'</td><td>'+(d>=0?'+':'')+fmt(d,0)+'</td><td style="color:'+(d>0?'var(--good)':d<0?'var(--serious)':'var(--muted)')+'">'+(a>0?((d>=0?'+':'')+fmt(100*d/a,1)):'—')+'</td></tr>';
+    }).join('')+'</table>' : '<div class="empty">Log loaded sets to build the progression audit.</div>';
+
+  /* vo2 */
+  var z=(S.settings.z4!==null&&S.settings.z4!==undefined)?S.settings.z4:(FEED.apple?FEED.apple.z4plus_min_week:null);
+  var v=(S.settings.vo2!==null&&S.settings.vo2!==undefined)?S.settings.vo2:(FEED.vo2?FEED.vo2.latest:null);
+  $('vo2Rows').innerHTML=rowsHTML([
+    ['Z4+ minutes this week', z===null?'—':fmt(z,0),'min'],
+    ['Target', '≥'+Z4_TARGET,'min'],
+    ['Prescription','4 × 4 min at 90–95% HRmax',''],
+    ['Modality','bike or erg — not running',''],
+    ['Latest VO₂ max', v===null?'—':fmt(v,1),'ml/kg/min'],
+    ['Feed date', (FEED.vo2&&FEED.vo2.date)||'—','']
+  ]);
+  $('vo2Call').innerHTML='<b>One session, correctly executed, is the whole prescription.</b> In the trial that established this protocol, forty moderately trained men were randomized across four matched-work conditions for eight weeks; 4 × 4 min at 90–95% HRmax raised VO₂ max more than lactate-threshold or long-slow-distance work, and produced the largest stroke-volume increase (Helgerud J, et al. Med Sci Sports Exerc 2007;39(4):665–671). Two sessions a week is the ceiling worth paying for during a hypertrophy block. Note the HRmax anchor of 181 is still unaudited — a ramp test resolves it, and every zone number depends on it.';
+
+  /* nutrition */
+  $('nTdee').value=S.settings.tdee; $('nSurplus').value=String(S.settings.surplus);
+  var tdee=Number(S.settings.tdee)||2778, sur=Number(S.settings.surplus)||0.075;
+  var kcal=tdee*(1+sur);
+  var kg=est?est.w*0.4536:75.1;
+  $('nutRows').innerHTML=rowsHTML([
+    ['Measured expenditure (28 d)', fmt(tdee,0),'kcal/day'],
+    ['Surplus', fmt(sur*100,1)+'%  ·  +'+fmt(kcal-tdee,0),'kcal'],
+    ['Intake target', fmt(kcal,0),'kcal/day'],
+    ['Protein — meta-analytic plateau', fmt(1.62*kg,0),'g/day'],
+    ['Protein — upper bound of CI', fmt(2.2*kg,0),'g/day'],
+    ['Working protein target', fmt(1.9*kg,0)+'–'+fmt(2.2*kg,0),'g/day'],
+    ['Remaining kcal for carb and fat', fmt(kcal-2.05*kg*4,0),'kcal']
+  ]);
+  $('nutCall').innerHTML='<b>Recompute this when triathlon volume comes out, not before.</b> The '+fmt(tdee,0)+' kcal figure was measured while you were swimming and running. Removing that volume will lower expenditure by a few hundred kcal a day, and an intake target left at the old number quietly converts a 7.5% surplus into something closer to 20% — which is the exact condition Garthe showed buys fat and no extra lean tissue. Refit from the 28-day Apple average four weeks after the endurance volume drops.';
+
+  /* feed + store */
+  $('feedRows').innerHTML=rowsHTML([
+    ['Generated', FEED.generated||'—',''],
+    ['Apple TDEE (28 d)', FEED.apple?fmt(FEED.apple.tdee28,0):'—','kcal'],
+    ['Apple Z4+ this week', FEED.apple?fmt(FEED.apple.z4plus_min_week,0):'—','min'],
+    ['Oura sleep · HRV · RHR', FEED.oura?(fmt(FEED.oura.sleep_h,1)+' h · '+fmt(FEED.oura.hrv,0)+' · '+fmt(FEED.oura.rhr,0)):'—',''],
+    ['Latest VO₂ max', FEED.vo2?fmt(FEED.vo2.latest,1):'—','ml/kg/min']
+  ]);
+  $('storeRows').innerHTML=rowsHTML([
+    ['Weigh-ins', String(S.weighins.length),''],
+    ['Scans', String(S.scans.length),''],
+    ['Logged exercise entries', String(S.sessions.length),''],
+    ['Storage key','matt_hyper_v1','']
+  ]);
+}
+
+/* ---------- events ---------- */
+$('wDate').value=today(); $('sDate').value=today(); $('lDate').value=today();
+
+$('wAdd').addEventListener('click',function(){
+  var d=$('wDate').value, w=parseFloat($('wLb').value);
+  if(!d||!w||w<50||w>500) return;
+  S.weighins=S.weighins.filter(function(x){return x.d!==d;});
+  S.weighins.push({d:d,w:w}); save(); $('wLb').value=''; render();
+});
+$('sAdd').addEventListener('click',function(){
+  var d=$('sDate').value, w=parseFloat($('sLb').value), bf=parseFloat($('sBf').value), smm=parseFloat($('sSmm').value);
+  if(!d||!w||!bf) return;
+  S.scans=S.scans.filter(function(x){return x.d!==d;});
+  S.scans.push({d:d,w:w,bf:bf,smm:isNaN(smm)?null:smm}); save();
+  $('sLb').value=''; $('sBf').value=''; $('sSmm').value=''; render();
+});
+$('lAdd').addEventListener('click',function(){
+  var d=$('lDate').value, ex=$('lEx').value, raw=$('lSets').value.trim();
+  if(!d||!ex||!raw) return;
+  raw.split(',').forEach(function(part){
+    var m=part.trim().match(/^(\d+)\s*[xX*]\s*(\d+)\s*(?:@\s*(\d+(?:\.\d+)?))?$/);
+    if(!m) return;
+    S.sessions.push({id:Date.now()+Math.random(), d:d, ex:ex, sets:parseInt(m[1],10), reps:parseInt(m[2],10), load:m[3]?parseFloat(m[3]):0});
+  });
+  save(); $('lSets').value=''; render();
+});
+$('pAssume').addEventListener('change',function(){
+  var v=parseFloat($('pAssume').value); if(isNaN(v)||v<=0||v>=1) return;
+  S.settings.pAssume=v; save(); render();
+});
+$('pCalib').addEventListener('click',function(){
+  var scs=S.scans.slice().sort(byDate);
+  if(scs.length<2) return;
+  var A=scs[scs.length-2], B=scs[scs.length-1];
+  var dW=B.w-A.w; if(Math.abs(dW)<0.3){ alert('Weight barely moved between the last two scans, so the p-ratio is undefined. Recomposition at flat weight cannot produce a meaningful ratio — use the default until two scans bracket a real weight change.'); return; }
+  var pr=(scanFFM(B)-scanFFM(A))/dW;
+  S.settings.pAssume=Math.max(0.1,Math.min(0.9,pr)); save(); render();
+});
+$('zAdd').addEventListener('click',function(){
+  var z=parseFloat($('zMin').value), v=parseFloat($('zVo2').value);
+  if(!isNaN(z)) S.settings.z4=z;
+  if(!isNaN(v)) S.settings.vo2=v;
+  save(); $('zMin').value=''; $('zVo2').value=''; render();
+});
+$('nSave').addEventListener('click',function(){
+  var t=parseFloat($('nTdee').value), s=parseFloat($('nSurplus').value);
+  if(!isNaN(t)&&t>800) S.settings.tdee=t;
+  if(!isNaN(s)) S.settings.surplus=s;
+  save(); render();
+});
+document.getElementById('liftPick').addEventListener('change',render);
+$('expBtn').addEventListener('click',function(){
+  var b=$('ioBox'); b.style.display='block'; b.value=JSON.stringify(S,null,1); b.select();
+});
+$('impBtn').addEventListener('click',function(){
+  var b=$('ioBox');
+  if(b.style.display==='none'||!b.value){ b.style.display='block'; b.value=''; b.placeholder='Paste exported JSON here, then press Import again.'; b.focus(); return; }
+  try{ var o=JSON.parse(b.value); S=Object.assign({},seed,o); S.settings=Object.assign({},seed.settings,o.settings||{}); save(); b.style.display='none'; render(); }
+  catch(e){ alert('That is not valid JSON. Nothing was changed.'); }
+});
+$('clrBtn').addEventListener('click',function(){
+  if(!confirm('Erase every weigh-in, scan and logged set stored in this browser? This cannot be undone.')) return;
+  localStorage.removeItem(KEY); S=JSON.parse(JSON.stringify(seed)); render();
+});
+
+render();
+})();
+</script>
+</body>
+</html>
