@@ -267,13 +267,13 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
       <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
         <label>Prep phase &mdash; 7 to 27 September</label>
         <div style="font-size:12px;line-height:1.55;color:var(--txt2)">
-          Week 1 of the block is <b>28 September</b>, not the 7th. The three weeks before it are a prep phase, and they are not wasted: <b>7&ndash;16 Sept</b> find your working loads on all five primaries at the prescribed RIR, so week 1 is not spent guessing. <b>15 Sept</b> is the baseline draw and InBody scan &mdash; do not lift for 48&ndash;72 h beforehand, which means nothing after Friday the 11th. <b>17&ndash;22 Sept</b> is travel: VO&#8322; and open days as you can, substitutions are in every session under group X. <b>23&ndash;27 Sept</b> re-entry, moderate. Then week 1 starts against a clean baseline.
+          Week 1 of the block is <b>28 September</b>. <b>7&ndash;16 Sept</b> find working loads on all five primaries at the prescribed RIR. <b>15 Sept</b> baseline draw and InBody scan &mdash; no lifting for 48&ndash;72 h beforehand, so nothing after Friday the 11th. <b>17&ndash;22 Sept</b> travel: VO&#8322; and open days as you can, substitutions under group X in every session. <b>23&ndash;27 Sept</b> re-entry, moderate.
         </div>
       </div>
       <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
         <label>Mass Accrual Console</label>
         <div style="font-size:12px;line-height:1.55;color:var(--txt2)">
-          Marking a session complete writes its <b>prescribed</b> working sets into the console's store, along with any Monday bodyweight and the Wednesday Z4+ minutes. Warm-up, cool-down, the technique brief and the travel substitutions are excluded &mdash; they are not working volume, and a rest-pause or drop set still counts as one set. If you cut a session short, untick it or correct it there.
+          Marking a session complete writes its <b>prescribed</b> working sets into the console's store, along with any Monday bodyweight and the Wednesday Z4+ minutes. Warm-up, cool-down, the technique brief and the travel substitutions are excluded. If you cut a session short, untick it or correct it there.
         </div>
         <button class="btn" style="margin-top:8px" onclick="bridgeRebuildAll()">Rebuild console from completed sessions</button>
       </div>
@@ -557,8 +557,8 @@ var EX_DATA = {
       ["B2. Seated Leg Curl","3x 10-15","RIR 3 || TEMPO: 3 sec eccentric every rep"],
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
-      ["C1. Leg Extension","3x 12-15","last set to failure is cheap here -- RIR 3"],
-      ["C2. Standing Calf Raise","4x 10-15","2 sec pause at the bottom -- RIR 3"],
+      ["C1. Leg Extension","4x 12-15","last set to failure is cheap here -- RIR 3"],
+      ["C2. Standing Calf Raise","3x 10-15","gastrocnemius -- knee straight -- RIR 3 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
       ["D1. Pallof Press w/ Twists (CORE)","3x 10","per side"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
@@ -628,8 +628,9 @@ var EX_DATA = {
       ["Intervals at 90-95% HRmax","4 x 4 min","3 min active recovery between reps"],
     ]},
     {title:"B -- Accessory (after the intervals)",ex:[
-      ["B1. Standing Calf Raise","3x 12-20","RIR 3"],
-      ["B2. Hanging Leg Raise (CORE)","3x 10-15",""],
+      ["B1. Standing Calf Raise","3x 12-20","gastrocnemius -- knee straight -- RIR 3 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B2. Seated Calf Raise","3x 15-25","soleus -- knee bent to ~90 deg; higher reps, it is overwhelmingly slow-twitch -- RIR 3 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B3. Hanging Leg Raise (CORE)","3x 10-15",""],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -660,7 +661,7 @@ var EX_DATA = {
       ["B2. Lying Leg Curl","3x 10-15","RIR 3 || TEMPO: 3 sec eccentric every rep"],
     ]},
     {title:"C -- Accessory",ex:[
-      ["C1. Seated Calf Raise","3x 12-20","RIR 3"],
+      ["C1. Seated Calf Raise","4x 15-25","soleus -- knee bent; higher reps -- RIR 3 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -756,8 +757,8 @@ var EX_DATA = {
       ["B2. Seated Leg Curl","3x 10-15","RIR 2 || TEMPO: 3 sec eccentric every rep"],
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
-      ["C1. Leg Extension","3x 12-15","last set to failure is cheap here -- RIR 2"],
-      ["C2. Standing Calf Raise","5x 10-15","2 sec pause at the bottom -- RIR 2"],
+      ["C1. Leg Extension","5x 12-15","last set to failure is cheap here -- RIR 2"],
+      ["C2. Standing Calf Raise","3x 10-15","gastrocnemius -- knee straight -- RIR 2 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
       ["D1. Pallof Press w/ Twists (CORE)","3x 10","per side"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
@@ -827,8 +828,9 @@ var EX_DATA = {
       ["Intervals at 90-95% HRmax","4 x 4 min","3 min active recovery between reps"],
     ]},
     {title:"B -- Accessory (after the intervals)",ex:[
-      ["B1. Standing Calf Raise","3x 12-20","RIR 2"],
-      ["B2. Hanging Leg Raise (CORE)","3x 10-15",""],
+      ["B1. Standing Calf Raise","3x 12-20","gastrocnemius -- knee straight -- RIR 2 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B2. Seated Calf Raise","3x 15-25","soleus -- knee bent to ~90 deg; higher reps, it is overwhelmingly slow-twitch -- RIR 2 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B3. Hanging Leg Raise (CORE)","3x 10-15",""],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -860,7 +862,7 @@ var EX_DATA = {
     ]},
     {title:"C -- Accessory",ex:[
       ["C1. Walking Lunge","3x 10-12","per leg; log total load in hand -- RIR 2"],
-      ["C2. Seated Calf Raise","3x 12-20","RIR 2"],
+      ["C2. Seated Calf Raise","5x 15-25","soleus -- knee bent; higher reps -- RIR 2 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -956,8 +958,8 @@ var EX_DATA = {
       ["B2. Seated Leg Curl","4x 10-15","RIR 1 || TEMPO: 3 sec eccentric every rep"],
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
-      ["C1. Leg Extension","4x 12-15","last set to failure is cheap here -- RIR 1"],
-      ["C2. Standing Calf Raise","5x 10-15","2 sec pause at the bottom -- RIR 1"],
+      ["C1. Leg Extension","5x 12-15","last set to failure is cheap here -- RIR 1"],
+      ["C2. Standing Calf Raise","4x 10-15","gastrocnemius -- knee straight -- RIR 1 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
       ["D1. Pallof Press w/ Twists (CORE)","4x 10","per side"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
@@ -1027,8 +1029,9 @@ var EX_DATA = {
       ["Intervals at 90-95% HRmax","5 x 4 min","3 min active recovery between reps"],
     ]},
     {title:"B -- Accessory (after the intervals)",ex:[
-      ["B1. Standing Calf Raise","4x 12-20","RIR 1"],
-      ["B2. Hanging Leg Raise (CORE)","4x 10-15",""],
+      ["B1. Standing Calf Raise","4x 12-20","gastrocnemius -- knee straight -- RIR 1 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B2. Seated Calf Raise","4x 15-25","soleus -- knee bent to ~90 deg; higher reps, it is overwhelmingly slow-twitch -- RIR 1 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B3. Hanging Leg Raise (CORE)","4x 10-15",""],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -1060,7 +1063,7 @@ var EX_DATA = {
     ]},
     {title:"C -- Accessory",ex:[
       ["C1. Walking Lunge","4x 10-12","per leg; log total load in hand -- RIR 1"],
-      ["C2. Seated Calf Raise","4x 12-20","RIR 1"],
+      ["C2. Seated Calf Raise","5x 15-25","soleus -- knee bent; higher reps -- RIR 1 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -1157,7 +1160,7 @@ var EX_DATA = {
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
       ["C1. Leg Extension","2x 12-15","last set to failure is cheap here -- RIR 4"],
-      ["C2. Standing Calf Raise","2x 10-15","2 sec pause at the bottom -- RIR 4"],
+      ["C2. Standing Calf Raise","2x 10-15","gastrocnemius -- knee straight -- RIR 4 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
       ["D1. Pallof Press w/ Twists (CORE)","2x 10","per side"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
@@ -1227,8 +1230,9 @@ var EX_DATA = {
       ["Intervals at 90-95% HRmax","3 x 4 min","3 min active recovery between reps"],
     ]},
     {title:"B -- Accessory (after the intervals)",ex:[
-      ["B1. Standing Calf Raise","2x 12-20","RIR 4"],
-      ["B2. Hanging Leg Raise (CORE)","2x 10-15",""],
+      ["B1. Standing Calf Raise","2x 12-20","gastrocnemius -- knee straight -- RIR 4 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B2. Seated Calf Raise","2x 15-25","soleus -- knee bent to ~90 deg; higher reps, it is overwhelmingly slow-twitch -- RIR 4 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B3. Hanging Leg Raise (CORE)","2x 10-15",""],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -1260,7 +1264,7 @@ var EX_DATA = {
     ]},
     {title:"C -- Accessory",ex:[
       ["C1. Walking Lunge","2x 10-12","per leg; log total load in hand -- RIR 4"],
-      ["C2. Seated Calf Raise","2x 12-20","RIR 4"],
+      ["C2. Seated Calf Raise","2x 15-25","soleus -- knee bent; higher reps -- RIR 4 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -1356,8 +1360,8 @@ var EX_DATA = {
       ["B2. Seated Leg Curl","3x 10-15","RIR 2"],
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
-      ["C1. Leg Extension","3x 12-15","last set to failure is cheap here -- RIR 2 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
-      ["C2. Standing Calf Raise","4x 10-15","2 sec pause at the bottom -- RIR 2 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
+      ["C1. Leg Extension","4x 12-15","last set to failure is cheap here -- RIR 2 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
+      ["C2. Standing Calf Raise","3x 10-15","gastrocnemius -- knee straight -- RIR 2 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
       ["D1. Pallof Press w/ Twists (CORE)","3x 10","per side"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
@@ -1427,8 +1431,9 @@ var EX_DATA = {
       ["Intervals at 90-95% HRmax","4 x 4 min","3 min active recovery between reps"],
     ]},
     {title:"B -- Accessory (after the intervals)",ex:[
-      ["B1. Standing Calf Raise","3x 12-20","RIR 2 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
-      ["B2. Hanging Leg Raise (CORE)","3x 10-15",""],
+      ["B1. Standing Calf Raise","3x 12-20","gastrocnemius -- knee straight -- RIR 2 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B2. Seated Calf Raise","3x 15-25","soleus -- knee bent to ~90 deg; higher reps, it is overwhelmingly slow-twitch -- RIR 2 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B3. Hanging Leg Raise (CORE)","3x 10-15",""],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -1459,7 +1464,7 @@ var EX_DATA = {
       ["B2. Lying Leg Curl","3x 10-15","RIR 2"],
     ]},
     {title:"C -- Accessory",ex:[
-      ["C1. Seated Calf Raise","3x 12-20","RIR 2 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
+      ["C1. Seated Calf Raise","4x 15-25","soleus -- knee bent; higher reps -- RIR 2 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -1555,8 +1560,8 @@ var EX_DATA = {
       ["B2. Seated Leg Curl","3x 10-15","RIR 1"],
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
-      ["C1. Leg Extension","3x 12-15","last set to failure is cheap here -- RIR 1 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
-      ["C2. Standing Calf Raise","5x 10-15","2 sec pause at the bottom -- RIR 1 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
+      ["C1. Leg Extension","5x 12-15","last set to failure is cheap here -- RIR 1 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
+      ["C2. Standing Calf Raise","3x 10-15","gastrocnemius -- knee straight -- RIR 1 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
       ["D1. Pallof Press w/ Twists (CORE)","3x 10","per side"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
@@ -1626,8 +1631,9 @@ var EX_DATA = {
       ["Intervals at 90-95% HRmax","5 x 4 min","3 min active recovery between reps"],
     ]},
     {title:"B -- Accessory (after the intervals)",ex:[
-      ["B1. Standing Calf Raise","3x 12-20","RIR 1 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
-      ["B2. Hanging Leg Raise (CORE)","3x 10-15",""],
+      ["B1. Standing Calf Raise","3x 12-20","gastrocnemius -- knee straight -- RIR 1 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B2. Seated Calf Raise","3x 15-25","soleus -- knee bent to ~90 deg; higher reps, it is overwhelmingly slow-twitch -- RIR 1 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B3. Hanging Leg Raise (CORE)","3x 10-15",""],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -1659,7 +1665,7 @@ var EX_DATA = {
     ]},
     {title:"C -- Accessory",ex:[
       ["C1. Walking Lunge","3x 10-12","per leg; log total load in hand -- RIR 1"],
-      ["C2. Seated Calf Raise","3x 12-20","RIR 1 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
+      ["C2. Seated Calf Raise","5x 15-25","soleus -- knee bent; higher reps -- RIR 1 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -1755,8 +1761,8 @@ var EX_DATA = {
       ["B2. Seated Leg Curl","4x 10-15","RIR 1"],
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
-      ["C1. Leg Extension","4x 12-15","last set to failure is cheap here -- RIR 1 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
-      ["C2. Standing Calf Raise","5x 10-15","2 sec pause at the bottom -- RIR 1 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
+      ["C1. Leg Extension","5x 12-15","last set to failure is cheap here -- RIR 1 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
+      ["C2. Standing Calf Raise","4x 10-15","gastrocnemius -- knee straight -- RIR 1 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
       ["D1. Pallof Press w/ Twists (CORE)","4x 10","per side"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
@@ -1826,8 +1832,9 @@ var EX_DATA = {
       ["Intervals at 90-95% HRmax","5 x 4 min","3 min active recovery between reps"],
     ]},
     {title:"B -- Accessory (after the intervals)",ex:[
-      ["B1. Standing Calf Raise","4x 12-20","RIR 1 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
-      ["B2. Hanging Leg Raise (CORE)","4x 10-15",""],
+      ["B1. Standing Calf Raise","4x 12-20","gastrocnemius -- knee straight -- RIR 1 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B2. Seated Calf Raise","4x 15-25","soleus -- knee bent to ~90 deg; higher reps, it is overwhelmingly slow-twitch -- RIR 1 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B3. Hanging Leg Raise (CORE)","4x 10-15",""],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -1859,7 +1866,7 @@ var EX_DATA = {
     ]},
     {title:"C -- Accessory",ex:[
       ["C1. Walking Lunge","4x 10-12","per leg; log total load in hand -- RIR 1"],
-      ["C2. Seated Calf Raise","4x 12-20","RIR 1 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
+      ["C2. Seated Calf Raise","5x 15-25","soleus -- knee bent; higher reps -- RIR 1 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -1956,7 +1963,7 @@ var EX_DATA = {
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
       ["C1. Leg Extension","2x 12-15","last set to failure is cheap here -- RIR 4 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
-      ["C2. Standing Calf Raise","2x 10-15","2 sec pause at the bottom -- RIR 4 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
+      ["C2. Standing Calf Raise","2x 10-15","gastrocnemius -- knee straight -- RIR 4 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
       ["D1. Pallof Press w/ Twists (CORE)","2x 10","per side"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
@@ -2026,8 +2033,9 @@ var EX_DATA = {
       ["Intervals at 90-95% HRmax","3 x 4 min","3 min active recovery between reps"],
     ]},
     {title:"B -- Accessory (after the intervals)",ex:[
-      ["B1. Standing Calf Raise","2x 12-20","RIR 4 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
-      ["B2. Hanging Leg Raise (CORE)","2x 10-15",""],
+      ["B1. Standing Calf Raise","2x 12-20","gastrocnemius -- knee straight -- RIR 4 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B2. Seated Calf Raise","2x 15-25","soleus -- knee bent to ~90 deg; higher reps, it is overwhelmingly slow-twitch -- RIR 4 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B3. Hanging Leg Raise (CORE)","2x 10-15",""],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -2059,7 +2067,7 @@ var EX_DATA = {
     ]},
     {title:"C -- Accessory",ex:[
       ["C1. Walking Lunge","2x 10-12","per leg; log total load in hand -- RIR 4"],
-      ["C2. Seated Calf Raise","2x 12-20","RIR 4 || INTENSITY: final set -- rest-pause (failure / 15 s / failure / 15 s / failure)"],
+      ["C2. Seated Calf Raise","2x 15-25","soleus -- knee bent; higher reps -- RIR 4 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -2155,8 +2163,8 @@ var EX_DATA = {
       ["B2. Seated Leg Curl","3x 10-15","RIR 2 || LONG-LENGTH: final set -- 3-5 lengthened partials after full-ROM failure"],
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
-      ["C1. Leg Extension","3x 12-15","last set to failure is cheap here -- RIR 2"],
-      ["C2. Standing Calf Raise","4x 10-15","2 sec pause at the bottom -- RIR 2 || LONG-LENGTH: final set -- 3-5 lengthened partials after full-ROM failure"],
+      ["C1. Leg Extension","4x 12-15","last set to failure is cheap here -- RIR 2"],
+      ["C2. Standing Calf Raise","3x 10-15","gastrocnemius -- knee straight -- RIR 2 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
       ["D1. Pallof Press w/ Twists (CORE)","3x 10","per side"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
@@ -2226,8 +2234,9 @@ var EX_DATA = {
       ["Intervals at 90-95% HRmax","5 x 4 min","3 min active recovery between reps"],
     ]},
     {title:"B -- Accessory (after the intervals)",ex:[
-      ["B1. Standing Calf Raise","3x 12-20","RIR 2 || LONG-LENGTH: final set -- 3-5 lengthened partials after full-ROM failure"],
-      ["B2. Hanging Leg Raise (CORE)","3x 10-15",""],
+      ["B1. Standing Calf Raise","3x 12-20","gastrocnemius -- knee straight -- RIR 2 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B2. Seated Calf Raise","3x 15-25","soleus -- knee bent to ~90 deg; higher reps, it is overwhelmingly slow-twitch -- RIR 2 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B3. Hanging Leg Raise (CORE)","3x 10-15",""],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -2258,7 +2267,7 @@ var EX_DATA = {
       ["B2. Lying Leg Curl","3x 10-15","RIR 2 || LONG-LENGTH: final set -- 3-5 lengthened partials after full-ROM failure"],
     ]},
     {title:"C -- Accessory",ex:[
-      ["C1. Seated Calf Raise","3x 12-20","RIR 2 || LONG-LENGTH: final set -- 3-5 lengthened partials after full-ROM failure"],
+      ["C1. Seated Calf Raise","4x 15-25","soleus -- knee bent; higher reps -- RIR 2 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -2354,8 +2363,8 @@ var EX_DATA = {
       ["B2. Seated Leg Curl","3x 10-15","RIR 1 || LONG-LENGTH: final set -- 3-5 lengthened partials after full-ROM failure"],
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
-      ["C1. Leg Extension","3x 12-15","last set to failure is cheap here -- RIR 1"],
-      ["C2. Standing Calf Raise","5x 10-15","2 sec pause at the bottom -- RIR 1 || LONG-LENGTH: final set -- 3-5 lengthened partials after full-ROM failure"],
+      ["C1. Leg Extension","5x 12-15","last set to failure is cheap here -- RIR 1"],
+      ["C2. Standing Calf Raise","3x 10-15","gastrocnemius -- knee straight -- RIR 1 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
       ["D1. Pallof Press w/ Twists (CORE)","3x 10","per side"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
@@ -2425,8 +2434,9 @@ var EX_DATA = {
       ["Intervals at 90-95% HRmax","5 x 4 min","3 min active recovery between reps"],
     ]},
     {title:"B -- Accessory (after the intervals)",ex:[
-      ["B1. Standing Calf Raise","3x 12-20","RIR 1 || LONG-LENGTH: final set -- 3-5 lengthened partials after full-ROM failure"],
-      ["B2. Hanging Leg Raise (CORE)","3x 10-15",""],
+      ["B1. Standing Calf Raise","3x 12-20","gastrocnemius -- knee straight -- RIR 1 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B2. Seated Calf Raise","3x 15-25","soleus -- knee bent to ~90 deg; higher reps, it is overwhelmingly slow-twitch -- RIR 1 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B3. Hanging Leg Raise (CORE)","3x 10-15",""],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -2458,7 +2468,7 @@ var EX_DATA = {
     ]},
     {title:"C -- Accessory",ex:[
       ["C1. Walking Lunge","3x 10-12","per leg; log total load in hand -- RIR 1"],
-      ["C2. Seated Calf Raise","3x 12-20","RIR 1 || LONG-LENGTH: final set -- 3-5 lengthened partials after full-ROM failure"],
+      ["C2. Seated Calf Raise","5x 15-25","soleus -- knee bent; higher reps -- RIR 1 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -2554,8 +2564,8 @@ var EX_DATA = {
       ["B2. Seated Leg Curl","4x 10-15","RIR 0 || LONG-LENGTH: final set -- 3-5 lengthened partials after full-ROM failure"],
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
-      ["C1. Leg Extension","4x 12-15","last set to failure is cheap here -- RIR 0"],
-      ["C2. Standing Calf Raise","5x 10-15","2 sec pause at the bottom -- RIR 0 || LONG-LENGTH: final set -- 3-5 lengthened partials after full-ROM failure"],
+      ["C1. Leg Extension","5x 12-15","last set to failure is cheap here -- RIR 0"],
+      ["C2. Standing Calf Raise","4x 10-15","gastrocnemius -- knee straight -- RIR 0 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
       ["D1. Pallof Press w/ Twists (CORE)","4x 10","per side"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
@@ -2625,8 +2635,9 @@ var EX_DATA = {
       ["Intervals at 90-95% HRmax","5 x 4 min","3 min active recovery between reps"],
     ]},
     {title:"B -- Accessory (after the intervals)",ex:[
-      ["B1. Standing Calf Raise","4x 12-20","RIR 0 || LONG-LENGTH: final set -- 3-5 lengthened partials after full-ROM failure"],
-      ["B2. Hanging Leg Raise (CORE)","4x 10-15",""],
+      ["B1. Standing Calf Raise","4x 12-20","gastrocnemius -- knee straight -- RIR 0 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B2. Seated Calf Raise","4x 15-25","soleus -- knee bent to ~90 deg; higher reps, it is overwhelmingly slow-twitch -- RIR 0 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B3. Hanging Leg Raise (CORE)","4x 10-15",""],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -2658,7 +2669,7 @@ var EX_DATA = {
     ]},
     {title:"C -- Accessory",ex:[
       ["C1. Walking Lunge","4x 10-12","per leg; log total load in hand -- RIR 0"],
-      ["C2. Seated Calf Raise","4x 12-20","RIR 0 || LONG-LENGTH: final set -- 3-5 lengthened partials after full-ROM failure"],
+      ["C2. Seated Calf Raise","5x 15-25","soleus -- knee bent; higher reps -- RIR 0 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -2755,7 +2766,7 @@ var EX_DATA = {
     ]},
     {title:"C/D -- Accessory (hypertrophy)",ex:[
       ["C1. Leg Extension","2x 12-15","last set to failure is cheap here -- RIR 4"],
-      ["C2. Standing Calf Raise","2x 10-15","2 sec pause at the bottom -- RIR 4 || LONG-LENGTH: final set -- 3-5 lengthened partials after full-ROM failure"],
+      ["C2. Standing Calf Raise","2x 10-15","gastrocnemius -- knee straight -- RIR 4 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
       ["D1. Pallof Press w/ Twists (CORE)","2x 10","per side"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
@@ -2825,8 +2836,9 @@ var EX_DATA = {
       ["Intervals at 90-95% HRmax","3 x 4 min","3 min active recovery between reps"],
     ]},
     {title:"B -- Accessory (after the intervals)",ex:[
-      ["B1. Standing Calf Raise","2x 12-20","RIR 4 || LONG-LENGTH: final set -- 3-5 lengthened partials after full-ROM failure"],
-      ["B2. Hanging Leg Raise (CORE)","2x 10-15",""],
+      ["B1. Standing Calf Raise","2x 12-20","gastrocnemius -- knee straight -- RIR 4 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B2. Seated Calf Raise","2x 15-25","soleus -- knee bent to ~90 deg; higher reps, it is overwhelmingly slow-twitch -- RIR 4 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
+      ["B3. Hanging Leg Raise (CORE)","2x 10-15",""],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -2858,7 +2870,7 @@ var EX_DATA = {
     ]},
     {title:"C -- Accessory",ex:[
       ["C1. Walking Lunge","2x 10-12","per leg; log total load in hand -- RIR 4"],
-      ["C2. Seated Calf Raise","2x 12-20","RIR 4 || LONG-LENGTH: final set -- 3-5 lengthened partials after full-ROM failure"],
+      ["C2. Seated Calf Raise","2x 15-25","soleus -- knee bent; higher reps -- RIR 4 || LONG-LENGTH (all 12 weeks): full stretch at the bottom, 2 sec pause, and 3-5 partials in the stretched half on the final set"],
     ]},
     {title:"X -- Travelling or limited equipment? Substitute these",ex:[
       ["Read this first","note","Use these only when the prescribed session is not available. They are a holding pattern, not equivalent -- expect to hold loads rather than progress them. Tick the session so adherence stays honest, then correct the volume in the console if what you did was far below the prescription."],
@@ -2935,7 +2947,7 @@ var EX_DATA = {
     ]},
   ]}
 };
-var HYPER_VOLUME = {"w1s1": [{"ex": "Barbell back squat", "sets": 4, "reps": 6}, {"ex": "Leg press", "sets": 3, "reps": 12}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Leg extension", "sets": 3, "reps": 14}, {"ex": "Calf raise", "sets": 4, "reps": 12}], "w1s2": [{"ex": "Barbell bench press", "sets": 4, "reps": 6}, {"ex": "Chest-supported row", "sets": 4, "reps": 10}, {"ex": "Incline DB press", "sets": 3, "reps": 10}, {"ex": "Lat pulldown", "sets": 3, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 3, "reps": 12}, {"ex": "Incline DB curl", "sets": 3, "reps": 12}, {"ex": "Face pull", "sets": 3, "reps": 16}], "w1s3": [{"ex": "Calf raise", "sets": 3, "reps": 16}], "w1s4": [{"ex": "Conventional deadlift", "sets": 3, "reps": 4}, {"ex": "Hip thrust", "sets": 4, "reps": 10}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Calf raise", "sets": 3, "reps": 16}], "w1s5": [{"ex": "Overhead press", "sets": 4, "reps": 8}, {"ex": "Pull-up", "sets": 3, "reps": 8}, {"ex": "Cable fly", "sets": 3, "reps": 14}, {"ex": "Dip", "sets": 3, "reps": 10}, {"ex": "Lateral raise", "sets": 3, "reps": 16}, {"ex": "Barbell curl", "sets": 3, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 3, "reps": 12}], "w2s1": [{"ex": "Barbell back squat", "sets": 5, "reps": 6}, {"ex": "Leg press", "sets": 3, "reps": 12}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Leg extension", "sets": 3, "reps": 14}, {"ex": "Calf raise", "sets": 5, "reps": 12}], "w2s2": [{"ex": "Barbell bench press", "sets": 5, "reps": 6}, {"ex": "Chest-supported row", "sets": 5, "reps": 10}, {"ex": "Incline DB press", "sets": 3, "reps": 10}, {"ex": "Lat pulldown", "sets": 3, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 3, "reps": 12}, {"ex": "Incline DB curl", "sets": 3, "reps": 12}, {"ex": "Face pull", "sets": 3, "reps": 16}], "w2s3": [{"ex": "Calf raise", "sets": 3, "reps": 16}], "w2s4": [{"ex": "Romanian deadlift", "sets": 5, "reps": 8}, {"ex": "Hip thrust", "sets": 3, "reps": 10}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Walking lunge", "sets": 3, "reps": 11}, {"ex": "Calf raise", "sets": 3, "reps": 16}], "w2s5": [{"ex": "Overhead press", "sets": 5, "reps": 8}, {"ex": "Pull-up", "sets": 3, "reps": 8}, {"ex": "Cable fly", "sets": 3, "reps": 14}, {"ex": "Dip", "sets": 3, "reps": 10}, {"ex": "Lateral raise", "sets": 3, "reps": 16}, {"ex": "Barbell curl", "sets": 3, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 3, "reps": 12}], "w3s1": [{"ex": "Barbell back squat", "sets": 5, "reps": 6}, {"ex": "Leg press", "sets": 4, "reps": 12}, {"ex": "Leg curl", "sets": 4, "reps": 12}, {"ex": "Leg extension", "sets": 4, "reps": 14}, {"ex": "Calf raise", "sets": 5, "reps": 12}], "w3s2": [{"ex": "Barbell bench press", "sets": 5, "reps": 6}, {"ex": "Chest-supported row", "sets": 5, "reps": 10}, {"ex": "Incline DB press", "sets": 4, "reps": 10}, {"ex": "Lat pulldown", "sets": 4, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 4, "reps": 12}, {"ex": "Incline DB curl", "sets": 4, "reps": 12}, {"ex": "Face pull", "sets": 4, "reps": 16}], "w3s3": [{"ex": "Calf raise", "sets": 4, "reps": 16}], "w3s4": [{"ex": "Romanian deadlift", "sets": 5, "reps": 8}, {"ex": "Hip thrust", "sets": 4, "reps": 10}, {"ex": "Leg curl", "sets": 4, "reps": 12}, {"ex": "Walking lunge", "sets": 4, "reps": 11}, {"ex": "Calf raise", "sets": 4, "reps": 16}], "w3s5": [{"ex": "Overhead press", "sets": 5, "reps": 8}, {"ex": "Pull-up", "sets": 4, "reps": 8}, {"ex": "Cable fly", "sets": 4, "reps": 14}, {"ex": "Dip", "sets": 4, "reps": 10}, {"ex": "Lateral raise", "sets": 4, "reps": 16}, {"ex": "Barbell curl", "sets": 4, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 4, "reps": 12}], "w4s1": [{"ex": "Barbell back squat", "sets": 2, "reps": 6}, {"ex": "Leg press", "sets": 2, "reps": 12}, {"ex": "Leg curl", "sets": 2, "reps": 12}, {"ex": "Leg extension", "sets": 2, "reps": 14}, {"ex": "Calf raise", "sets": 2, "reps": 12}], "w4s2": [{"ex": "Barbell bench press", "sets": 2, "reps": 6}, {"ex": "Chest-supported row", "sets": 2, "reps": 10}, {"ex": "Incline DB press", "sets": 2, "reps": 10}, {"ex": "Lat pulldown", "sets": 2, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 2, "reps": 12}, {"ex": "Incline DB curl", "sets": 2, "reps": 12}, {"ex": "Face pull", "sets": 2, "reps": 16}], "w4s3": [{"ex": "Calf raise", "sets": 2, "reps": 16}], "w4s4": [{"ex": "Romanian deadlift", "sets": 2, "reps": 8}, {"ex": "Hip thrust", "sets": 2, "reps": 10}, {"ex": "Leg curl", "sets": 2, "reps": 12}, {"ex": "Walking lunge", "sets": 2, "reps": 11}, {"ex": "Calf raise", "sets": 2, "reps": 16}], "w4s5": [{"ex": "Overhead press", "sets": 2, "reps": 8}, {"ex": "Pull-up", "sets": 2, "reps": 8}, {"ex": "Cable fly", "sets": 2, "reps": 14}, {"ex": "Dip", "sets": 2, "reps": 10}, {"ex": "Lateral raise", "sets": 2, "reps": 16}, {"ex": "Barbell curl", "sets": 2, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 2, "reps": 12}], "w5s1": [{"ex": "Barbell back squat", "sets": 4, "reps": 6}, {"ex": "Leg press", "sets": 3, "reps": 12}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Leg extension", "sets": 3, "reps": 14}, {"ex": "Calf raise", "sets": 4, "reps": 12}], "w5s2": [{"ex": "Barbell bench press", "sets": 4, "reps": 6}, {"ex": "Chest-supported row", "sets": 4, "reps": 10}, {"ex": "Incline DB press", "sets": 3, "reps": 10}, {"ex": "Lat pulldown", "sets": 3, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 3, "reps": 12}, {"ex": "Incline DB curl", "sets": 3, "reps": 12}, {"ex": "Face pull", "sets": 3, "reps": 16}], "w5s3": [{"ex": "Calf raise", "sets": 3, "reps": 16}], "w5s4": [{"ex": "Conventional deadlift", "sets": 3, "reps": 4}, {"ex": "Hip thrust", "sets": 4, "reps": 10}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Calf raise", "sets": 3, "reps": 16}], "w5s5": [{"ex": "Overhead press", "sets": 4, "reps": 8}, {"ex": "Pull-up", "sets": 3, "reps": 8}, {"ex": "Cable fly", "sets": 3, "reps": 14}, {"ex": "Dip", "sets": 3, "reps": 10}, {"ex": "Lateral raise", "sets": 3, "reps": 16}, {"ex": "Barbell curl", "sets": 3, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 3, "reps": 12}], "w6s1": [{"ex": "Barbell back squat", "sets": 5, "reps": 6}, {"ex": "Leg press", "sets": 3, "reps": 12}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Leg extension", "sets": 3, "reps": 14}, {"ex": "Calf raise", "sets": 5, "reps": 12}], "w6s2": [{"ex": "Barbell bench press", "sets": 5, "reps": 6}, {"ex": "Chest-supported row", "sets": 5, "reps": 10}, {"ex": "Incline DB press", "sets": 3, "reps": 10}, {"ex": "Lat pulldown", "sets": 3, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 3, "reps": 12}, {"ex": "Incline DB curl", "sets": 3, "reps": 12}, {"ex": "Face pull", "sets": 3, "reps": 16}], "w6s3": [{"ex": "Calf raise", "sets": 3, "reps": 16}], "w6s4": [{"ex": "Romanian deadlift", "sets": 5, "reps": 8}, {"ex": "Hip thrust", "sets": 3, "reps": 10}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Walking lunge", "sets": 3, "reps": 11}, {"ex": "Calf raise", "sets": 3, "reps": 16}], "w6s5": [{"ex": "Overhead press", "sets": 5, "reps": 8}, {"ex": "Pull-up", "sets": 3, "reps": 8}, {"ex": "Cable fly", "sets": 3, "reps": 14}, {"ex": "Dip", "sets": 3, "reps": 10}, {"ex": "Lateral raise", "sets": 3, "reps": 16}, {"ex": "Barbell curl", "sets": 3, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 3, "reps": 12}], "w7s1": [{"ex": "Barbell back squat", "sets": 5, "reps": 6}, {"ex": "Leg press", "sets": 4, "reps": 12}, {"ex": "Leg curl", "sets": 4, "reps": 12}, {"ex": "Leg extension", "sets": 4, "reps": 14}, {"ex": "Calf raise", "sets": 5, "reps": 12}], "w7s2": [{"ex": "Barbell bench press", "sets": 5, "reps": 6}, {"ex": "Chest-supported row", "sets": 5, "reps": 10}, {"ex": "Incline DB press", "sets": 4, "reps": 10}, {"ex": "Lat pulldown", "sets": 4, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 4, "reps": 12}, {"ex": "Incline DB curl", "sets": 4, "reps": 12}, {"ex": "Face pull", "sets": 4, "reps": 16}], "w7s3": [{"ex": "Calf raise", "sets": 4, "reps": 16}], "w7s4": [{"ex": "Romanian deadlift", "sets": 5, "reps": 8}, {"ex": "Hip thrust", "sets": 4, "reps": 10}, {"ex": "Leg curl", "sets": 4, "reps": 12}, {"ex": "Walking lunge", "sets": 4, "reps": 11}, {"ex": "Calf raise", "sets": 4, "reps": 16}], "w7s5": [{"ex": "Overhead press", "sets": 5, "reps": 8}, {"ex": "Pull-up", "sets": 4, "reps": 8}, {"ex": "Cable fly", "sets": 4, "reps": 14}, {"ex": "Dip", "sets": 4, "reps": 10}, {"ex": "Lateral raise", "sets": 4, "reps": 16}, {"ex": "Barbell curl", "sets": 4, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 4, "reps": 12}], "w8s1": [{"ex": "Barbell back squat", "sets": 2, "reps": 6}, {"ex": "Leg press", "sets": 2, "reps": 12}, {"ex": "Leg curl", "sets": 2, "reps": 12}, {"ex": "Leg extension", "sets": 2, "reps": 14}, {"ex": "Calf raise", "sets": 2, "reps": 12}], "w8s2": [{"ex": "Barbell bench press", "sets": 2, "reps": 6}, {"ex": "Chest-supported row", "sets": 2, "reps": 10}, {"ex": "Incline DB press", "sets": 2, "reps": 10}, {"ex": "Lat pulldown", "sets": 2, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 2, "reps": 12}, {"ex": "Incline DB curl", "sets": 2, "reps": 12}, {"ex": "Face pull", "sets": 2, "reps": 16}], "w8s3": [{"ex": "Calf raise", "sets": 2, "reps": 16}], "w8s4": [{"ex": "Romanian deadlift", "sets": 2, "reps": 8}, {"ex": "Hip thrust", "sets": 2, "reps": 10}, {"ex": "Leg curl", "sets": 2, "reps": 12}, {"ex": "Walking lunge", "sets": 2, "reps": 11}, {"ex": "Calf raise", "sets": 2, "reps": 16}], "w8s5": [{"ex": "Overhead press", "sets": 2, "reps": 8}, {"ex": "Pull-up", "sets": 2, "reps": 8}, {"ex": "Cable fly", "sets": 2, "reps": 14}, {"ex": "Dip", "sets": 2, "reps": 10}, {"ex": "Lateral raise", "sets": 2, "reps": 16}, {"ex": "Barbell curl", "sets": 2, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 2, "reps": 12}], "w9s1": [{"ex": "Barbell back squat", "sets": 4, "reps": 6}, {"ex": "Leg press", "sets": 3, "reps": 12}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Leg extension", "sets": 3, "reps": 14}, {"ex": "Calf raise", "sets": 4, "reps": 12}], "w9s2": [{"ex": "Barbell bench press", "sets": 4, "reps": 6}, {"ex": "Chest-supported row", "sets": 4, "reps": 10}, {"ex": "Incline DB press", "sets": 3, "reps": 10}, {"ex": "Lat pulldown", "sets": 3, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 3, "reps": 12}, {"ex": "Incline DB curl", "sets": 3, "reps": 12}, {"ex": "Face pull", "sets": 3, "reps": 16}], "w9s3": [{"ex": "Calf raise", "sets": 3, "reps": 16}], "w9s4": [{"ex": "Conventional deadlift", "sets": 3, "reps": 4}, {"ex": "Hip thrust", "sets": 4, "reps": 10}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Calf raise", "sets": 3, "reps": 16}], "w9s5": [{"ex": "Overhead press", "sets": 4, "reps": 8}, {"ex": "Pull-up", "sets": 3, "reps": 8}, {"ex": "Cable fly", "sets": 3, "reps": 14}, {"ex": "Dip", "sets": 3, "reps": 10}, {"ex": "Lateral raise", "sets": 3, "reps": 16}, {"ex": "Barbell curl", "sets": 3, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 3, "reps": 12}], "w10s1": [{"ex": "Barbell back squat", "sets": 5, "reps": 6}, {"ex": "Leg press", "sets": 3, "reps": 12}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Leg extension", "sets": 3, "reps": 14}, {"ex": "Calf raise", "sets": 5, "reps": 12}], "w10s2": [{"ex": "Barbell bench press", "sets": 5, "reps": 6}, {"ex": "Chest-supported row", "sets": 5, "reps": 10}, {"ex": "Incline DB press", "sets": 3, "reps": 10}, {"ex": "Lat pulldown", "sets": 3, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 3, "reps": 12}, {"ex": "Incline DB curl", "sets": 3, "reps": 12}, {"ex": "Face pull", "sets": 3, "reps": 16}], "w10s3": [{"ex": "Calf raise", "sets": 3, "reps": 16}], "w10s4": [{"ex": "Romanian deadlift", "sets": 5, "reps": 8}, {"ex": "Hip thrust", "sets": 3, "reps": 10}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Walking lunge", "sets": 3, "reps": 11}, {"ex": "Calf raise", "sets": 3, "reps": 16}], "w10s5": [{"ex": "Overhead press", "sets": 5, "reps": 8}, {"ex": "Pull-up", "sets": 3, "reps": 8}, {"ex": "Cable fly", "sets": 3, "reps": 14}, {"ex": "Dip", "sets": 3, "reps": 10}, {"ex": "Lateral raise", "sets": 3, "reps": 16}, {"ex": "Barbell curl", "sets": 3, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 3, "reps": 12}], "w11s1": [{"ex": "Barbell back squat", "sets": 5, "reps": 6}, {"ex": "Leg press", "sets": 4, "reps": 12}, {"ex": "Leg curl", "sets": 4, "reps": 12}, {"ex": "Leg extension", "sets": 4, "reps": 14}, {"ex": "Calf raise", "sets": 5, "reps": 12}], "w11s2": [{"ex": "Barbell bench press", "sets": 5, "reps": 6}, {"ex": "Chest-supported row", "sets": 5, "reps": 10}, {"ex": "Incline DB press", "sets": 4, "reps": 10}, {"ex": "Lat pulldown", "sets": 4, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 4, "reps": 12}, {"ex": "Incline DB curl", "sets": 4, "reps": 12}, {"ex": "Face pull", "sets": 4, "reps": 16}], "w11s3": [{"ex": "Calf raise", "sets": 4, "reps": 16}], "w11s4": [{"ex": "Romanian deadlift", "sets": 5, "reps": 8}, {"ex": "Hip thrust", "sets": 4, "reps": 10}, {"ex": "Leg curl", "sets": 4, "reps": 12}, {"ex": "Walking lunge", "sets": 4, "reps": 11}, {"ex": "Calf raise", "sets": 4, "reps": 16}], "w11s5": [{"ex": "Overhead press", "sets": 5, "reps": 8}, {"ex": "Pull-up", "sets": 4, "reps": 8}, {"ex": "Cable fly", "sets": 4, "reps": 14}, {"ex": "Dip", "sets": 4, "reps": 10}, {"ex": "Lateral raise", "sets": 4, "reps": 16}, {"ex": "Barbell curl", "sets": 4, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 4, "reps": 12}], "w12s1": [{"ex": "Barbell back squat", "sets": 2, "reps": 6}, {"ex": "Leg press", "sets": 2, "reps": 12}, {"ex": "Leg curl", "sets": 2, "reps": 12}, {"ex": "Leg extension", "sets": 2, "reps": 14}, {"ex": "Calf raise", "sets": 2, "reps": 12}], "w12s2": [{"ex": "Barbell bench press", "sets": 2, "reps": 6}, {"ex": "Chest-supported row", "sets": 2, "reps": 10}, {"ex": "Incline DB press", "sets": 2, "reps": 10}, {"ex": "Lat pulldown", "sets": 2, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 2, "reps": 12}, {"ex": "Incline DB curl", "sets": 2, "reps": 12}, {"ex": "Face pull", "sets": 2, "reps": 16}], "w12s3": [{"ex": "Calf raise", "sets": 2, "reps": 16}], "w12s4": [{"ex": "Romanian deadlift", "sets": 2, "reps": 8}, {"ex": "Hip thrust", "sets": 2, "reps": 10}, {"ex": "Leg curl", "sets": 2, "reps": 12}, {"ex": "Walking lunge", "sets": 2, "reps": 11}, {"ex": "Calf raise", "sets": 2, "reps": 16}], "w12s5": [{"ex": "Overhead press", "sets": 2, "reps": 8}, {"ex": "Pull-up", "sets": 2, "reps": 8}, {"ex": "Cable fly", "sets": 2, "reps": 14}, {"ex": "Dip", "sets": 2, "reps": 10}, {"ex": "Lateral raise", "sets": 2, "reps": 16}, {"ex": "Barbell curl", "sets": 2, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 2, "reps": 12}]};
+var HYPER_VOLUME = {"w1s1": [{"ex": "Barbell back squat", "sets": 4, "reps": 6}, {"ex": "Leg press", "sets": 3, "reps": 12}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Leg extension", "sets": 4, "reps": 14}, {"ex": "Calf raise", "sets": 3, "reps": 12}], "w1s2": [{"ex": "Barbell bench press", "sets": 4, "reps": 6}, {"ex": "Chest-supported row", "sets": 4, "reps": 10}, {"ex": "Incline DB press", "sets": 3, "reps": 10}, {"ex": "Lat pulldown", "sets": 3, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 3, "reps": 12}, {"ex": "Incline DB curl", "sets": 3, "reps": 12}, {"ex": "Face pull", "sets": 3, "reps": 16}], "w1s3": [{"ex": "Calf raise", "sets": 3, "reps": 16}, {"ex": "Calf raise", "sets": 3, "reps": 20}], "w1s4": [{"ex": "Conventional deadlift", "sets": 3, "reps": 4}, {"ex": "Hip thrust", "sets": 4, "reps": 10}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Calf raise", "sets": 4, "reps": 20}], "w1s5": [{"ex": "Overhead press", "sets": 4, "reps": 8}, {"ex": "Pull-up", "sets": 3, "reps": 8}, {"ex": "Cable fly", "sets": 3, "reps": 14}, {"ex": "Dip", "sets": 3, "reps": 10}, {"ex": "Lateral raise", "sets": 3, "reps": 16}, {"ex": "Barbell curl", "sets": 3, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 3, "reps": 12}], "w2s1": [{"ex": "Barbell back squat", "sets": 5, "reps": 6}, {"ex": "Leg press", "sets": 3, "reps": 12}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Leg extension", "sets": 5, "reps": 14}, {"ex": "Calf raise", "sets": 3, "reps": 12}], "w2s2": [{"ex": "Barbell bench press", "sets": 5, "reps": 6}, {"ex": "Chest-supported row", "sets": 5, "reps": 10}, {"ex": "Incline DB press", "sets": 3, "reps": 10}, {"ex": "Lat pulldown", "sets": 3, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 3, "reps": 12}, {"ex": "Incline DB curl", "sets": 3, "reps": 12}, {"ex": "Face pull", "sets": 3, "reps": 16}], "w2s3": [{"ex": "Calf raise", "sets": 3, "reps": 16}, {"ex": "Calf raise", "sets": 3, "reps": 20}], "w2s4": [{"ex": "Romanian deadlift", "sets": 5, "reps": 8}, {"ex": "Hip thrust", "sets": 3, "reps": 10}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Walking lunge", "sets": 3, "reps": 11}, {"ex": "Calf raise", "sets": 5, "reps": 20}], "w2s5": [{"ex": "Overhead press", "sets": 5, "reps": 8}, {"ex": "Pull-up", "sets": 3, "reps": 8}, {"ex": "Cable fly", "sets": 3, "reps": 14}, {"ex": "Dip", "sets": 3, "reps": 10}, {"ex": "Lateral raise", "sets": 3, "reps": 16}, {"ex": "Barbell curl", "sets": 3, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 3, "reps": 12}], "w3s1": [{"ex": "Barbell back squat", "sets": 5, "reps": 6}, {"ex": "Leg press", "sets": 4, "reps": 12}, {"ex": "Leg curl", "sets": 4, "reps": 12}, {"ex": "Leg extension", "sets": 5, "reps": 14}, {"ex": "Calf raise", "sets": 4, "reps": 12}], "w3s2": [{"ex": "Barbell bench press", "sets": 5, "reps": 6}, {"ex": "Chest-supported row", "sets": 5, "reps": 10}, {"ex": "Incline DB press", "sets": 4, "reps": 10}, {"ex": "Lat pulldown", "sets": 4, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 4, "reps": 12}, {"ex": "Incline DB curl", "sets": 4, "reps": 12}, {"ex": "Face pull", "sets": 4, "reps": 16}], "w3s3": [{"ex": "Calf raise", "sets": 4, "reps": 16}, {"ex": "Calf raise", "sets": 4, "reps": 20}], "w3s4": [{"ex": "Romanian deadlift", "sets": 5, "reps": 8}, {"ex": "Hip thrust", "sets": 4, "reps": 10}, {"ex": "Leg curl", "sets": 4, "reps": 12}, {"ex": "Walking lunge", "sets": 4, "reps": 11}, {"ex": "Calf raise", "sets": 5, "reps": 20}], "w3s5": [{"ex": "Overhead press", "sets": 5, "reps": 8}, {"ex": "Pull-up", "sets": 4, "reps": 8}, {"ex": "Cable fly", "sets": 4, "reps": 14}, {"ex": "Dip", "sets": 4, "reps": 10}, {"ex": "Lateral raise", "sets": 4, "reps": 16}, {"ex": "Barbell curl", "sets": 4, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 4, "reps": 12}], "w4s1": [{"ex": "Barbell back squat", "sets": 2, "reps": 6}, {"ex": "Leg press", "sets": 2, "reps": 12}, {"ex": "Leg curl", "sets": 2, "reps": 12}, {"ex": "Leg extension", "sets": 2, "reps": 14}, {"ex": "Calf raise", "sets": 2, "reps": 12}], "w4s2": [{"ex": "Barbell bench press", "sets": 2, "reps": 6}, {"ex": "Chest-supported row", "sets": 2, "reps": 10}, {"ex": "Incline DB press", "sets": 2, "reps": 10}, {"ex": "Lat pulldown", "sets": 2, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 2, "reps": 12}, {"ex": "Incline DB curl", "sets": 2, "reps": 12}, {"ex": "Face pull", "sets": 2, "reps": 16}], "w4s3": [{"ex": "Calf raise", "sets": 2, "reps": 16}, {"ex": "Calf raise", "sets": 2, "reps": 20}], "w4s4": [{"ex": "Romanian deadlift", "sets": 2, "reps": 8}, {"ex": "Hip thrust", "sets": 2, "reps": 10}, {"ex": "Leg curl", "sets": 2, "reps": 12}, {"ex": "Walking lunge", "sets": 2, "reps": 11}, {"ex": "Calf raise", "sets": 2, "reps": 20}], "w4s5": [{"ex": "Overhead press", "sets": 2, "reps": 8}, {"ex": "Pull-up", "sets": 2, "reps": 8}, {"ex": "Cable fly", "sets": 2, "reps": 14}, {"ex": "Dip", "sets": 2, "reps": 10}, {"ex": "Lateral raise", "sets": 2, "reps": 16}, {"ex": "Barbell curl", "sets": 2, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 2, "reps": 12}], "w5s1": [{"ex": "Barbell back squat", "sets": 4, "reps": 6}, {"ex": "Leg press", "sets": 3, "reps": 12}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Leg extension", "sets": 4, "reps": 14}, {"ex": "Calf raise", "sets": 3, "reps": 12}], "w5s2": [{"ex": "Barbell bench press", "sets": 4, "reps": 6}, {"ex": "Chest-supported row", "sets": 4, "reps": 10}, {"ex": "Incline DB press", "sets": 3, "reps": 10}, {"ex": "Lat pulldown", "sets": 3, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 3, "reps": 12}, {"ex": "Incline DB curl", "sets": 3, "reps": 12}, {"ex": "Face pull", "sets": 3, "reps": 16}], "w5s3": [{"ex": "Calf raise", "sets": 3, "reps": 16}, {"ex": "Calf raise", "sets": 3, "reps": 20}], "w5s4": [{"ex": "Conventional deadlift", "sets": 3, "reps": 4}, {"ex": "Hip thrust", "sets": 4, "reps": 10}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Calf raise", "sets": 4, "reps": 20}], "w5s5": [{"ex": "Overhead press", "sets": 4, "reps": 8}, {"ex": "Pull-up", "sets": 3, "reps": 8}, {"ex": "Cable fly", "sets": 3, "reps": 14}, {"ex": "Dip", "sets": 3, "reps": 10}, {"ex": "Lateral raise", "sets": 3, "reps": 16}, {"ex": "Barbell curl", "sets": 3, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 3, "reps": 12}], "w6s1": [{"ex": "Barbell back squat", "sets": 5, "reps": 6}, {"ex": "Leg press", "sets": 3, "reps": 12}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Leg extension", "sets": 5, "reps": 14}, {"ex": "Calf raise", "sets": 3, "reps": 12}], "w6s2": [{"ex": "Barbell bench press", "sets": 5, "reps": 6}, {"ex": "Chest-supported row", "sets": 5, "reps": 10}, {"ex": "Incline DB press", "sets": 3, "reps": 10}, {"ex": "Lat pulldown", "sets": 3, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 3, "reps": 12}, {"ex": "Incline DB curl", "sets": 3, "reps": 12}, {"ex": "Face pull", "sets": 3, "reps": 16}], "w6s3": [{"ex": "Calf raise", "sets": 3, "reps": 16}, {"ex": "Calf raise", "sets": 3, "reps": 20}], "w6s4": [{"ex": "Romanian deadlift", "sets": 5, "reps": 8}, {"ex": "Hip thrust", "sets": 3, "reps": 10}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Walking lunge", "sets": 3, "reps": 11}, {"ex": "Calf raise", "sets": 5, "reps": 20}], "w6s5": [{"ex": "Overhead press", "sets": 5, "reps": 8}, {"ex": "Pull-up", "sets": 3, "reps": 8}, {"ex": "Cable fly", "sets": 3, "reps": 14}, {"ex": "Dip", "sets": 3, "reps": 10}, {"ex": "Lateral raise", "sets": 3, "reps": 16}, {"ex": "Barbell curl", "sets": 3, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 3, "reps": 12}], "w7s1": [{"ex": "Barbell back squat", "sets": 5, "reps": 6}, {"ex": "Leg press", "sets": 4, "reps": 12}, {"ex": "Leg curl", "sets": 4, "reps": 12}, {"ex": "Leg extension", "sets": 5, "reps": 14}, {"ex": "Calf raise", "sets": 4, "reps": 12}], "w7s2": [{"ex": "Barbell bench press", "sets": 5, "reps": 6}, {"ex": "Chest-supported row", "sets": 5, "reps": 10}, {"ex": "Incline DB press", "sets": 4, "reps": 10}, {"ex": "Lat pulldown", "sets": 4, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 4, "reps": 12}, {"ex": "Incline DB curl", "sets": 4, "reps": 12}, {"ex": "Face pull", "sets": 4, "reps": 16}], "w7s3": [{"ex": "Calf raise", "sets": 4, "reps": 16}, {"ex": "Calf raise", "sets": 4, "reps": 20}], "w7s4": [{"ex": "Romanian deadlift", "sets": 5, "reps": 8}, {"ex": "Hip thrust", "sets": 4, "reps": 10}, {"ex": "Leg curl", "sets": 4, "reps": 12}, {"ex": "Walking lunge", "sets": 4, "reps": 11}, {"ex": "Calf raise", "sets": 5, "reps": 20}], "w7s5": [{"ex": "Overhead press", "sets": 5, "reps": 8}, {"ex": "Pull-up", "sets": 4, "reps": 8}, {"ex": "Cable fly", "sets": 4, "reps": 14}, {"ex": "Dip", "sets": 4, "reps": 10}, {"ex": "Lateral raise", "sets": 4, "reps": 16}, {"ex": "Barbell curl", "sets": 4, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 4, "reps": 12}], "w8s1": [{"ex": "Barbell back squat", "sets": 2, "reps": 6}, {"ex": "Leg press", "sets": 2, "reps": 12}, {"ex": "Leg curl", "sets": 2, "reps": 12}, {"ex": "Leg extension", "sets": 2, "reps": 14}, {"ex": "Calf raise", "sets": 2, "reps": 12}], "w8s2": [{"ex": "Barbell bench press", "sets": 2, "reps": 6}, {"ex": "Chest-supported row", "sets": 2, "reps": 10}, {"ex": "Incline DB press", "sets": 2, "reps": 10}, {"ex": "Lat pulldown", "sets": 2, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 2, "reps": 12}, {"ex": "Incline DB curl", "sets": 2, "reps": 12}, {"ex": "Face pull", "sets": 2, "reps": 16}], "w8s3": [{"ex": "Calf raise", "sets": 2, "reps": 16}, {"ex": "Calf raise", "sets": 2, "reps": 20}], "w8s4": [{"ex": "Romanian deadlift", "sets": 2, "reps": 8}, {"ex": "Hip thrust", "sets": 2, "reps": 10}, {"ex": "Leg curl", "sets": 2, "reps": 12}, {"ex": "Walking lunge", "sets": 2, "reps": 11}, {"ex": "Calf raise", "sets": 2, "reps": 20}], "w8s5": [{"ex": "Overhead press", "sets": 2, "reps": 8}, {"ex": "Pull-up", "sets": 2, "reps": 8}, {"ex": "Cable fly", "sets": 2, "reps": 14}, {"ex": "Dip", "sets": 2, "reps": 10}, {"ex": "Lateral raise", "sets": 2, "reps": 16}, {"ex": "Barbell curl", "sets": 2, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 2, "reps": 12}], "w9s1": [{"ex": "Barbell back squat", "sets": 4, "reps": 6}, {"ex": "Leg press", "sets": 3, "reps": 12}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Leg extension", "sets": 4, "reps": 14}, {"ex": "Calf raise", "sets": 3, "reps": 12}], "w9s2": [{"ex": "Barbell bench press", "sets": 4, "reps": 6}, {"ex": "Chest-supported row", "sets": 4, "reps": 10}, {"ex": "Incline DB press", "sets": 3, "reps": 10}, {"ex": "Lat pulldown", "sets": 3, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 3, "reps": 12}, {"ex": "Incline DB curl", "sets": 3, "reps": 12}, {"ex": "Face pull", "sets": 3, "reps": 16}], "w9s3": [{"ex": "Calf raise", "sets": 3, "reps": 16}, {"ex": "Calf raise", "sets": 3, "reps": 20}], "w9s4": [{"ex": "Conventional deadlift", "sets": 3, "reps": 4}, {"ex": "Hip thrust", "sets": 4, "reps": 10}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Calf raise", "sets": 4, "reps": 20}], "w9s5": [{"ex": "Overhead press", "sets": 4, "reps": 8}, {"ex": "Pull-up", "sets": 3, "reps": 8}, {"ex": "Cable fly", "sets": 3, "reps": 14}, {"ex": "Dip", "sets": 3, "reps": 10}, {"ex": "Lateral raise", "sets": 3, "reps": 16}, {"ex": "Barbell curl", "sets": 3, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 3, "reps": 12}], "w10s1": [{"ex": "Barbell back squat", "sets": 5, "reps": 6}, {"ex": "Leg press", "sets": 3, "reps": 12}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Leg extension", "sets": 5, "reps": 14}, {"ex": "Calf raise", "sets": 3, "reps": 12}], "w10s2": [{"ex": "Barbell bench press", "sets": 5, "reps": 6}, {"ex": "Chest-supported row", "sets": 5, "reps": 10}, {"ex": "Incline DB press", "sets": 3, "reps": 10}, {"ex": "Lat pulldown", "sets": 3, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 3, "reps": 12}, {"ex": "Incline DB curl", "sets": 3, "reps": 12}, {"ex": "Face pull", "sets": 3, "reps": 16}], "w10s3": [{"ex": "Calf raise", "sets": 3, "reps": 16}, {"ex": "Calf raise", "sets": 3, "reps": 20}], "w10s4": [{"ex": "Romanian deadlift", "sets": 5, "reps": 8}, {"ex": "Hip thrust", "sets": 3, "reps": 10}, {"ex": "Leg curl", "sets": 3, "reps": 12}, {"ex": "Walking lunge", "sets": 3, "reps": 11}, {"ex": "Calf raise", "sets": 5, "reps": 20}], "w10s5": [{"ex": "Overhead press", "sets": 5, "reps": 8}, {"ex": "Pull-up", "sets": 3, "reps": 8}, {"ex": "Cable fly", "sets": 3, "reps": 14}, {"ex": "Dip", "sets": 3, "reps": 10}, {"ex": "Lateral raise", "sets": 3, "reps": 16}, {"ex": "Barbell curl", "sets": 3, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 3, "reps": 12}], "w11s1": [{"ex": "Barbell back squat", "sets": 5, "reps": 6}, {"ex": "Leg press", "sets": 4, "reps": 12}, {"ex": "Leg curl", "sets": 4, "reps": 12}, {"ex": "Leg extension", "sets": 5, "reps": 14}, {"ex": "Calf raise", "sets": 4, "reps": 12}], "w11s2": [{"ex": "Barbell bench press", "sets": 5, "reps": 6}, {"ex": "Chest-supported row", "sets": 5, "reps": 10}, {"ex": "Incline DB press", "sets": 4, "reps": 10}, {"ex": "Lat pulldown", "sets": 4, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 4, "reps": 12}, {"ex": "Incline DB curl", "sets": 4, "reps": 12}, {"ex": "Face pull", "sets": 4, "reps": 16}], "w11s3": [{"ex": "Calf raise", "sets": 4, "reps": 16}, {"ex": "Calf raise", "sets": 4, "reps": 20}], "w11s4": [{"ex": "Romanian deadlift", "sets": 5, "reps": 8}, {"ex": "Hip thrust", "sets": 4, "reps": 10}, {"ex": "Leg curl", "sets": 4, "reps": 12}, {"ex": "Walking lunge", "sets": 4, "reps": 11}, {"ex": "Calf raise", "sets": 5, "reps": 20}], "w11s5": [{"ex": "Overhead press", "sets": 5, "reps": 8}, {"ex": "Pull-up", "sets": 4, "reps": 8}, {"ex": "Cable fly", "sets": 4, "reps": 14}, {"ex": "Dip", "sets": 4, "reps": 10}, {"ex": "Lateral raise", "sets": 4, "reps": 16}, {"ex": "Barbell curl", "sets": 4, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 4, "reps": 12}], "w12s1": [{"ex": "Barbell back squat", "sets": 2, "reps": 6}, {"ex": "Leg press", "sets": 2, "reps": 12}, {"ex": "Leg curl", "sets": 2, "reps": 12}, {"ex": "Leg extension", "sets": 2, "reps": 14}, {"ex": "Calf raise", "sets": 2, "reps": 12}], "w12s2": [{"ex": "Barbell bench press", "sets": 2, "reps": 6}, {"ex": "Chest-supported row", "sets": 2, "reps": 10}, {"ex": "Incline DB press", "sets": 2, "reps": 10}, {"ex": "Lat pulldown", "sets": 2, "reps": 12}, {"ex": "Cable triceps pushdown", "sets": 2, "reps": 12}, {"ex": "Incline DB curl", "sets": 2, "reps": 12}, {"ex": "Face pull", "sets": 2, "reps": 16}], "w12s3": [{"ex": "Calf raise", "sets": 2, "reps": 16}, {"ex": "Calf raise", "sets": 2, "reps": 20}], "w12s4": [{"ex": "Romanian deadlift", "sets": 2, "reps": 8}, {"ex": "Hip thrust", "sets": 2, "reps": 10}, {"ex": "Leg curl", "sets": 2, "reps": 12}, {"ex": "Walking lunge", "sets": 2, "reps": 11}, {"ex": "Calf raise", "sets": 2, "reps": 20}], "w12s5": [{"ex": "Overhead press", "sets": 2, "reps": 8}, {"ex": "Pull-up", "sets": 2, "reps": 8}, {"ex": "Cable fly", "sets": 2, "reps": 14}, {"ex": "Dip", "sets": 2, "reps": 10}, {"ex": "Lateral raise", "sets": 2, "reps": 16}, {"ex": "Barbell curl", "sets": 2, "reps": 10}, {"ex": "Overhead triceps ext", "sets": 2, "reps": 12}]};
 
 function getGenericExDetail(type, name) {
   var n = name.toLowerCase();
