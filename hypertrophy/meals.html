@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Meals">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0d0d0d">
+<title>Meal plans — hypertrophy block</title>
+<style>
+  :root{
+    color-scheme: dark;
+    --bg:#0d0d0d; --bg2:#1a1a19; --bg3:#222220;
+    --txt:#ffffff; --txt2:#c3c2b7; --txt3:#898781;
+    --line:rgba(255,255,255,0.10); --accent:#3987e5; --green:#199e70; --warn:#c98500;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:720px;margin:0 auto;padding:18px 16px 60px}
+  h1{font-size:22px;margin:0 0 2px;letter-spacing:-0.02em}
+  .subtitle{font-size:13px;color:var(--txt3);margin:0 0 14px}
+  .back{display:inline-block;font-size:12px;color:var(--accent);text-decoration:none;margin-bottom:12px}
+  .card{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:15px;margin-bottom:12px}
+  .card h2{font-size:13px;margin:0 0 3px;letter-spacing:.05em;text-transform:uppercase;color:var(--txt3);font-weight:700}
+  .card h3{font-size:15px;margin:0 0 8px;font-weight:650}
+  .meal{border-top:1px solid var(--line);padding:10px 0}
+  .meal:first-of-type{border-top:0;padding-top:2px}
+  .meal .nm{font-weight:650;font-size:14px;display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .meal .mac{font-size:11.5px;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .meal ul{margin:5px 0 0;padding-left:18px;font-size:13px;color:var(--txt2)}
+  .meal li{margin:2px 0}
+  .tot{display:flex;justify-content:space-between;gap:10px;border-top:2px solid var(--line);margin-top:10px;padding-top:10px;font-weight:700;font-size:14px;flex-wrap:wrap}
+  .tot span:last-child{color:var(--green);font-variant-numeric:tabular-nums}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
+  th{text-align:right;color:var(--txt3);font-weight:600;padding:5px 0;border-bottom:1px solid var(--line);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em}
+  th:first-child{text-align:left}
+  td{text-align:right;padding:7px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+  td:first-child{text-align:left}
+  .note{font-size:12.5px;color:var(--txt2);line-height:1.6}
+  .note b{color:var(--txt)}
+  .warn{border-left:3px solid var(--warn)}
+  .foot{font-size:11.5px;color:var(--txt3);font-style:italic;margin-top:16px}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="./index.html">&larr; Back to the block</a>
+  <h1>Meal plans &amp; prep</h1>
+  <p class="subtitle">Built against the moderate-week target &middot; 158P / 372C / 92F &middot; 2,948 kcal</p>
+
+  <div class="card">
+    <h2>Base day</h2>
+    <h3>What a moderate-load day looks like</h3>
+
+    <div class="meal">
+      <div class="nm"><span>Breakfast &mdash; about 8 minutes</span><span class="mac">33P 111C 34F</span></div>
+      <ul>
+        <li>3 whole eggs, soft-scrambled</li>
+        <li>3 slices seeded sourdough, toasted</li>
+        <li>1/2 avocado</li>
+        <li>1 cup mixed berries</li>
+      </ul>
+    </div>
+
+    <div class="meal">
+      <div class="nm"><span>Post-workout</span><span class="mac">40P 42C 7F</span></div>
+      <ul><li>The smoothie already defined in the tracker</li></ul>
+    </div>
+
+    <div class="meal">
+      <div class="nm"><span>Lunch &mdash; assembled from Sunday prep</span><span class="mac">43P 130C 16F</span></div>
+      <ul>
+        <li>4 oz chicken thigh</li>
+        <li>2.5 cups cooked jasmine rice</li>
+        <li>1.5 cups roasted vegetables</li>
+        <li>1/2 tbsp olive oil</li>
+      </ul>
+    </div>
+
+    <div class="meal">
+      <div class="nm"><span>Dinner &mdash; cooked fresh</span><span class="mac">38P 70C 19F</span></div>
+      <ul>
+        <li>5 oz salmon</li>
+        <li>300 g roasted sweet potato</li>
+        <li>Large salad, 1 tbsp vinaigrette</li>
+      </ul>
+    </div>
+
+    <div class="meal">
+      <div class="nm"><span>Evening</span><span class="mac">6P 32C 13F</span></div>
+      <ul><li>1 banana</li><li>25 g almonds</li></ul>
+    </div>
+
+    <div class="tot"><span>Day total</span><span>160P / 385C / 89F &middot; 2,981 kcal</span></div>
+    <p class="note" style="margin-top:8px">Within 33 kcal and 2 g protein of target &mdash; comfortably inside the error of any food estimate you will realistically make.</p>
+  </div>
+
+  <div class="card">
+    <h2>Load levels</h2>
+    <h3>Move by carbohydrate only</h3>
+    <p class="note">Protein and fat stay fixed for all twelve weeks. Carbohydrate is the single dial, so there is only ever one number to change.</p>
+    <table>
+      <tr><th>Week type</th><th>kcal</th><th>Carbs</th><th>Change from base day</th></tr>
+      <tr><td>Deload</td><td>2,852</td><td>348 g</td><td>&minus;32 g &mdash; one slice of bread and 1/2 cup rice out</td></tr>
+      <tr><td>Moderate</td><td>2,948</td><td>372 g</td><td>base day as written</td></tr>
+      <tr><td>High</td><td>3,028</td><td>392 g</td><td>+12 g &mdash; 1/2 cup more rice</td></tr>
+      <tr><td>Peak</td><td>3,080</td><td>405 g</td><td>+25 g &mdash; 1 cup more rice, or a second banana</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px"><b>The peak figure is a ceiling, not a floor.</b> It sits at a 10.9% surplus over your measured 2,778 kcal expenditure. Garthe I, et al. <i>Eur J Sport Sci</i> 2013;13(3):295&ndash;303 randomized 39 elite athletes across 8&ndash;12 weeks and found a much larger surplus produced <b>no additional lean-mass gain</b> while fat mass rose 15% against 3%. Above roughly 11%, the extra food is fat.</p>
+    <p class="note"><b>And the deload figure is not maintenance.</b> Lean accrual is impaired in an energy deficit (Murphy C, Koehler K. <i>Scand J Med Sci Sports</i> 2022;32(1):125&ndash;137, lean-mass ES &minus;0.57, p = 0.02), and the deload is when the tissue is actually laid down. Keep the surplus.</p>
+  </div>
+
+  <div class="card">
+    <h2>Swaps</h2>
+    <h3>Same macros, different food</h3>
+    <table>
+      <tr><th>Instead of</th><th>Use</th></tr>
+      <tr><td>5 oz salmon</td><td>6 oz cod + 1 tsp oil, or 5 oz 90/10 beef</td></tr>
+      <tr><td>4 oz chicken thigh</td><td>5 oz chicken breast + 1 tsp oil</td></tr>
+      <tr><td>Jasmine rice</td><td>Potato, pasta or quinoa at equal cooked carbohydrate</td></tr>
+      <tr><td>Sourdough</td><td>Oats, 20 g dry per slice</td></tr>
+      <tr><td>Sweet potato</td><td>White potato, gram for gram</td></tr>
+      <tr><td>Almonds</td><td>Any nut at equal weight; walnuts and pecans run slightly fattier</td></tr>
+    </table>
+  </div>
+
+  <div class="card warn">
+    <h2>Two specifics for you</h2>
+    <p class="note"><b>The whey.</b> The BPN vanilla is a concentrate-and-casein blend, and the GI symptoms you get from it are the lactose. During a surplus, when you are eating more of everything, that is worth solving rather than tolerating. Switch the post-workout smoothie to a whey <b>isolate</b> or a non-dairy protein &mdash; the macros above do not change either way.</p>
+    <p class="note" style="margin-top:8px"><b>Altitude, 5,280 ft.</b> Water boils near 202&deg;F here, so anything simmered runs long. Hard-boiled eggs need roughly 3 extra minutes. Rice and quinoa need more water and more time than the package says. Roasted vegetables run slightly <i>shorter</i>, since dry heat is unaffected but the food dehydrates faster.</p>
+  </div>
+
+  <div class="card">
+    <h2>Sunday prep</h2>
+    <h3>About 50 minutes, covers five lunches</h3>
+    <p class="note">
+      Oven to 425&deg;F. Chicken thighs and two trays of vegetables go in together. Rice cooker on at the same time. Sweet potatoes on the lower rack while the oven is already hot, so dinner prep is half-done too. Portion chicken and rice into five containers; keep the vegetables in one large box and add them cold at assembly, or they turn to mush by Wednesday. Salmon is the one thing that does not batch well &mdash; cook it fresh.
+    </p>
+  </div>
+
+  <p class="foot">A template to eat against, not a prescription to obey. Hit protein first, then total calories. The distribution across meals has no established effect on hypertrophy at a fixed daily total, so eat these in whatever order the day allows.</p>
+</div>
+</body>
+</html>
