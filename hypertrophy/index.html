@@ -270,6 +270,19 @@ textarea:focus{outline:2px solid #378add;outline-offset:0}
           Week 1 of the block is <b>28 September</b>. <b>7&ndash;16 Sept</b> find working loads on all five primaries. <b>15 Sept</b> baseline draw and InBody scan &mdash; nothing heavier than a walk after Friday the 11th. <b>17&ndash;22 Sept</b> travel: VO&#8322; and open days, substitutions under group X. <b>23&ndash;27 Sept</b> re-entry.
         </div>
       </div>
+
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
+        <label>Travel weeks</label>
+        <div style="font-size:12px;line-height:1.55;color:var(--txt2);margin-bottom:8px">
+          A travel week is <b>inserted</b> into the calendar, not substituted for a programmed one &mdash; no loading week is lost, the block just runs a week longer. Prescribed as a hold at ~60% of normal sets on hotel and bodyweight equipment, with the interval session unchanged.
+        </div>
+        <div id="travelList" style="margin-bottom:8px"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <input type="date" id="travelDate" aria-label="Any date inside the travel week" style="padding:6px 8px;font-size:13px">
+          <button class="btn" onclick="addTravelWeek()">Mark as travel week</button>
+        </div>
+        <div style="font-size:11.5px;color:var(--txt3);margin-top:6px">Pick any date inside the week. Future weeks only &mdash; inserting one before logged work would shift those records onto the wrong week.</div>
+      </div>
       <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
         <label>Mass Accrual Console</label>
         <div style="font-size:12px;line-height:1.55;color:var(--txt2)">
@@ -3615,6 +3628,183 @@ var pendingFood = null;
 function loadData() {
   try { var s = localStorage.getItem('matt_block_v1'); if (s) appData = JSON.parse(s); } catch(e) {}
 }
+
+// ─── TRAVEL WEEKS ─────────────────────────────────────────────────────────────
+// A travel week is inserted into the calendar rather than replacing a programmed
+// week, so no loading week is ever lost -- the block simply runs one week longer.
+// Stored as a list of calendar slots in appData._travel and re-applied on every
+// page load, so the authored 12-week program on disk is never mutated.
+//
+// It is prescribed as a HOLD, not a deload: ~60% of a loading week's sets, RIR 2,
+// hotel and bodyweight equipment. The job is to keep the stimulus alive and come
+// home able to train hard, not to progress loads on unfamiliar equipment.
+
+function getTravelWeeks() {
+  if (!appData._travel) appData._travel = [];
+  return appData._travel.slice().sort(function(a,b){ return a-b; });
+}
+
+function travelSessions(k) {
+  var P = 'tv' + k + 's';
+  return [
+    {id:P+'1', name:'Travel Lower -- hotel gym or room', typ:'lift', day:'Mon',
+     fields:[{k:'bw',l:'Bodyweight AM (lbs)'}], groups:[
+      ['A -- Legs, whatever the hotel has', [
+        ['DB/KB Goblet Squat','Leg press',4,'4x 12-20','heels elevated on a plate or a book if your ankles are tight'],
+        ['DB Split Squat','Walking lunge',3,'3x 10-12/leg','the closest thing to a squat stimulus without a rack'],
+        ['DB Romanian Deadlift','Romanian deadlift',3,'3x 10-15','slow, full stretch; a light load is fine here'],
+        ['Slider or Towel Leg Curl','Leg curl',3,'3x 8-12','hotel floors are perfect for this'],
+        ['Standing Calf Raise, single leg','Calf raise',4,'4x 15-25','off a stair edge for range -- knee straight']]]]},
+    {id:P+'2', name:'Travel Upper -- push and pull', typ:'lift', day:'Tue',
+     fields:[{k:'notes_load',l:'Heaviest DB used (lbs)'}], groups:[
+      ['A -- Superset throughout', [
+        ['Push-up, feet elevated','Incline DB press',4,'4x 10-20','slow eccentric, chest to the floor'],
+        ['Single-arm DB Row','Chest-supported row',4,'4x 10-15','or a band anchored in a door hinge'],
+        ['DB Shoulder Press','Overhead press',3,'3x 8-12',''],
+        ['DB or Band Lateral Raise','Lateral raise',3,'3x 15-20',''],
+        ['Chair Dip','Dip',3,'3x 10-15',''],
+        ['DB or Band Curl','Barbell curl',4,'4x 10-15','arms are the thinnest part of a travel week -- do not skip these'],
+        ['Overhead DB Triceps Extension','Overhead triceps ext',4,'4x 12-15','one dumbbell, both hands']]]]},
+    {id:P+'3', name:'VO2 -- 4 x 4, travel-proof', typ:'bike', day:'Wed',
+     fields:[{k:'bike_min',l:'Total duration (min)'},{k:'z4_min',l:'Minutes at Z4+'},{k:'bike_avghr',l:'Avg HR during work (bpm)'}],
+     groups:[
+      ['A -- The one session that does not change', [
+        ['4 x 4 min at 90-95% HRmax',null,0,'4 x 4 min','hotel bike, inclined treadmill, rower, stairwell, or hills outside. Heart rate is the target, not the machine. 3 min easy between reps, 10 min warm-up.']]],
+      ['B -- Accessory', [
+        ['Standing Calf Raise','Calf raise',4,'4x 15-25',''],
+        ['Lying or Hanging Leg Raise',null,0,'3x 12-20','']]]]},
+    {id:P+'4', name:'Travel Lower -- hinge and glute', typ:'lift', day:'Thu',
+     fields:[{k:'notes_load',l:'Heaviest DB used (lbs)'}], groups:[
+      ['A -- Posterior chain', [
+        ['DB Romanian Deadlift','Romanian deadlift',4,'4x 10-15','or single-leg with one dumbbell'],
+        ['Hip Thrust off the bed or a bench','Hip thrust',4,'4x 15-25','bodyweight, 2 sec squeeze at the top'],
+        ['Nordic or Slider Leg Curl','Leg curl',3,'3x 6-10','eccentric-only reps are fine'],
+        ['Walking Lunge','Walking lunge',3,'3x 12-15/leg','hallway or car park'],
+        ['Seated Calf Raise','Calf raise',2,'2x 20-25','dumbbells on the knees']]]]},
+    {id:P+'5', name:'Travel Upper -- vertical and arms', typ:'lift', day:'Fri',
+     fields:[{k:'notes_load',l:'Heaviest DB used (lbs)'}], groups:[
+      ['A -- Vertical bias', [
+        ['Pike Push-up or DB Overhead Press','Overhead press',4,'4x 8-15','feet elevated makes the pike harder'],
+        ['Pull-up on any bar, or Band Pulldown','Pull-up',4,'4x max','door frames, playgrounds and luggage rails have all worked'],
+        ['Wide Push-up or Band Fly','Cable fly',3,'3x 12-20',''],
+        ['Band Row','Barbell row',3,'3x 15-20',''],
+        ['DB or Band Lateral Raise','Lateral raise',3,'3x 15-20',''],
+        ['DB or Band Curl','Barbell curl',3,'3x 12-15',''],
+        ['Overhead DB Triceps Extension','Overhead triceps ext',3,'3x 12-15','']]]]},
+    {id:P+'6', name:'Open -- walk, spin, or nothing', typ:'lift', day:'Sat',
+     fields:[{k:'notes_load',l:'Top load if lifted (lbs)'}], groups:[
+      ['A -- Unprogrammed', [['Travel day. A long walk counts.',null,0,'as available','']]]]}
+  ];
+}
+
+var TRAVEL_REPS = {'Leg press':15,'Walking lunge':12,'Romanian deadlift':12,'Leg curl':10,'Calf raise':20,
+  'Incline DB press':15,'Chest-supported row':12,'Overhead press':10,'Lateral raise':17,'Dip':12,
+  'Barbell curl':12,'Hip thrust':20,'Pull-up':8,'Cable fly':15,'Barbell row':17,'Overhead triceps ext':13};
+
+var TRAVEL_HOLD = 'TRAVEL WEEK -- this is a HOLD, not a loading week and not a deload. The job is to keep the ' +
+  'stimulus alive and arrive home able to train hard. Do not chase failure on unfamiliar equipment and do not try ' +
+  'to match your gym loads with dumbbells. Slow the eccentric and take sets close to failure instead -- with light ' +
+  'loads that is what makes them count. The progression resumes next week.';
+
+function buildTravelWeek(k) {
+  var defs = travelSessions(k), sess = [];
+  for (var i = 0; i < defs.length; i++) {
+    var d = defs[i];
+    sess.push({id:d.id, name:d.name, type:d.typ, day:d.day, fields:d.fields,
+      detail: (d.typ === 'bike' ? '4 x 4 min at 90-95% HRmax. ' : '') + TRAVEL_HOLD});
+    var groups = [
+      {title:'W -- Warm-up (~6 min)', ex:[
+        ['Easy cardio or a brisk walk','5 min',''],
+        ['Bodyweight squats and arm circles','2x 15','hotel rooms are cold and you will be stiff from the flight']]}
+    ], vol = [];
+    for (var g = 0; g < d.groups.length; g++) {
+      var title = d.groups[g][0], items = d.groups[g][1], rows = [];
+      for (var j = 0; j < items.length; j++) {
+        var disp = items[j][0], canon = items[j][1], sets = items[j][2], presc = items[j][3], note = items[j][4];
+        var nt = note + (canon && sets ? (note ? ' -- ' : '') + 'RIR 2' : '');
+        if (canon === 'Calf raise') nt += ' || LONG-LENGTH: full stretch at the bottom, 2 sec pause, 3-5 partials in the stretched half on the final set';
+        rows.push([disp, presc, nt]);
+        if (canon && sets) vol.push({ex:canon, sets:sets, reps:TRAVEL_REPS[canon] || 12});
+      }
+      groups.push({title:title, ex:rows});
+    }
+    groups.push({title:'Z -- Cool-down (~4 min)', ex:[
+      ['Walk or easy spin','4 min',''],
+      ['Couch stretch and doorway pec stretch','45 sec/side','']]});
+    EX_DATA[d.id] = {groups:groups};
+    if (vol.length) HYPER_VOLUME[d.id] = vol;
+  }
+  return {n:0, phase:'', focus:'Travel week -- hotel gym, hold the stimulus', load:'low',
+          rir:2, mult:0.60, travel:true, technique:'', sessions:sess};
+}
+
+// Re-apply stored travel weeks to the in-memory program. Called once at boot.
+function applyTravelWeeks() {
+  var slots = getTravelWeeks(), k = 0;
+  for (var i = 0; i < slots.length; i++) {
+    var s = slots[i];
+    if (s < 1 || s > WEEKS.length + 1) continue;
+    WEEKS.splice(s - 1, 0, buildTravelWeek(++k));
+  }
+  for (var w = 0; w < WEEKS.length; w++) {
+    WEEKS[w].n = w + 1;
+    if (WEEKS[w].travel) {
+      var src = WEEKS[w + 1] && !WEEKS[w + 1].travel ? WEEKS[w + 1] : WEEKS[w - 1];
+      if (src) { WEEKS[w].phase = src.phase; WEEKS[w].technique = src.technique; }
+    }
+  }
+}
+
+function weekSlotForDate(iso) {
+  var start = parseDate(getProgramStart()), d = parseDate(iso);
+  var n = Math.floor((d - start) / 86400000 / 7) + 1;
+  return n;
+}
+
+function addTravelWeek() {
+  var el = document.getElementById('travelDate');
+  var v = el && el.value;
+  if (!v) { showToast('Pick any date inside the travel week'); return; }
+  var slot = weekSlotForDate(v);
+  if (slot < 1) { showToast('That date is before the block starts'); return; }
+  var cur = getCurrentWeekNum();
+  if (slot < cur) { showToast('Week ' + slot + ' is already behind you -- inserting there would shift logged records onto the wrong week'); return; }
+  for (var n = slot; n <= WEEKS.length; n++) {
+    var wd = appData[wkey(n)];
+    if (wd && wd.sessions && Object.keys(wd.sessions).length) {
+      showToast('Week ' + n + ' already has logged sessions. Clear them first or pick a later week.'); return;
+    }
+  }
+  var list = getTravelWeeks();
+  if (list.indexOf(slot) >= 0) { showToast('Week ' + slot + ' is already a travel week'); return; }
+  list.push(slot);
+  appData._travel = list;
+  saveData();
+  location.reload();
+}
+
+function removeTravelWeek(slot) {
+  var list = getTravelWeeks().filter(function(x){ return x !== slot; });
+  appData._travel = list;
+  saveData();
+  location.reload();
+}
+
+function renderTravelPanel() {
+  var el = document.getElementById('travelList'); if (!el) return;
+  var slots = getTravelWeeks();
+  if (!slots.length) { el.innerHTML = '<span style="color:var(--txt3);font-size:12px">None set. The block runs its authored 12 weeks.</span>'; return; }
+  var html = '';
+  for (var i = 0; i < slots.length; i++) {
+    var s = slots[i], wk = WEEKS[s - 1];
+    var d = wk ? shiftedDate(s, 'Mon') : null;
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:12.5px">' +
+      '<span>Week ' + s + (d ? ' &middot; ' + (d.getMonth()+1) + '/' + d.getDate() : '') + '</span>' +
+      '<button class="btn" style="font-size:11px;padding:4px 10px" onclick="removeTravelWeek(' + s + ')">Remove</button></div>';
+  }
+  el.innerHTML = html + '<div style="font-size:11.5px;color:var(--txt3);margin-top:8px">Block length: ' + WEEKS.length + ' weeks. Each travel week pushes everything after it back by seven days rather than consuming a loading week.</div>';
+}
+
 function saveData() {
   try { localStorage.setItem('matt_block_v1', JSON.stringify(appData)); } catch(e) {}
 }
@@ -4915,11 +5105,13 @@ function addDescribedMeal() {
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 loadData();
+applyTravelWeeks();
 buildSelect();
 renderTraining();
 loadSyncSettings();
 loadProfile();
 loadScheduleConfig();
+renderTravelPanel();
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
