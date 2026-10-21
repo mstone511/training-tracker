@@ -82,6 +82,10 @@ h1{font-size:19px;font-weight:600;margin-bottom:2px}
 .ex-num{font-size:11px;color:var(--txt3);min-width:16px;padding-top:1px;flex-shrink:0}
 .ex-info{flex:1}
 .ex-name{font-size:12px;font-weight:500}
+.ex-log{display:flex;align-items:center;gap:5px;margin-top:5px;flex-wrap:wrap}
+.ex-log input{width:58px;padding:4px 6px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--txt);font-family:inherit}
+.ex-log .x{font-size:11px;color:var(--txt3)}
+.ex-last{font-size:10.5px;color:var(--txt3);margin-left:4px}
 .ex-note{font-size:10px;color:var(--txt3);margin-top:1px}
 .ex-sets{font-size:11px;color:var(--txt2);min-width:110px;text-align:right;padding-top:1px;flex-shrink:0}
 .wc-item{display:flex;gap:6px;padding:3px 0;font-size:12px;color:var(--txt)}
@@ -3466,12 +3470,39 @@ function buildExHtml(sid, type, name) {
   for (var g = 0; g < allGroups.length; g++) {
     var group = allGroups[g];
     var rowsHtml = '';
+    var isAux = /^[WZTX]\s*--/.test(group.title);
     for (var e = 0; e < group.ex.length; e++) {
       var ex = group.ex[e];
       var noteHtml = ex[2] ? '<div class="ex-note">' + ex[2] + '</div>' : '';
       rowsHtml += '<div class="ex-row">';
       rowsHtml += '<span class="ex-num">' + (e + 1) + '</span>';
-      rowsHtml += '<div class="ex-info"><div class="ex-name">' + ex[0] + '</div>' + noteHtml + '</div>';
+      rowsHtml += '<div class="ex-info"><div class="ex-name">' + ex[0] + '</div>' + noteHtml;
+      if (!isAux && wkObj) {
+        var safeK = exKey(ex[0]).replace(/[^a-z0-9]/g, '');
+        var cur = getExLoad(sid, wkObj.n, ex[0]);
+        var wkIdx = WEEKS.indexOf(wkObj);
+        var prev = lastExLoad(ex[0], wkIdx);
+        var prevTxt = '';
+        if (prev && (prev.load || prev.reps)) {
+          prevTxt = 'Last: ' + (prev.load ? prev.load + ' lb' : '--') +
+                    (prev.reps ? ' x ' + prev.reps : '') + ' (wk ' + prev.wkNum + ')';
+          if (prev.load && cur.load) {
+            var d = cur.load - prev.load;
+            prevTxt += d > 0 ? '  &#9650; +' + d : (d < 0 ? '  &#9660; ' + d : '  = same');
+          }
+        } else {
+          prevTxt = 'No history yet -- this becomes next week\'s reference.';
+        }
+        var esc = ex[0].replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        rowsHtml += '<div class="ex-log">' +
+          '<input type="text" inputmode="decimal" placeholder="lb" value="' + (cur.load !== undefined ? cur.load : '') +
+            '" oninput="saveExLoad(\'' + sid + '\',' + wkObj.n + ',\'' + esc + '\',\'load\',this.value)">' +
+          '<span class="x">&times;</span>' +
+          '<input type="text" inputmode="numeric" placeholder="reps" value="' + (cur.reps !== undefined ? cur.reps : '') +
+            '" oninput="saveExLoad(\'' + sid + '\',' + wkObj.n + ',\'' + esc + '\',\'reps\',this.value)">' +
+          '<span class="ex-last" id="lastfor-' + sid + '-' + safeK + '">' + prevTxt + '</span></div>';
+      }
+      rowsHtml += '</div>';
       rowsHtml += '<span class="ex-sets">' + ex[1] + '</span>';
       rowsHtml += '</div>';
     }
@@ -4176,12 +4207,118 @@ function renderTraining() {
       html += '</div>';
     }
     var notes = (sd.notes || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    var pn = priorNotes(s.name, curWk, 2);
+    if (pn.length) {
+      html += '<div style="font-size:11.5px;color:var(--txt2);background:var(--bg2);border-left:3px solid var(--accent,#3987e5);border-radius:6px;padding:7px 9px;margin-bottom:6px;line-height:1.5">';
+      html += '<b style="color:var(--txt3);font-size:10px;letter-spacing:.05em;text-transform:uppercase">What you wrote last time</b>';
+      for (var pi = 0; pi < pn.length; pi++) {
+        html += '<div style="margin-top:4px"><span style="color:var(--txt3)">Wk ' + pn[pi].wkNum + ':</span> ' +
+                pn[pi].text.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+      }
+      html += '</div>';
+    }
     html += '<textarea placeholder="Notes..." oninput="saveNotes(\'' + s.id + '\',\'' + wk.n + '\',this.value)">' + notes + '</textarea>';
     html += '<button class="done-btn ' + (isDone ? 'is-done' : '') + '" onclick="toggleDone(\'' + s.id + '\',\'' + wk.n + '\')">' + (isDone ? '&#10003; Completed -- tap to undo' : 'Mark complete') + '</button>';
     html += '</div></div>';
   }
   document.getElementById('sessionList').innerHTML = html;
   document.getElementById('aiText').textContent = wd.ai || 'Log sessions then tap Analyse for evidence-based feedback and next-week adjustments.';
+}
+
+
+// ─── PER-EXERCISE LOAD MEMORY ────────────────────────────────────────────────
+// Loads are stored on the session that produced them -- wd.sessions[sid].ex --
+// so there is one source of truth and history is derived by scanning, never
+// duplicated. exKey() strips the "A1. " ordering prefix so the same movement
+// matches across weeks even when its position in the session changes.
+
+function exKey(display) {
+  return String(display).replace(/^[A-Z]\d*\.\s*/, '').trim().toLowerCase();
+}
+
+// normalized display name -> the console's canonical movement name
+var EX_CANON = {
+  'bb back squat':'Barbell back squat','leg press':'Leg press','seated leg curl':'Leg curl',
+  'leg extension':'Leg extension','standing calf raise':'Calf raise','seated calf raise':'Calf raise',
+  'bb bench press':'Barbell bench press','chest-supported row':'Chest-supported row',
+  'incline db press':'Incline DB press','lat pulldown':'Lat pulldown',
+  'overhead cable triceps extension':'Overhead triceps ext','incline db curl':'Incline DB curl',
+  'face pull':'Face pull','bb romanian deadlift':'Romanian deadlift',
+  'bb conventional deadlift':'Conventional deadlift','bb hip thrust':'Hip thrust',
+  'walking lunge':'Walking lunge','standing bb overhead press':'Overhead press','pull-up':'Pull-up',
+  'cable fly':'Cable fly','weighted dip':'Dip','lateral raise':'Lateral raise',
+  'ez-bar curl':'Barbell curl','cable triceps pushdown':'Cable triceps pushdown',
+  'db/kb goblet squat':'Leg press','db split squat':'Walking lunge',
+  'db romanian deadlift':'Romanian deadlift','slider or towel leg curl':'Leg curl',
+  'standing calf raise, single leg':'Calf raise','push-up, feet elevated':'Incline DB press',
+  'single-arm db row':'Chest-supported row','db shoulder press':'Overhead press',
+  'db or band lateral raise':'Lateral raise','chair dip':'Dip','db or band curl':'Barbell curl',
+  'overhead db triceps extension':'Overhead triceps ext',
+  'hip thrust off the bed or a bench':'Hip thrust','nordic or slider leg curl':'Leg curl',
+  'pike push-up or db overhead press':'Overhead press',
+  'pull-up on any bar, or band pulldown':'Pull-up','wide push-up or band fly':'Cable fly',
+  'band row':'Barbell row'
+};
+
+function saveExLoad(sid, wn, display, which, value) {
+  var wd = getWD(wn);
+  if (!wd.sessions[sid]) wd.sessions[sid] = {};
+  if (!wd.sessions[sid].ex) wd.sessions[sid].ex = {};
+  var k = exKey(display);
+  if (!wd.sessions[sid].ex[k]) wd.sessions[sid].ex[k] = {};
+  var n = parseFloat(value);
+  if (isNaN(n)) delete wd.sessions[sid].ex[k][which]; else wd.sessions[sid].ex[k][which] = n;
+  wd.sessions[sid].ex[k].d = toISO(todayLocal());
+  saveData();
+  if (wd.sessions[sid].done) { try { bridgeSession(sid, wn, true); } catch(e) {} }
+  var el = document.getElementById('lastfor-' + sid + '-' + k.replace(/[^a-z0-9]/g,''));
+  if (el) el.innerHTML = '';   // it is now today's entry, not history
+}
+
+function getExLoad(sid, wn, display) {
+  var wd = appData[wkey(wn)];
+  var k = exKey(display);
+  return (wd && wd.sessions && wd.sessions[sid] && wd.sessions[sid].ex && wd.sessions[sid].ex[k]) || {};
+}
+
+// Most recent logged entry for this movement STRICTLY before the given week index.
+function lastExLoad(display, beforeWkIdx) {
+  var k = exKey(display), best = null;
+  for (var w = 0; w < WEEKS.length && w < beforeWkIdx; w++) {
+    var wn = WEEKS[w].n, wd = appData[wkey(wn)];
+    if (!wd || !wd.sessions) continue;
+    for (var s = 0; s < WEEKS[w].sessions.length; s++) {
+      var rec = wd.sessions[WEEKS[w].sessions[s].id];
+      if (rec && rec.ex && rec.ex[k] && (rec.ex[k].load || rec.ex[k].reps)) {
+        best = {wkNum: wn, load: rec.ex[k].load, reps: rec.ex[k].reps, d: rec.ex[k].d};
+      }
+    }
+  }
+  return best;
+}
+
+// Prior notes for the SAME session slot (matched on session name), most recent first.
+function priorNotes(sessionName, beforeWkIdx, limit) {
+  var out = [];
+  for (var w = beforeWkIdx - 1; w >= 0 && out.length < (limit || 2); w--) {
+    var wk = WEEKS[w], wd = appData[wkey(wk.n)];
+    if (!wd || !wd.sessions) continue;
+    for (var s = 0; s < wk.sessions.length; s++) {
+      if (wk.sessions[s].name !== sessionName) continue;
+      var rec = wd.sessions[wk.sessions[s].id];
+      if (rec && rec.notes && rec.notes.trim()) out.push({wkNum: wk.n, text: rec.notes.trim()});
+    }
+  }
+  return out;
+}
+
+// Which calendar week does today fall in? Index into WEEKS, clamped to the block.
+function currentWeekIndex() {
+  var start = parseDate(getProgramStart());
+  var diff = Math.floor((todayLocal() - start) / 86400000 / 7);
+  if (diff < 0) return 0;
+  if (diff > WEEKS.length - 1) return WEEKS.length - 1;
+  return diff;
 }
 
 function toggleSession(sid) { document.getElementById('bod-' + sid).classList.toggle('open'); }
@@ -4253,6 +4390,15 @@ function bridgeSession(sid, wn, isDone) {
       var v = parseFloat(flds[k]);
       if (!isNaN(v) && v > 0) loadByEx[FIELD_TO_EX[k]] = v;
     }
+    // Per-exercise logs are more specific than the session's single top-set
+    // field, so they win where both exist.
+    if (sd.ex) {
+      for (var ek in sd.ex) {
+        var canon = EX_CANON[ek];
+        var lv = sd.ex[ek] && sd.ex[ek].load;
+        if (canon && lv > 0) loadByEx[canon] = lv;
+      }
+    }
     var vol = (typeof HYPER_VOLUME !== 'undefined' && HYPER_VOLUME[sid]) ? HYPER_VOLUME[sid] : [];
     for (var i = 0; i < vol.length; i++) {
       o.sessions.push({
@@ -4320,10 +4466,25 @@ async function runAnalysis() {
   var summary = wk.sessions.map(function(s) {
     var sd = wd.sessions[s.id] || {};
     var flds = Object.entries(sd.fields || {}).map(function(kv) { return kv[0] + ':' + kv[1]; }).join(', ');
-    return s.name + ' [' + s.type + '] ' + (sd.done ? 'DONE' : 'NOT DONE') + ' -- ' + (flds || 'no stats') + ' -- notes: ' + (sd.notes || 'none');
+    var lifts = Object.keys(sd.ex || {}).map(function(k) {
+      var r = sd.ex[k];
+      return k + ' ' + (r.load !== undefined ? r.load + 'lb' : '?') + (r.reps !== undefined ? 'x' + r.reps : '');
+    }).join('; ');
+    var hist = Object.keys(sd.ex || {}).map(function(k) {
+      var p = lastExLoad(k, curWk);
+      return p && p.load ? k + ' prev ' + p.load + 'lb (wk' + p.wkNum + ')' : null;
+    }).filter(Boolean).join('; ');
+    return s.name + ' [' + s.type + '] ' + (sd.done ? 'DONE' : 'NOT DONE') + ' -- ' + (flds || 'no stats') +
+      (lifts ? ' -- loads this week: ' + lifts : '') +
+      (hist ? ' -- same lifts previously: ' + hist : '') +
+      ' -- notes: ' + (sd.notes || 'none');
   }).join('\n');
+  var carried = wk.sessions.map(function(s) {
+    var pn = priorNotes(s.name, curWk, 2);
+    return pn.length ? s.name + ' >> ' + pn.map(function(p) { return 'wk' + p.wkNum + ': ' + p.text; }).join(' | ') : null;
+  }).filter(Boolean).join('\n') || 'none';
   var prevAI = appData['wk' + (wk.n - 1)] && appData['wk' + (wk.n - 1)].ai ? appData['wk' + (wk.n - 1)].ai.slice(0, 300) + '...' : 'none';
-  var prompt = 'Expert exercise physiologist reviewing a dedicated hypertrophy block for Matt (38M, 165.5 lbs, 11.1% BF, 147.1 lbs FFM, FFMI 21.4, advanced trainee, conjugate background, Denver ~5280 ft). 12-week block: 3 mesocycles of 3 loading weeks + 1 deload, 5 lifting days + one 4x4 bike VO2 session. Triathlon volume is deliberately OUT of this block; the VO2 session is retained. Week ' + wk.n + '/12 (' + wk.phase + ': ' + wk.focus + ', load: ' + wk.load + ', target RIR ' + (wk.rir !== undefined ? wk.rir : '?') + ', set multiplier x' + (wk.mult || 1) + '). Governing constraint: body-fat ceiling 13%, fat budget ~3.6 lbs, so rate of gain must stay near 0.2-0.4% body mass per week. Week ' + wk.n + ' data:\n' + summary + '\nPrev week: ' + prevAI + '\nDirect review max 200 words: 1) completion and which sessions were skipped 2) whether top-set loads progressed versus last week, by movement 3) whether the Z4+ minutes on the bike session met the 16-minute prescription 4) whether reported bodyweight is inside the target band 5) one specific adjustment for next week, naming sets or load, not effort. Numbers only. If load progression has stalled two weeks running, say so plainly and name sleep, intake or set volume as the likely cause in that order.';
+  var prompt = 'Expert exercise physiologist reviewing a dedicated hypertrophy block for Matt (38M, 165.5 lbs, 11.1% BF, 147.1 lbs FFM, FFMI 21.4, advanced trainee, conjugate background, Denver ~5280 ft). 12-week block: 3 mesocycles of 3 loading weeks + 1 deload, 5 lifting days + one 4x4 bike VO2 session. Triathlon volume is deliberately OUT of this block; the VO2 session is retained. Week ' + wk.n + '/12 (' + wk.phase + ': ' + wk.focus + ', load: ' + wk.load + ', target RIR ' + (wk.rir !== undefined ? wk.rir : '?') + ', set multiplier x' + (wk.mult || 1) + '). Governing constraint: body-fat ceiling 13%, fat budget ~3.6 lbs, so rate of gain must stay near 0.2-0.4% body mass per week. Week ' + wk.n + ' data:\n' + summary + '\nPrev week AI review: ' + prevAI + '\nNotes from earlier weeks on these same sessions:\n' + carried + '\nDirect review max 200 words: 1) completion and which sessions were skipped 2) whether top-set loads progressed versus last week, by movement 3) whether the Z4+ minutes on the bike session met the 16-minute prescription 4) whether reported bodyweight is inside the target band 5) read the carried-forward notes above and say whether any recurring complaint (a nagging joint, a machine that was unavailable, a lift that keeps stalling) is a pattern rather than a one-off, and what to change about it 6) one specific adjustment for next week, naming sets or load, not effort. Numbers only. If load progression has stalled two weeks running, say so plainly and name sleep, intake or set volume as the likely cause in that order.';
   try {
     var r = await fetch('https://tracker-ai.msmyers4.workers.dev/', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:'claude-sonnet-4-5-20250929', max_tokens:1000, messages:[{role:'user', content:prompt}]})});
     var d = await r.json();
@@ -5106,6 +5267,7 @@ function addDescribedMeal() {
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 loadData();
 applyTravelWeeks();
+curWk = currentWeekIndex();
 buildSelect();
 renderTraining();
 loadSyncSettings();
