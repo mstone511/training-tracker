@@ -3420,10 +3420,12 @@ function deriveFields(sid, sessionType, authored){
       out.push({ k:key, l: clean + ' top set (lbs)' });
     }
   }
-  // For run/swim/bike conditioning days, keep the authored fields (AMRAP, time, HR, etc.)
-  if (sessionType !== 'lift') return authored || [];
-  // If we somehow derived nothing, fall back to authored
-  return out.length ? out : (authored || []);
+  // Per-exercise load logging replaced the generated per-movement top-set fields,
+  // which duplicated it. The authored fields are the ones that are NOT duplicative:
+  // bodyweight, Z4+ minutes, bike duration and average HR, and the Open-day load.
+  // `out` is still computed above because legacyLoadKey() reproduces its keys when
+  // migrating data that was entered through the old fields.
+  return authored || [];
 }
 
 function buildExHtml(sid, type, name) {
@@ -3477,7 +3479,7 @@ function buildExHtml(sid, type, name) {
       rowsHtml += '<div class="ex-row">';
       rowsHtml += '<span class="ex-num">' + (e + 1) + '</span>';
       rowsHtml += '<div class="ex-info"><div class="ex-name">' + ex[0] + '</div>' + noteHtml;
-      if (!isAux && wkObj) {
+      if (!isAux && wkObj && /^\d+x\s/.test(ex[1])) {
         var safeK = exKey(ex[0]).replace(/[^a-z0-9]/g, '');
         var cur = getExLoad(sid, wkObj.n, ex[0]);
         var wkIdx = WEEKS.indexOf(wkObj);
@@ -3538,99 +3540,99 @@ function toggleCollapsible(id) {
 // ─── WEEKS DATA ──────────────────────────────────────────────────────────────
 var WEEKS = [
 {n:1,phase:'Meso 1',focus:"Accumulation - establish loads",load:'moderate',rir:3,mult:1.00,technique:"Eccentric control",sessions:[
-{id:'w1s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 3.",fields:[{k: "squat_top", l: "Squat top set (lbs)"}, {k: "bw", l: "Bodyweight AM (lbs)"}]},
-{id:'w1s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 3.",fields:[{k: "bench_top", l: "Bench top set (lbs)"}, {k: "row_top", l: "Row top set (lbs)"}]},
+{id:'w1s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 3.",fields:[{k: "bw", l: "Bodyweight AM (lbs)"}]},
+{id:'w1s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 3.",fields:[]},
 {id:'w1s3',name:"VO2 -- 4 x 4 on the bike",type:'bike',day:'Wed',detail:"4 x 4 min at 90-95% HRmax. 3 min easy between reps. Bike or erg -- not running.",fields:[{k: "bike_min", l: "Total duration (min)"}, {k: "z4_min", l: "Minutes at Z4+"}, {k: "bike_avghr", l: "Avg HR during work (bpm)"}]},
-{id:'w1s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain, heavy-pull week. Conventional deadlift replaces the RDL; walking lunge comes out so glute volume stays inside the band. Target RIR 3.",fields:[{k: "dl_top", l: "Deadlift top set (lbs)"}, {k: "hipthrust_top", l: "Hip thrust top set (lbs)"}]},
-{id:'w1s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 3.",fields:[{k: "press_top", l: "Overhead press top (lbs)"}, {k: "pullup_reps", l: "Pull-up top set (reps)"}]},
+{id:'w1s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain, heavy-pull week. Conventional deadlift replaces the RDL; walking lunge comes out so glute volume stays inside the band. Target RIR 3.",fields:[]},
+{id:'w1s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 3.",fields:[]},
 {id:'w1s6',name:"Open -- Jay session or easy Z2",type:'lift',day:'Sat',detail:"Log whatever Jay programs. If no Jay session, an easy 30-40 min spin or nothing at all.",fields:[{k: "notes_load", l: "Top load if lifted (lbs)"}]},
 ]},
 {n:2,phase:'Meso 1',focus:"Accumulation - add sets",load:'high',rir:2,mult:1.15,technique:"Eccentric control",sessions:[
-{id:'w2s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 2.",fields:[{k: "squat_top", l: "Squat top set (lbs)"}, {k: "bw", l: "Bodyweight AM (lbs)"}]},
-{id:'w2s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 2.",fields:[{k: "bench_top", l: "Bench top set (lbs)"}, {k: "row_top", l: "Row top set (lbs)"}]},
+{id:'w2s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 2.",fields:[{k: "bw", l: "Bodyweight AM (lbs)"}]},
+{id:'w2s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 2.",fields:[]},
 {id:'w2s3',name:"VO2 -- 4 x 4 on the bike",type:'bike',day:'Wed',detail:"4 x 4 min at 90-95% HRmax. 3 min easy between reps. Bike or erg -- not running.",fields:[{k: "bike_min", l: "Total duration (min)"}, {k: "z4_min", l: "Minutes at Z4+"}, {k: "bike_avghr", l: "Avg HR during work (bpm)"}]},
-{id:'w2s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 2.",fields:[{k: "rdl_top", l: "RDL top set (lbs)"}, {k: "hipthrust_top", l: "Hip thrust top set (lbs)"}]},
-{id:'w2s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 2.",fields:[{k: "press_top", l: "Overhead press top (lbs)"}, {k: "pullup_reps", l: "Pull-up top set (reps)"}]},
+{id:'w2s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 2.",fields:[]},
+{id:'w2s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 2.",fields:[]},
 {id:'w2s6',name:"Open -- Jay session or easy Z2",type:'lift',day:'Sat',detail:"Log whatever Jay programs. If no Jay session, an easy 30-40 min spin or nothing at all.",fields:[{k: "notes_load", l: "Top load if lifted (lbs)"}]},
 ]},
 {n:3,phase:'Meso 1',focus:"Overreach - top of the band",load:'peak',rir:1,mult:1.30,technique:"Eccentric control",sessions:[
-{id:'w3s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 1.",fields:[{k: "squat_top", l: "Squat top set (lbs)"}, {k: "bw", l: "Bodyweight AM (lbs)"}]},
-{id:'w3s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 1.",fields:[{k: "bench_top", l: "Bench top set (lbs)"}, {k: "row_top", l: "Row top set (lbs)"}]},
+{id:'w3s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 1.",fields:[{k: "bw", l: "Bodyweight AM (lbs)"}]},
+{id:'w3s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 1.",fields:[]},
 {id:'w3s3',name:"VO2 -- 4 x 4 on the bike",type:'bike',day:'Wed',detail:"5 x 4 min at 90-95% HRmax. 3 min easy between reps. Bike or erg -- not running.",fields:[{k: "bike_min", l: "Total duration (min)"}, {k: "z4_min", l: "Minutes at Z4+"}, {k: "bike_avghr", l: "Avg HR during work (bpm)"}]},
-{id:'w3s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 1.",fields:[{k: "rdl_top", l: "RDL top set (lbs)"}, {k: "hipthrust_top", l: "Hip thrust top set (lbs)"}]},
-{id:'w3s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 1.",fields:[{k: "press_top", l: "Overhead press top (lbs)"}, {k: "pullup_reps", l: "Pull-up top set (reps)"}]},
+{id:'w3s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 1.",fields:[]},
+{id:'w3s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 1.",fields:[]},
 {id:'w3s6',name:"Open -- Jay session or easy Z2",type:'lift',day:'Sat',detail:"Log whatever Jay programs. If no Jay session, an easy 30-40 min spin or nothing at all.",fields:[{k: "notes_load", l: "Top load if lifted (lbs)"}]},
 ]},
 {n:4,phase:'Meso 1',focus:"Deload - hold load, halve sets",load:'deload',rir:4,mult:0.50,technique:"Eccentric control",sessions:[
-{id:'w4s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 4.",fields:[{k: "squat_top", l: "Squat top set (lbs)"}, {k: "bw", l: "Bodyweight AM (lbs)"}]},
-{id:'w4s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 4.",fields:[{k: "bench_top", l: "Bench top set (lbs)"}, {k: "row_top", l: "Row top set (lbs)"}]},
+{id:'w4s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 4.",fields:[{k: "bw", l: "Bodyweight AM (lbs)"}]},
+{id:'w4s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 4.",fields:[]},
 {id:'w4s3',name:"VO2 -- 4 x 4 on the bike",type:'bike',day:'Wed',detail:"3 x 4 min at 90-95% HRmax. 3 min easy between reps. Bike or erg -- not running.",fields:[{k: "bike_min", l: "Total duration (min)"}, {k: "z4_min", l: "Minutes at Z4+"}, {k: "bike_avghr", l: "Avg HR during work (bpm)"}]},
-{id:'w4s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 4.",fields:[{k: "rdl_top", l: "RDL top set (lbs)"}, {k: "hipthrust_top", l: "Hip thrust top set (lbs)"}]},
-{id:'w4s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 4.",fields:[{k: "press_top", l: "Overhead press top (lbs)"}, {k: "pullup_reps", l: "Pull-up top set (reps)"}]},
+{id:'w4s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 4.",fields:[]},
+{id:'w4s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 4.",fields:[]},
 {id:'w4s6',name:"Open -- Jay session or easy Z2",type:'lift',day:'Sat',detail:"Log whatever Jay programs. If no Jay session, an easy 30-40 min spin or nothing at all.",fields:[{k: "notes_load", l: "Top load if lifted (lbs)"}]},
 ]},
 {n:5,phase:'Meso 2',focus:"Accumulation - reset from new loads",load:'high',rir:2,mult:1.00,technique:"Rest-pause and drop sets",sessions:[
-{id:'w5s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 2.",fields:[{k: "squat_top", l: "Squat top set (lbs)"}, {k: "bw", l: "Bodyweight AM (lbs)"}]},
-{id:'w5s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 2.",fields:[{k: "bench_top", l: "Bench top set (lbs)"}, {k: "row_top", l: "Row top set (lbs)"}]},
+{id:'w5s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 2.",fields:[{k: "bw", l: "Bodyweight AM (lbs)"}]},
+{id:'w5s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 2.",fields:[]},
 {id:'w5s3',name:"VO2 -- 4 x 4 on the bike",type:'bike',day:'Wed',detail:"4 x 4 min at 90-95% HRmax. 3 min easy between reps. Bike or erg -- not running.",fields:[{k: "bike_min", l: "Total duration (min)"}, {k: "z4_min", l: "Minutes at Z4+"}, {k: "bike_avghr", l: "Avg HR during work (bpm)"}]},
-{id:'w5s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain, heavy-pull week. Conventional deadlift replaces the RDL; walking lunge comes out so glute volume stays inside the band. Target RIR 2.",fields:[{k: "dl_top", l: "Deadlift top set (lbs)"}, {k: "hipthrust_top", l: "Hip thrust top set (lbs)"}]},
-{id:'w5s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 2.",fields:[{k: "press_top", l: "Overhead press top (lbs)"}, {k: "pullup_reps", l: "Pull-up top set (reps)"}]},
+{id:'w5s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain, heavy-pull week. Conventional deadlift replaces the RDL; walking lunge comes out so glute volume stays inside the band. Target RIR 2.",fields:[]},
+{id:'w5s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 2.",fields:[]},
 {id:'w5s6',name:"Open -- Jay session or easy Z2",type:'lift',day:'Sat',detail:"Log whatever Jay programs. If no Jay session, an easy 30-40 min spin or nothing at all.",fields:[{k: "notes_load", l: "Top load if lifted (lbs)"}]},
 ]},
 {n:6,phase:'Meso 2',focus:"Accumulation - add sets",load:'high',rir:1,mult:1.15,technique:"Rest-pause and drop sets",sessions:[
-{id:'w6s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 1.",fields:[{k: "squat_top", l: "Squat top set (lbs)"}, {k: "bw", l: "Bodyweight AM (lbs)"}]},
-{id:'w6s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 1.",fields:[{k: "bench_top", l: "Bench top set (lbs)"}, {k: "row_top", l: "Row top set (lbs)"}]},
+{id:'w6s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 1.",fields:[{k: "bw", l: "Bodyweight AM (lbs)"}]},
+{id:'w6s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 1.",fields:[]},
 {id:'w6s3',name:"VO2 -- 4 x 4 on the bike",type:'bike',day:'Wed',detail:"5 x 4 min at 90-95% HRmax. 3 min easy between reps. Bike or erg -- not running.",fields:[{k: "bike_min", l: "Total duration (min)"}, {k: "z4_min", l: "Minutes at Z4+"}, {k: "bike_avghr", l: "Avg HR during work (bpm)"}]},
-{id:'w6s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 1.",fields:[{k: "rdl_top", l: "RDL top set (lbs)"}, {k: "hipthrust_top", l: "Hip thrust top set (lbs)"}]},
-{id:'w6s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 1.",fields:[{k: "press_top", l: "Overhead press top (lbs)"}, {k: "pullup_reps", l: "Pull-up top set (reps)"}]},
+{id:'w6s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 1.",fields:[]},
+{id:'w6s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 1.",fields:[]},
 {id:'w6s6',name:"Open -- Jay session or easy Z2",type:'lift',day:'Sat',detail:"Log whatever Jay programs. If no Jay session, an easy 30-40 min spin or nothing at all.",fields:[{k: "notes_load", l: "Top load if lifted (lbs)"}]},
 ]},
 {n:7,phase:'Meso 2',focus:"Overreach",load:'peak',rir:1,mult:1.30,technique:"Rest-pause and drop sets",sessions:[
-{id:'w7s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 1.",fields:[{k: "squat_top", l: "Squat top set (lbs)"}, {k: "bw", l: "Bodyweight AM (lbs)"}]},
-{id:'w7s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 1.",fields:[{k: "bench_top", l: "Bench top set (lbs)"}, {k: "row_top", l: "Row top set (lbs)"}]},
+{id:'w7s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 1.",fields:[{k: "bw", l: "Bodyweight AM (lbs)"}]},
+{id:'w7s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 1.",fields:[]},
 {id:'w7s3',name:"VO2 -- 4 x 4 on the bike",type:'bike',day:'Wed',detail:"5 x 4 min at 90-95% HRmax. 3 min easy between reps. Bike or erg -- not running.",fields:[{k: "bike_min", l: "Total duration (min)"}, {k: "z4_min", l: "Minutes at Z4+"}, {k: "bike_avghr", l: "Avg HR during work (bpm)"}]},
-{id:'w7s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 1.",fields:[{k: "rdl_top", l: "RDL top set (lbs)"}, {k: "hipthrust_top", l: "Hip thrust top set (lbs)"}]},
-{id:'w7s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 1.",fields:[{k: "press_top", l: "Overhead press top (lbs)"}, {k: "pullup_reps", l: "Pull-up top set (reps)"}]},
+{id:'w7s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 1.",fields:[]},
+{id:'w7s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 1.",fields:[]},
 {id:'w7s6',name:"Open -- Jay session or easy Z2",type:'lift',day:'Sat',detail:"Log whatever Jay programs. If no Jay session, an easy 30-40 min spin or nothing at all.",fields:[{k: "notes_load", l: "Top load if lifted (lbs)"}]},
 ]},
 {n:8,phase:'Meso 2',focus:"Deload + mid-block scan",load:'deload',rir:4,mult:0.50,technique:"Rest-pause and drop sets",sessions:[
-{id:'w8s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 4.",fields:[{k: "squat_top", l: "Squat top set (lbs)"}, {k: "bw", l: "Bodyweight AM (lbs)"}]},
-{id:'w8s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 4.",fields:[{k: "bench_top", l: "Bench top set (lbs)"}, {k: "row_top", l: "Row top set (lbs)"}]},
+{id:'w8s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 4.",fields:[{k: "bw", l: "Bodyweight AM (lbs)"}]},
+{id:'w8s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 4.",fields:[]},
 {id:'w8s3',name:"VO2 -- 4 x 4 on the bike",type:'bike',day:'Wed',detail:"3 x 4 min at 90-95% HRmax. 3 min easy between reps. Bike or erg -- not running.",fields:[{k: "bike_min", l: "Total duration (min)"}, {k: "z4_min", l: "Minutes at Z4+"}, {k: "bike_avghr", l: "Avg HR during work (bpm)"}]},
-{id:'w8s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 4.",fields:[{k: "rdl_top", l: "RDL top set (lbs)"}, {k: "hipthrust_top", l: "Hip thrust top set (lbs)"}]},
-{id:'w8s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 4.",fields:[{k: "press_top", l: "Overhead press top (lbs)"}, {k: "pullup_reps", l: "Pull-up top set (reps)"}]},
+{id:'w8s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 4.",fields:[]},
+{id:'w8s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 4.",fields:[]},
 {id:'w8s6',name:"Open -- Jay session or easy Z2",type:'lift',day:'Sat',detail:"Log whatever Jay programs. If no Jay session, an easy 30-40 min spin or nothing at all.",fields:[{k: "notes_load", l: "Top load if lifted (lbs)"}]},
 ]},
 {n:9,phase:'Meso 3',focus:"Intensification - heaviest loads",load:'high',rir:2,mult:1.00,technique:"Long-length bias",sessions:[
-{id:'w9s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 2.",fields:[{k: "squat_top", l: "Squat top set (lbs)"}, {k: "bw", l: "Bodyweight AM (lbs)"}]},
-{id:'w9s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 2.",fields:[{k: "bench_top", l: "Bench top set (lbs)"}, {k: "row_top", l: "Row top set (lbs)"}]},
+{id:'w9s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 2.",fields:[{k: "bw", l: "Bodyweight AM (lbs)"}]},
+{id:'w9s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 2.",fields:[]},
 {id:'w9s3',name:"VO2 -- 4 x 4 on the bike",type:'bike',day:'Wed',detail:"5 x 4 min at 90-95% HRmax. 3 min easy between reps. Bike or erg -- not running.",fields:[{k: "bike_min", l: "Total duration (min)"}, {k: "z4_min", l: "Minutes at Z4+"}, {k: "bike_avghr", l: "Avg HR during work (bpm)"}]},
-{id:'w9s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain, heavy-pull week. Conventional deadlift replaces the RDL; walking lunge comes out so glute volume stays inside the band. Target RIR 2.",fields:[{k: "dl_top", l: "Deadlift top set (lbs)"}, {k: "hipthrust_top", l: "Hip thrust top set (lbs)"}]},
-{id:'w9s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 2.",fields:[{k: "press_top", l: "Overhead press top (lbs)"}, {k: "pullup_reps", l: "Pull-up top set (reps)"}]},
+{id:'w9s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain, heavy-pull week. Conventional deadlift replaces the RDL; walking lunge comes out so glute volume stays inside the band. Target RIR 2.",fields:[]},
+{id:'w9s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 2.",fields:[]},
 {id:'w9s6',name:"Open -- Jay session or easy Z2",type:'lift',day:'Sat',detail:"Log whatever Jay programs. If no Jay session, an easy 30-40 min spin or nothing at all.",fields:[{k: "notes_load", l: "Top load if lifted (lbs)"}]},
 ]},
 {n:10,phase:'Meso 3',focus:"Intensification",load:'peak',rir:1,mult:1.15,technique:"Long-length bias",sessions:[
-{id:'w10s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 1.",fields:[{k: "squat_top", l: "Squat top set (lbs)"}, {k: "bw", l: "Bodyweight AM (lbs)"}]},
-{id:'w10s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 1.",fields:[{k: "bench_top", l: "Bench top set (lbs)"}, {k: "row_top", l: "Row top set (lbs)"}]},
+{id:'w10s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 1.",fields:[{k: "bw", l: "Bodyweight AM (lbs)"}]},
+{id:'w10s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 1.",fields:[]},
 {id:'w10s3',name:"VO2 -- 4 x 4 on the bike",type:'bike',day:'Wed',detail:"5 x 4 min at 90-95% HRmax. 3 min easy between reps. Bike or erg -- not running.",fields:[{k: "bike_min", l: "Total duration (min)"}, {k: "z4_min", l: "Minutes at Z4+"}, {k: "bike_avghr", l: "Avg HR during work (bpm)"}]},
-{id:'w10s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 1.",fields:[{k: "rdl_top", l: "RDL top set (lbs)"}, {k: "hipthrust_top", l: "Hip thrust top set (lbs)"}]},
-{id:'w10s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 1.",fields:[{k: "press_top", l: "Overhead press top (lbs)"}, {k: "pullup_reps", l: "Pull-up top set (reps)"}]},
+{id:'w10s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 1.",fields:[]},
+{id:'w10s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 1.",fields:[]},
 {id:'w10s6',name:"Open -- Jay session or easy Z2",type:'lift',day:'Sat',detail:"Log whatever Jay programs. If no Jay session, an easy 30-40 min spin or nothing at all.",fields:[{k: "notes_load", l: "Top load if lifted (lbs)"}]},
 ]},
 {n:11,phase:'Meso 3',focus:"Peak - top of the band at top loads",load:'peak',rir:0,mult:1.30,technique:"Long-length bias",sessions:[
-{id:'w11s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 0.",fields:[{k: "squat_top", l: "Squat top set (lbs)"}, {k: "bw", l: "Bodyweight AM (lbs)"}]},
-{id:'w11s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 0.",fields:[{k: "bench_top", l: "Bench top set (lbs)"}, {k: "row_top", l: "Row top set (lbs)"}]},
+{id:'w11s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 0.",fields:[{k: "bw", l: "Bodyweight AM (lbs)"}]},
+{id:'w11s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 0.",fields:[]},
 {id:'w11s3',name:"VO2 -- 4 x 4 on the bike",type:'bike',day:'Wed',detail:"5 x 4 min at 90-95% HRmax. 3 min easy between reps. Bike or erg -- not running.",fields:[{k: "bike_min", l: "Total duration (min)"}, {k: "z4_min", l: "Minutes at Z4+"}, {k: "bike_avghr", l: "Avg HR during work (bpm)"}]},
-{id:'w11s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 0.",fields:[{k: "rdl_top", l: "RDL top set (lbs)"}, {k: "hipthrust_top", l: "Hip thrust top set (lbs)"}]},
-{id:'w11s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 0.",fields:[{k: "press_top", l: "Overhead press top (lbs)"}, {k: "pullup_reps", l: "Pull-up top set (reps)"}]},
+{id:'w11s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 0.",fields:[]},
+{id:'w11s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 0.",fields:[]},
 {id:'w11s6',name:"Open -- Jay session or easy Z2",type:'lift',day:'Sat',detail:"Log whatever Jay programs. If no Jay session, an easy 30-40 min spin or nothing at all.",fields:[{k: "notes_load", l: "Top load if lifted (lbs)"}]},
 ]},
 {n:12,phase:'Meso 3',focus:"Deload + end-block rescan",load:'deload',rir:4,mult:0.40,technique:"Long-length bias",sessions:[
-{id:'w12s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 4.",fields:[{k: "squat_top", l: "Squat top set (lbs)"}, {k: "bw", l: "Bodyweight AM (lbs)"}]},
-{id:'w12s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 4.",fields:[{k: "bench_top", l: "Bench top set (lbs)"}, {k: "row_top", l: "Row top set (lbs)"}]},
+{id:'w12s1',name:"Lower A -- squat emphasis",type:'lift',day:'Mon',detail:"Quad-dominant. Squat is the load anchor of the block. Target RIR 4.",fields:[{k: "bw", l: "Bodyweight AM (lbs)"}]},
+{id:'w12s2',name:"Upper A -- horizontal push and pull",type:'lift',day:'Tue',detail:"Bench is the load anchor. Row volume matched to press volume. Target RIR 4.",fields:[]},
 {id:'w12s3',name:"VO2 -- 4 x 4 on the bike",type:'bike',day:'Wed',detail:"3 x 4 min at 90-95% HRmax. 3 min easy between reps. Bike or erg -- not running.",fields:[{k: "bike_min", l: "Total duration (min)"}, {k: "z4_min", l: "Minutes at Z4+"}, {k: "bike_avghr", l: "Avg HR during work (bpm)"}]},
-{id:'w12s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 4.",fields:[{k: "rdl_top", l: "RDL top set (lbs)"}, {k: "hipthrust_top", l: "Hip thrust top set (lbs)"}]},
-{id:'w12s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 4.",fields:[{k: "press_top", l: "Overhead press top (lbs)"}, {k: "pullup_reps", l: "Pull-up top set (reps)"}]},
+{id:'w12s4',name:"Lower B -- hinge and glute",type:'lift',day:'Thu',detail:"Posterior chain. RDL is the hinge this week; conventional deadlifts appear in weeks 1, 5 and 9 only. Target RIR 4.",fields:[]},
+{id:'w12s5',name:"Upper B -- vertical push and pull, arms",type:'lift',day:'Fri',detail:"Overhead press and chin-ups anchor. Direct arm work sits here. Target RIR 4.",fields:[]},
 {id:'w12s6',name:"Open -- Jay session or easy Z2",type:'lift',day:'Sat',detail:"Log whatever Jay programs. If no Jay session, an easy 30-40 min spin or nothing at all.",fields:[{k: "notes_load", l: "Top load if lifted (lbs)"}]},
 ]}
 ];
@@ -4231,6 +4233,50 @@ function renderTraining() {
 // so there is one source of truth and history is derived by scanning, never
 // duplicated. exKey() strips the "A1. " ordering prefix so the same movement
 // matches across weeks even when its position in the session changes.
+
+
+// ─── MIGRATION: generated top-set fields -> per-exercise store ───────────────
+// Lift sessions used to render one "<movement> top set (lbs)" field per primary,
+// with keys built by deriveFields(). Per-exercise logging replaced them. This
+// reproduces that key algorithm exactly -- including its 28-character truncation
+// -- so values already entered are carried into history rather than orphaned.
+// Source fields are left in place; nothing is deleted.
+
+function legacyLoadKey(display) {
+  var clean = String(display).replace(/^[AB]1\.\s*/, '').trim().toLowerCase();
+  return 'load_' + clean.replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 28);
+}
+
+function migrateTopSets() {
+  if (appData._migratedTopSets) return;
+  var moved = 0;
+  for (var w = 0; w < WEEKS.length; w++) {
+    var wn = WEEKS[w].n, wd = appData[wkey(wn)];
+    if (!wd || !wd.sessions) continue;
+    for (var s = 0; s < WEEKS[w].sessions.length; s++) {
+      var sid = WEEKS[w].sessions[s].id;
+      var rec = wd.sessions[sid];
+      if (!rec || !rec.fields) continue;
+      var detail = EX_DATA[sid] || (EX_ALIAS[sid] && EX_DATA[EX_ALIAS[sid]]);
+      if (!detail) continue;
+      for (var g = 0; g < detail.groups.length; g++) {
+        var exs = detail.groups[g].ex || [];
+        for (var e = 0; e < exs.length; e++) {
+          var disp = exs[e][0] || '';
+          var v = parseFloat(rec.fields[legacyLoadKey(disp)]);
+          if (isNaN(v) || v <= 0) continue;
+          var k = exKey(disp);
+          if (!rec.ex) rec.ex = {};
+          if (!rec.ex[k]) rec.ex[k] = {};
+          if (rec.ex[k].load === undefined) { rec.ex[k].load = v; moved++; }
+        }
+      }
+    }
+  }
+  appData._migratedTopSets = true;
+  saveData();
+  if (moved) console.log('[migration] carried ' + moved + ' top-set value(s) into per-exercise history');
+}
 
 function exKey(display) {
   return String(display).replace(/^[A-Z]\d*\.\s*/, '').trim().toLowerCase();
@@ -5267,6 +5313,7 @@ function addDescribedMeal() {
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 loadData();
 applyTravelWeeks();
+migrateTopSets();
 curWk = currentWeekIndex();
 buildSelect();
 renderTraining();
