@@ -2614,7 +2614,10 @@ function applyTravelWeeks() {
   }
   for (var w = 0; w < WEEKS.length; w++) {
     WEEKS[w].n = w + 1;
-    if (WEEKS[w].travel) {
+    if (WEEKS[w].travel && !WEEKS[w].phase) {
+      // Only weeks INSERTED by the travel toggle need to borrow a phase and
+      // technique from a neighbour. A travel week authored into the program
+      // (the NYC week) already has its own and must keep them.
       var src = WEEKS[w + 1] && !WEEKS[w + 1].travel ? WEEKS[w + 1] : WEEKS[w - 1];
       if (src) { WEEKS[w].phase = src.phase; WEEKS[w].technique = src.technique; }
     }
@@ -3325,6 +3328,31 @@ function jayPickerHtml(sid, wn) {
       'border-radius:6px;padding:7px 9px;margin-bottom:8px;line-height:1.5">This day is a <b>Jay session</b>. ' +
       'It replaces the programmed work rather than adding to it, and the ledger counts Jay\'s sets, not the ' +
       'prescription.</div>' + topUpHtml(wn) : '');
+}
+
+// ─── START-DATE ALIGNMENT ────────────────────────────────────────────────────
+// getProgramStart() prefers appData.config.startDate over DEFAULT_START, so a
+// stored start date from the previous block silently wins and every week number
+// is computed from the wrong Monday. Guarded separately from archiveOldBlock()
+// on purpose: anyone who already loaded the new program under the old start
+// date is repaired on their next load rather than being stuck with it.
+// The previous dates are kept in the archive, not discarded.
+function alignBlockStart() {
+  if (appData._startAligned === BLOCK_ID) return;
+  if (!appData.config) appData.config = {};
+  var cur = appData.config.startDate || null;
+  if (cur !== DEFAULT_START) {
+    var arch = appData._archive || {};
+    arch._prevConfig = arch._prevConfig || {};
+    arch._prevConfig[appData._startAligned || 'sep2026'] =
+      {startDate: cur, raceDate: appData.config.raceDate || ''};
+    appData._archive = arch;
+    appData.config.startDate = DEFAULT_START;
+    appData.config.raceDate = '2027-01-08';
+    console.log('[align] block start moved from ' + cur + ' to ' + DEFAULT_START);
+  }
+  appData._startAligned = BLOCK_ID;
+  saveData();
 }
 
 // ─── WEEKLY VOLUME, AS ACTUALLY PRESCRIBED ───────────────────────────────────
@@ -4346,6 +4374,7 @@ function addDescribedMeal() {
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 loadData();
 archiveOldBlock();
+alignBlockStart();
 indexArchive();
 applyTravelWeeks();
 migrateTopSets();
