@@ -56,8 +56,10 @@ h1{font-size:19px;font-weight:600;margin-bottom:2px}
 .check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;transition:all .15s}
 .check.done{background:var(--green-bg);border-color:var(--green-txt);color:var(--green-txt)}
 .sinfo{flex:1;min-width:0}
-.sname{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.smeta{font-size:11px;color:var(--txt2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sname{font-size:13px;font-weight:500;line-height:1.35}
+.smeta{font-size:11px;color:var(--txt2);margin-top:2px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sess-full-detail{font-size:12.5px;line-height:1.6;color:var(--txt2);background:var(--bg2);border-left:3px solid var(--accent,#3987e5);border-radius:8px;padding:10px 12px;margin-bottom:10px}
+.sess-full-detail b{color:var(--txt)}
 .stag{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:500;flex-shrink:0}
 .t-lift{background:var(--blue-bg);color:var(--blue-txt)}
 .t-swim{background:var(--green-bg);color:var(--green-txt)}
@@ -86,7 +88,8 @@ h1{font-size:19px;font-weight:600;margin-bottom:2px}
 .ex-log input{width:58px;padding:4px 6px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--txt);font-family:inherit}
 .ex-log .x{font-size:11px;color:var(--txt3)}
 .ex-last{font-size:10.5px;color:var(--txt3);margin-left:4px}
-.ex-note{font-size:10px;color:var(--txt3);margin-top:1px}
+.ex-note{font-size:11.5px;line-height:1.5;color:var(--txt3);margin-top:3px}
+.ex-note-tag{font-size:11.5px;line-height:1.5;color:var(--txt2);border-left:2px solid var(--border);padding-left:8px;margin-top:5px}
 .ex-sets{font-size:11px;color:var(--txt2);min-width:110px;text-align:right;padding-top:1px;flex-shrink:0}
 .wc-item{display:flex;gap:6px;padding:3px 0;font-size:12px;color:var(--txt)}
 .wc-item::before{content:"·";color:var(--txt3);flex-shrink:0}
@@ -2292,6 +2295,7 @@ function deriveFields(sid, sessionType, authored){
 
 function buildExHtml(sid, type, name) {
   var jaySwap = getJaySwap(sid);
+  if (jaySwap === 'jlive') return buildLiveJayHtml(sid, weekNumForSid(sid));
   var detail = jaySwap ? JAY_SESSIONS[jaySwap]
              : (EX_DATA[sid] || (EX_ALIAS[sid] && EX_DATA[EX_ALIAS[sid]]) || getGenericExDetail(type, name));
   if (!detail) return '';
@@ -2339,7 +2343,18 @@ function buildExHtml(sid, type, name) {
     var isAux = /^[WZTX]\s*--/.test(group.title);
     for (var e = 0; e < group.ex.length; e++) {
       var ex = group.ex[e];
-      var noteHtml = ex[2] ? '<div class="ex-note">' + ex[2] + '</div>' : '';
+      var noteHtml = '';
+      if (ex[2]) {
+        // Notes carry several independent things separated by '||' -- the cue, the
+        // RIR target, a technique tag, a Jay variant. Rendered as one run they are
+        // unreadable on a phone, so each segment gets its own line.
+        var nparts = String(ex[2]).split('||');
+        for (var np = 0; np < nparts.length; np++) {
+          var ntxt = nparts[np].trim();
+          if (!ntxt) continue;
+          noteHtml += '<div class="' + (np ? 'ex-note-tag' : 'ex-note') + '">' + ntxt + '</div>';
+        }
+      }
       rowsHtml += '<div class="ex-row">';
       rowsHtml += '<span class="ex-num">' + (e + 1) + '</span>';
       rowsHtml += '<div class="ex-info"><div class="ex-name">' + ex[0] + '</div>' + noteHtml;
@@ -2361,12 +2376,16 @@ function buildExHtml(sid, type, name) {
           prevTxt = 'No history yet -- this becomes next week\'s reference.';
         }
         var esc = ex[0].replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        var presSets = (String(ex[1]).match(/^(\d+)x/) || [])[1] || '';
         rowsHtml += '<div class="ex-log">' +
-          '<input type="text" inputmode="decimal" placeholder="lb" value="' + (cur.load !== undefined ? cur.load : '') +
-            '" oninput="saveExLoad(\'' + sid + '\',' + wkObj.n + ',\'' + esc + '\',\'load\',this.value)">' +
+          '<input type="text" inputmode="numeric" placeholder="' + (presSets || 'sets') + '" value="' + (cur.sets !== undefined ? cur.sets : '') +
+            '" oninput="saveExLoad(\'' + sid + '\',' + wkObj.n + ',\'' + esc + '\',\'sets\',this.value)" title="sets actually done">' +
           '<span class="x">&times;</span>' +
           '<input type="text" inputmode="numeric" placeholder="reps" value="' + (cur.reps !== undefined ? cur.reps : '') +
             '" oninput="saveExLoad(\'' + sid + '\',' + wkObj.n + ',\'' + esc + '\',\'reps\',this.value)">' +
+          '<span class="x">@</span>' +
+          '<input type="text" inputmode="decimal" placeholder="lb" value="' + (cur.load !== undefined ? cur.load : '') +
+            '" oninput="saveExLoad(\'' + sid + '\',' + wkObj.n + ',\'' + esc + '\',\'load\',this.value)">' +
           '<span class="ex-last" id="lastfor-' + sid + '-' + safeK + '">' + prevTxt + '</span></div>';
       }
       rowsHtml += '</div>';
@@ -3030,6 +3049,7 @@ function renderTraining() {
     html += '<div class="skip-btn" title="' + (skipped ? 'Restore' : 'Skip') + '" onclick="event.stopPropagation(); toggleSkip(\'' + s.id + '\',' + wk.n + ')">' + (skipped ? '&#8635;' : '&#8855;') + '</div>';
     html += '</div>';
     html += '<div class="session-body" id="bod-' + s.id + '">';
+    if (s.detail) html += '<div class="sess-full-detail">' + s.detail + '</div>';
     html += buildExHtml(s.id, s.type, s.name);
     html += buildWCHtml(s.id, s.type, s.name);
     var renderFields = deriveFields(s.id, s.type, s.fields);
@@ -3299,7 +3319,8 @@ function getJaySwap(sid) {
   if (wn === null) return null;
   var wd = appData[wkey(wn)];
   var r = wd && wd.sessions && wd.sessions[sid];
-  return (r && r.jay && JAY_SESSIONS[r.jay]) ? r.jay : null;
+  if (!r || !r.jay) return null;
+  return (r.jay === 'jlive' || JAY_SESSIONS[r.jay]) ? r.jay : null;
 }
 
 function setJaySwap(sid, wn, jayId) {
@@ -3308,13 +3329,16 @@ function setJaySwap(sid, wn, jayId) {
   if (jayId) wd.sessions[sid].jay = jayId; else delete wd.sessions[sid].jay;
   saveData();
   if (wd.sessions[sid].done) { try { bridgeSession(sid, wn, true); } catch (e) {} }
-  showToast(jayId ? 'Swapped to ' + JAY_SESSIONS[jayId].name : 'Back to the programmed session');
+  showToast(jayId ? 'Swapped to ' + (jayId === 'jlive' ? 'a live Jay session' : JAY_SESSIONS[jayId].name)
+                  : 'Back to the programmed session');
   renderTraining();
 }
 
 function jayPickerHtml(sid, wn) {
   var cur = getJaySwap(sid) || '';
   var o = '<option value="">Programmed session</option>';
+  o += '<option value="jlive"' + (cur === 'jlive' ? ' selected' : '') +
+       '>Jay -- LIVE in-person session (log as you go)</option>';
   for (var j in JAY_SESSIONS) {
     o += '<option value="' + j + '"' + (cur === j ? ' selected' : '') + '>' + JAY_SESSIONS[j].name +
          ' (' + JAY_SESSIONS[j].date + ')</option>';
@@ -3324,7 +3348,7 @@ function jayPickerHtml(sid, wn) {
     '<select onchange="setJaySwap(\'' + sid + '\',' + wn + ',this.value)" ' +
     'style="flex:1;min-width:190px;padding:6px 8px;font-size:12.5px;border:1px solid var(--border);' +
     'border-radius:7px;background:var(--bg2);color:var(--txt);font-family:inherit">' + o + '</select></div>' +
-    (cur ? '<div style="font-size:11.5px;color:var(--txt2);background:var(--bg2);border-left:3px solid var(--warn,#c98500);' +
+    (cur && cur !== 'jlive' ? '<div style="font-size:11.5px;color:var(--txt2);background:var(--bg2);border-left:3px solid var(--warn,#c98500);' +
       'border-radius:6px;padding:7px 9px;margin-bottom:8px;line-height:1.5">This day is a <b>Jay session</b>. ' +
       'It replaces the programmed work rather than adding to it, and the ledger counts Jay\'s sets, not the ' +
       'prescription.</div>' + topUpHtml(wn) : '');
@@ -3353,6 +3377,119 @@ function alignBlockStart() {
   }
   appData._startAligned = BLOCK_ID;
   saveData();
+}
+
+
+// ─── LIVE IN-PERSON JAY SESSION ──────────────────────────────────────────────
+// The four sessions off Jay's sheet are historical templates. A session he
+// programmes on the day will not be one of them, so 'jlive' renders an empty
+// session you fill in as you go. Volume reaches the ledger from what you log
+// rather than from a template, which is the only honest way to count a session
+// nobody wrote down in advance.
+var LIVE_ROWS = 8;
+
+function liveRows(sid, wn) {
+  var wd = appData[wkey(wn)] || {};
+  var rec = (wd.sessions || {})[sid] || {};
+  return rec.live || [];
+}
+
+function saveLiveRow(sid, wn, idx, field, value) {
+  var wd = getWD(wn);
+  if (!wd.sessions[sid]) wd.sessions[sid] = {};
+  if (!wd.sessions[sid].live) wd.sessions[sid].live = [];
+  var arr = wd.sessions[sid].live;
+  while (arr.length <= idx) arr.push({});
+  if (field === 'ex') {
+    if (value) arr[idx].ex = value; else delete arr[idx].ex;
+  } else {
+    var n = parseFloat(value);
+    if (isNaN(n)) delete arr[idx][field]; else arr[idx][field] = n;
+  }
+  saveData();
+  if (wd.sessions[sid].done) { try { bridgeSession(sid, wn, true); } catch (e) {} }
+}
+
+// Only movements the ledger understands are offered, so anything you select is
+// counted correctly. Jay's Olympic and explosive work has no hypertrophy
+// mapping, so it goes under "Other" and is logged without being counted.
+function liveMovementOptions(selected) {
+  var keys = [];
+  for (var k in VOL_LIB) keys.push(k);
+  keys.sort();
+  var o = '<option value="">-- pick a movement --</option>';
+  for (var i = 0; i < keys.length; i++) {
+    o += '<option value="' + keys[i] + '"' + (selected === keys[i] ? ' selected' : '') + '>' + keys[i] + '</option>';
+  }
+  o += '<option value="__other"' + (selected === '__other' ? ' selected' : '') +
+       '>Other / power movement (logged, not counted)</option>';
+  return o;
+}
+
+function buildLiveJayHtml(sid, wn) {
+  var rows = liveRows(sid, wn);
+  var html = '<div class="sess-full-detail" style="border-left-color:var(--s5,#9085e9)">' +
+    '<b>Live session with Jay.</b> Log what you actually did, in any order. Only the movements in the dropdown ' +
+    'reach the volume ledger &mdash; pick the closest match and the week stays honest. Anything Olympic or ' +
+    'explosive goes under <i>Other</i>: it is recorded but not counted as hypertrophy volume, because the ' +
+    'mechanical-tension dose does not support it. Put the session name and anything worth remembering in the ' +
+    'notes box at the bottom.</div>';
+  html += '<div class="ex-group"><div class="ex-group-title">What you did</div>';
+  for (var i = 0; i < LIVE_ROWS; i++) {
+    var r = rows[i] || {};
+    // Show a row if it has content, plus one empty row after the last filled one.
+    var lastFilled = -1;
+    for (var j = 0; j < LIVE_ROWS; j++) { if (rows[j] && (rows[j].ex || rows[j].sets)) lastFilled = j; }
+    if (i > lastFilled + 1) break;
+    html += '<div class="ex-row"><span class="ex-num">' + (i + 1) + '</span>' +
+      '<div class="ex-info" style="min-width:0">' +
+      '<select onchange="saveLiveRow(\'' + sid + '\',' + wn + ',' + i + ',\'ex\',this.value); renderTraining()" ' +
+      'style="width:100%;max-width:280px;padding:5px 7px;font-size:12px;border:1px solid var(--border);' +
+      'border-radius:6px;background:var(--bg2);color:var(--txt);font-family:inherit">' +
+      liveMovementOptions(r.ex) + '</select>' +
+      '<div class="ex-log">' +
+        '<input type="text" inputmode="numeric" placeholder="sets" value="' + (r.sets !== undefined ? r.sets : '') +
+          '" oninput="saveLiveRow(\'' + sid + '\',' + wn + ',' + i + ',\'sets\',this.value)">' +
+        '<span class="x">&times;</span>' +
+        '<input type="text" inputmode="numeric" placeholder="reps" value="' + (r.reps !== undefined ? r.reps : '') +
+          '" oninput="saveLiveRow(\'' + sid + '\',' + wn + ',' + i + ',\'reps\',this.value)">' +
+        '<span class="x">@</span>' +
+        '<input type="text" inputmode="decimal" placeholder="lb" value="' + (r.load !== undefined ? r.load : '') +
+          '" oninput="saveLiveRow(\'' + sid + '\',' + wn + ',' + i + ',\'load\',this.value)">' +
+      '</div></div></div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+// Volume entries for a session, honouring (in order): a live Jay session, a Jay
+// template, then the programmed prescription with any logged set counts applied.
+function volumeForSession(sid, rec) {
+  rec = rec || {};
+  if (rec.jay === 'jlive') {
+    var out = [], L = rec.live || [];
+    for (var i = 0; i < L.length; i++) {
+      if (!L[i] || !L[i].ex || L[i].ex === '__other' || !L[i].sets) continue;
+      out.push({ex: L[i].ex, sets: L[i].sets, reps: L[i].reps || 10, load: L[i].load});
+    }
+    return out;
+  }
+  if (rec.jay && typeof JAY_VOLUME !== 'undefined' && JAY_VOLUME[rec.jay]) return JAY_VOLUME[rec.jay];
+  var base = (typeof HYPER_VOLUME !== 'undefined' && HYPER_VOLUME[sid]) ? HYPER_VOLUME[sid] : [];
+  if (!rec.ex) return base;
+  // A logged set count beats the prescription for that movement.
+  var byCanon = {};
+  for (var k in rec.ex) {
+    var canon = EX_CANON[k];
+    if (canon && rec.ex[k] && rec.ex[k].sets > 0) byCanon[canon] = rec.ex[k].sets;
+  }
+  if (!Object.keys(byCanon).length) return base;
+  var adj = [];
+  for (var b = 0; b < base.length; b++) {
+    var e = base[b];
+    adj.push({ex: e.ex, sets: (byCanon[e.ex] !== undefined ? byCanon[e.ex] : e.sets), reps: e.reps});
+  }
+  return adj;
 }
 
 // ─── WEEKLY VOLUME, AS ACTUALLY PRESCRIBED ───────────────────────────────────
@@ -3391,8 +3528,7 @@ function weekVolumeActual(wn) {
   for (var a = 0; a < VOL_MUSCLES.length; a++) m[VOL_MUSCLES[a]] = 0;
   for (var s = 0; s < wk.sessions.length; s++) {
     var sid = wk.sessions[s].id, rec = sess[sid] || {};
-    var vol = (rec.jay && typeof JAY_VOLUME !== 'undefined' && JAY_VOLUME[rec.jay]) ? JAY_VOLUME[rec.jay]
-            : ((typeof HYPER_VOLUME !== 'undefined' && HYPER_VOLUME[sid]) ? HYPER_VOLUME[sid] : []);
+    var vol = volumeForSession(sid, rec);
     for (var v = 0; v < vol.length; v++) {
       var L = VOL_LIB[vol[v].ex];
       if (!L) continue;
@@ -3505,13 +3641,12 @@ function bridgeSession(sid, wn, isDone) {
         if (canon && lv > 0) loadByEx[canon] = lv;
       }
     }
-    var vol = (sd.jay && typeof JAY_VOLUME !== 'undefined' && JAY_VOLUME[sd.jay]) ? JAY_VOLUME[sd.jay]
-            : ((typeof HYPER_VOLUME !== 'undefined' && HYPER_VOLUME[sid]) ? HYPER_VOLUME[sid] : []);
+    var vol = volumeForSession(sid, sd);
     for (var i = 0; i < vol.length; i++) {
       o.sessions.push({
         id: 'trk-' + sid + '-' + i, src: sid, d: date,
         ex: vol[i].ex, sets: vol[i].sets, reps: vol[i].reps,
-        load: loadByEx[vol[i].ex] || 0
+        load: (vol[i].load !== undefined ? vol[i].load : (loadByEx[vol[i].ex] || 0))
       });
     }
     // Bodyweight -> console weigh-ins (Monday field).
